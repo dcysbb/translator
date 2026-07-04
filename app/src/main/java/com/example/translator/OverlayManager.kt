@@ -9,6 +9,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
@@ -20,11 +21,17 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,6 +56,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -230,84 +238,213 @@ class OverlayManager(private val context: Context) {
     ) {
         var offsetX by remember { mutableFloatStateOf(0f) }
         var offsetY by remember { mutableFloatStateOf(0f) }
-        var userExpanded by remember { mutableStateOf(true) }
 
-        val showCard by remember(state, resultText, statusText) {
+        // Collapsed = single bubble; Expanded = pill + result panel.
+        // Starts collapsed. Refresh forces collapse (bubble shows loading),
+        // completion forces expand so the result/error is visible.
+        var panelOpen by remember { mutableStateOf(false) }
+        var userCardExpanded by remember { mutableStateOf(true) }
+
+        val showCard by remember(panelOpen, userCardExpanded, state, resultText, statusText) {
             derivedStateOf {
-                state !is OverlayState.Loading &&
-                    userExpanded &&
+                panelOpen &&
+                    userCardExpanded &&
+                    state !is OverlayState.Loading &&
                     (resultText.isNotEmpty() || statusText.isNotEmpty())
             }
         }
 
+        // Drive panel open/close from processing state:
+        //  - Loading  -> collapse to bubble (show spinner on the ball)
+        //  - Idle/Error with content -> auto-expand panel
         LaunchedEffect(state) {
-            if (state is OverlayState.Idle || state is OverlayState.Error) {
-                userExpanded = true
+            when (state) {
+                is OverlayState.Loading -> panelOpen = false
+                is OverlayState.Idle, is OverlayState.Error ->
+                    if (resultText.isNotEmpty() || statusText.isNotEmpty()) panelOpen = true
             }
         }
 
-        Column(
+        Box(
             modifier = Modifier
                 .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
-                .pointerInput(Unit) {
+                .pointerInput(panelOpen) {
+                    // Whole overlay is draggable; tap is handled inside each surface.
                     detectDragGestures { change, dragAmount ->
                         change.consume()
                         offsetX += dragAmount.x
                         offsetY += dragAmount.y
                     }
                 }
-                .widthIn(max = 280.dp)
         ) {
-            // ── Control Pill ──
-            ControlPill(
+            // Bubble ↔ Panel cross-fade. Bubble is always composed so its
+            // position/drag is preserved while the panel slides in.
+            Bubble(
                 state = state,
-                showCard = showCard,
-                onRefresh = onRefresh,
-                onPauseToggle = onPauseToggle,
-                onExpandToggle = { userExpanded = !userExpanded },
-                onClose = onClose
+                visible = !panelOpen,
+                onClick = { panelOpen = true },
+                onLongClick = { onClose() }   // long-press the ball to stop the service
             )
 
-            // ── Result Card (animated) ──
             AnimatedVisibility(
-                visible = showCard,
-                enter = expandVertically(
-                    animationSpec = spring(
-                        dampingRatio = 0.75f,
-                        stiffness = 300f
+                visible = panelOpen,
+                enter = fadeIn(animationSpec = tween(180)) +
+                    expandVertically(animationSpec = spring(dampingRatio = 0.8f, stiffness = 320f)),
+                exit = fadeOut(animationSpec = tween(140)) +
+                    shrinkVertically(
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioNoBouncy,
+                            stiffness = Spring.StiffnessMedium
+                        )
                     )
-                ) + fadeIn(animationSpec = tween(220)),
-                exit = shrinkVertically(
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioNoBouncy,
-                        stiffness = Spring.StiffnessMedium
-                    )
-                ) + fadeOut(animationSpec = tween(150))
             ) {
-                Column {
-                    Spacer(Modifier.height(6.dp))
-                    ResultCard(
-                        text = resultText,
-                        status = statusText,
-                        isError = state is OverlayState.Error,
-                        onCopy = {
-                            val clipboard = context.getSystemService(
-                                Context.CLIPBOARD_SERVICE
-                            ) as ClipboardManager
-                            clipboard.setPrimaryClip(
-                                ClipData.newPlainText(
-                                    "translation",
-                                    resultText.ifEmpty { statusText }
-                                )
+                Column(modifier = Modifier.widthIn(max = 280.dp)) {
+                    ControlPill(
+                        state = state,
+                        showCard = showCard,
+                        onRefresh = onRefresh,
+                        onPauseToggle = onPauseToggle,
+                        onExpandToggle = { userCardExpanded = !userCardExpanded },
+                        onClose = { panelOpen = false }
+                    )
+
+                    AnimatedVisibility(
+                        visible = showCard,
+                        enter = expandVertically(
+                            animationSpec = spring(dampingRatio = 0.75f, stiffness = 300f)
+                        ) + fadeIn(animationSpec = tween(220)),
+                        exit = shrinkVertically(
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioNoBouncy,
+                                stiffness = Spring.StiffnessMedium
+                            )
+                        ) + fadeOut(animationSpec = tween(150))
+                    ) {
+                        Column {
+                            Spacer(Modifier.height(6.dp))
+                            ResultCard(
+                                text = resultText,
+                                status = statusText,
+                                isError = state is OverlayState.Error,
+                                onCopy = {
+                                    val clipboard = context.getSystemService(
+                                        Context.CLIPBOARD_SERVICE
+                                    ) as ClipboardManager
+                                    clipboard.setPrimaryClip(
+                                        ClipData.newPlainText(
+                                            "translation",
+                                            resultText.ifEmpty { statusText }
+                                        )
+                                    )
+                                }
                             )
                         }
-                    )
+                    }
                 }
             }
         }
     }
 
-    // ── Control Pill ──
+    // ── Collapsed bubble (single ball) ──
+
+    @OptIn(ExperimentalFoundationApi::class)
+    @Composable
+    private fun Bubble(
+        state: OverlayState,
+        visible: Boolean,
+        onClick: () -> Unit,
+        onLongClick: () -> Unit
+    ) {
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn(animationSpec = tween(160)) + scaleIn(animationSpec = spring(stiffness = 360f)),
+            exit = fadeOut(animationSpec = tween(120)) + scaleOut(animationSpec = tween(120))
+        ) {
+            val interactionSource = remember { MutableInteractionSource() }
+            val pressed by interactionSource.collectIsPressedAsState()
+            val scale by animateFloatAsState(
+                targetValue = if (pressed) 0.9f else 1f,
+                animationSpec = tween(90),
+                label = "bubblePress"
+            )
+
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .scale(scale)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(OverlayColors.PillBgTop, OverlayColors.PillBgBottom)
+                        )
+                    )
+                    .border(
+                        width = 1.dp,
+                        brush = Brush.sweepGradient(
+                            listOf(
+                                OverlayColors.Accent.copy(alpha = 0.7f),
+                                OverlayColors.AccentSecondary.copy(alpha = 0.4f),
+                                OverlayColors.Accent.copy(alpha = 0.7f)
+                            )
+                        ),
+                        shape = CircleShape
+                    )
+                    .combinedClickable(
+                        interactionSource = interactionSource,
+                        indication = null,
+                        onClick = onClick,
+                        onLongClick = onLongClick
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                when (state) {
+                    is OverlayState.Loading -> LoadingRing()
+                    else -> Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(
+                                Brush.radialGradient(
+                                    listOf(
+                                        OverlayColors.Accent.copy(alpha = 0.35f),
+                                        Color.Transparent
+                                    )
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "译",
+                            color = OverlayColors.Accent,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun LoadingRing() {
+        val transition = rememberInfiniteTransition(label = "ring")
+        val angle by transition.animateFloat(
+            initialValue = 0f,
+            targetValue = 360f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(900, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "ringSpin"
+        )
+        CircularProgressIndicator(
+            modifier = Modifier.size(26.dp).rotate(angle),
+            strokeWidth = 2.5.dp,
+            color = OverlayColors.Accent
+        )
+    }
+
+    // ── Control pill ──
 
     @Composable
     private fun ControlPill(
