@@ -1,11 +1,16 @@
 package com.example.translator
 
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 
@@ -83,5 +88,35 @@ class DeepSeekHttpTest {
         val outcome = noKeyClient.translate("Hello")
         assertTrue(outcome is TranslationOutcome.Error)
         assertEquals(ErrorCode.EMPTY_TEXT, (outcome as TranslationOutcome.Error).code)
+    }
+
+    /**
+     * Regression: cancelling an in-flight translate() must propagate the
+     * CancellationException instead of returning it as a TranslationOutcome.Error
+     * (which previously surfaced "StandaloneCoroutine was canceled" to the user).
+     */
+    @Test
+    fun cancellationPropagatesInsteadOfBecomingError() = runBlocking {
+        // Server replies slowly so we can cancel mid-flight.
+        server.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setBody("""{"choices":[{"message":{"content":"{}"}}]}""")
+                .setBodyDelay(2, java.util.concurrent.TimeUnit.SECONDS)
+        )
+
+        var threwCancellation = false
+        val job = async {
+            try {
+                client.translate("Hello")
+            } catch (e: CancellationException) {
+                threwCancellation = true
+                throw e
+            }
+        }
+        delay(150) // let the request start
+        job.cancelAndJoin()
+
+        assertTrue("CancellationException must propagate, not be swallowed", threwCancellation)
     }
 }

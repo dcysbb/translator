@@ -3,6 +3,7 @@ package com.example.translator
 import com.google.gson.Gson
 import com.google.gson.JsonParser
 import com.google.gson.annotations.SerializedName
+import kotlinx.coroutines.CancellationException
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.HttpException
@@ -183,6 +184,11 @@ class DeepSeekClient(
             val content = response.body()?.choices?.firstOrNull()?.message?.content
                 ?: return TranslationOutcome.Error("Empty response from server", ErrorCode.BAD_RESPONSE)
             parseContent(content, cleaned, language)
+        } catch (e: CancellationException) {
+            // Coroutine cancellation is cooperative control flow, not an error.
+            // It must propagate (e.g. when a new refresh cancels the previous
+            // request) instead of being reported to the user.
+            throw e
         } catch (e: HttpException) {
             TranslationOutcome.Error(
                 httpErrorMessage(e.code(), null),
