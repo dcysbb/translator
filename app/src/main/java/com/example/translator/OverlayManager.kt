@@ -1,37 +1,32 @@
 package com.example.translator
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ObjectAnimator
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.PixelFormat
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.WindowManager
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,7 +34,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -49,7 +43,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
@@ -63,12 +56,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -82,7 +71,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -95,7 +83,6 @@ import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
-import kotlin.math.roundToInt
 
 // ─────────────────────────── Design Tokens ───────────────────────────
 
@@ -124,14 +111,37 @@ sealed class OverlayState {
 }
 
 // ─────────────────────────── OverlayManager ──────────────────────────
+//
+// Two independent WindowManager windows — a fixed-size bubble and a
+// fixed-width panel — of which exactly one is mounted at a time. Splitting
+// them (instead of one WRAP_CONTENT window whose content animates in place)
+// is what kills the flicker: each window's physical size is decided once at
+// addView time, so expanding/collapsing becomes a cheap alpha cross-fade
+// rather than a per-frame WindowManager re-layout.
+//
+// Position is tracked in [overlayX]/[overlayY] (top-left gravity) and shared
+// by both windows, so a drag on either carries over to the other when the
+// open state switches.
 
 class OverlayManager(private val context: Context) {
 
     private val windowManager =
         context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    private var controlView: View? = null
-
     private val lifecycleOwner = OverlayLifecycleOwner()
+
+    private var bubbleView: View? = null
+    private var panelView: View? = null
+    private var bubbleParams: WindowManager.LayoutParams? = null
+    private var panelParams: WindowManager.LayoutParams? = null
+
+    private var fadeAnimator: ObjectAnimator? = null
+
+    // Shared top-left position (pixels) for both windows.
+    private var overlayX = 80
+    private var overlayY = 160
+
+    /** Which window is currently mounted. */
+    private var panelOpenState: Boolean = false
 
     private var resultText by mutableStateOf("")
     private var statusText by mutableStateOf("")
@@ -148,51 +158,192 @@ class OverlayManager(private val context: Context) {
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
     }
 
-    fun showControlOverlay() {
-        if (controlView != null) return
+    // ───────────────────────── Window management ─────────────────────────
 
-        val composeView = ComposeView(context).apply {
+    fun showControlOverlay() {
+        // Initial mount is always the collapsed bubble.
+        if (bubbleView == null && panelView == null) {
+            applyOpenState(open = false)
+        }
+    }
+
+    /**
+     * Mount exactly one window. The other is removed first. Each window is
+     * cross-faded in via a View alpha animator so the transition reads as a
+     * smooth fade rather than a hard cut, without touching the window's size.
+     */
+    private fun applyOpenState(open: Boolean) {
+        if (open == panelOpenState && (bubbleView != null || panelView != null)) return
+        panelOpenState = open
+
+        // Cancel any in-flight fade so rapid taps don't stack animators.
+        fadeAnimator?.cancel()
+        fadeAnimator = null
+
+        if (open) {
+            removeViewSafe(bubbleView)
+            bubbleView = null
+            ensurePanelWindow()
+            fadeIn(panelView!!)
+        } else {
+            removeViewSafe(panelView)
+            panelView = null
+            ensureBubbleWindow()
+            fadeIn(bubbleView!!)
+        }
+    }
+
+    private fun fadeIn(view: View) {
+        view.alpha = 0f
+        val anim = ObjectAnimator.ofFloat(view, View.ALPHA, 0f, 1f).apply {
+            duration = 180
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    if (fadeAnimator === animation) fadeAnimator = null
+                }
+            })
+        }
+        fadeAnimator = anim
+        anim.start()
+    }
+
+    private fun removeViewSafe(view: View?) {
+        if (view == null) return
+        try {
+            windowManager.removeView(view)
+        } catch (_: Exception) {
+        }
+    }
+
+    // ── Bubble window ──
+
+    private fun ensureBubbleWindow() {
+        if (bubbleView != null) return
+        val view = newComposeView { BubbleContent() }
+
+        val params = baseParams().apply {
+            // 56dp fixed square — size never changes, so no per-frame re-layout.
+            width = dp(56)
+            height = dp(56)
+            x = overlayX
+            y = overlayY
+        }
+        view.setOnTouchListener(
+            OverlayTouchListener(
+                context = context,
+                onTap = { handleOverlayTap() },
+                onDragBy = ::handleDrag,
+                onLongPress = { onClose?.invoke() }
+            )
+        )
+        addViewSafe(view, params)
+        bubbleView = view
+        bubbleParams = params
+    }
+
+    // ── Panel window ──
+
+    private fun ensurePanelWindow() {
+        if (panelView != null) return
+        val view = newComposeView { PanelContent() }
+
+        val params = baseParams().apply {
+            // Fixed width, WRAP_CONTENT height: the panel's height only changes
+            // when the result text genuinely changes length, which is fine —
+            // the flicker came from the *expand/collapse* animation changing
+            // size every frame, not from text-driven reflow.
+            width = dp(280)
+            height = WindowManager.LayoutParams.WRAP_CONTENT
+            x = overlayX
+            y = overlayY
+        }
+        // No view-level OnTouchListener here: that would swallow the Compose
+        // button taps. The panel drags via a dedicated handle in PanelContent.
+        addViewSafe(view, params)
+        panelView = view
+        panelParams = params
+    }
+
+    private fun newComposeView(content: @Composable () -> Unit): ComposeView =
+        ComposeView(context).apply {
             setViewTreeLifecycleOwner(lifecycleOwner)
             setViewTreeViewModelStoreOwner(lifecycleOwner)
             setViewTreeSavedStateRegistryOwner(lifecycleOwner)
             setContent {
-                OverlayTheme {
-                    FloatingOverlay(
-                        resultText = resultText,
-                        statusText = statusText,
-                        state = overlayState,
-                        onPauseToggle = { onPauseToggle?.invoke() },
-                        onClose = { onClose?.invoke() },
-                        onRefresh = { onRefresh?.invoke() }
-                    )
-                }
+                OverlayTheme { content() }
             }
         }
 
-        val layoutParams = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-            else
-                @Suppress("DEPRECATION") WindowManager.LayoutParams.TYPE_PHONE,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-            PixelFormat.TRANSLUCENT
-        ).apply {
-            gravity = Gravity.TOP or Gravity.START
-            x = 80
-            y = 160
-        }
+    private fun baseParams() = WindowManager.LayoutParams(
+        WindowManager.LayoutParams.WRAP_CONTENT,
+        WindowManager.LayoutParams.WRAP_CONTENT,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        else
+            @Suppress("DEPRECATION") WindowManager.LayoutParams.TYPE_PHONE,
+        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+        PixelFormat.TRANSLUCENT
+    ).apply {
+        gravity = Gravity.TOP or Gravity.START
+    }
 
-        windowManager.addView(composeView, layoutParams)
-        controlView = composeView
+    private fun addViewSafe(view: View, params: WindowManager.LayoutParams) {
+        try {
+            windowManager.addView(view, params)
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun dp(value: Int): Int {
+        val density = context.resources.displayMetrics.density
+        return (value * density).toInt()
+    }
+
+    // ───────────────────────── Drag handling ─────────────────────────
+
+    /**
+     * Apply a drag delta to both windows' stored position, and live-update
+     * whichever window is currently mounted. Called from the bubble's native
+     * listener and the panel's Compose drag handle.
+     */
+    private fun handleDrag(dx: Int, dy: Int) {
+        overlayX += dx
+        overlayY += dy
+        if (panelOpenState) {
+            panelParams?.let { p ->
+                p.x = overlayX
+                p.y = overlayY
+                updateLayoutSafe(panelView, p)
+            }
+        } else {
+            bubbleParams?.let { p ->
+                p.x = overlayX
+                p.y = overlayY
+                updateLayoutSafe(bubbleView, p)
+            }
+        }
+    }
+
+    private fun updateLayoutSafe(view: View?, params: WindowManager.LayoutParams) {
+        if (view == null) return
+        try {
+            windowManager.updateViewLayout(view, params)
+        } catch (_: Exception) {
+        }
+    }
+
+    // ───────────────────────── State transitions ─────────────────────────
+
+    private fun handleOverlayTap() {
+        applyOpenState(open = !panelOpenState)
     }
 
     fun updateText(text: String) {
         resultText = text
         statusText = ""
         overlayState = OverlayState.Idle
+        applyOpenState(open = true)   // auto-expand to show the result
     }
 
     fun updateStatus(status: String) {
@@ -202,24 +353,31 @@ class OverlayManager(private val context: Context) {
     fun showLoading() {
         statusText = ""
         overlayState = OverlayState.Loading
+        applyOpenState(open = false)  // collapse to bubble, show spinner
     }
 
     fun showError(message: String) {
         statusText = message
         overlayState = OverlayState.Error(message)
+        applyOpenState(open = true)   // auto-expand to show the error
     }
 
     fun reset() {
         resultText = ""
         statusText = ""
         overlayState = OverlayState.Idle
+        applyOpenState(open = false)
     }
 
     fun hideAll() {
-        controlView?.let {
-            try { windowManager.removeView(it) } catch (_: Exception) {}
-            controlView = null
-        }
+        fadeAnimator?.cancel()
+        fadeAnimator = null
+        removeViewSafe(panelView)
+        removeViewSafe(bubbleView)
+        panelView = null
+        bubbleView = null
+        panelParams = null
+        bubbleParams = null
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -227,179 +385,41 @@ class OverlayManager(private val context: Context) {
 
     // ────────────────────────── Composable UI ─────────────────────────
 
+    /** Collapsed bubble content. Crossfades (fixed-size, alpha only) between
+     *  the idle "译" mark and the loading ring. */
     @Composable
-    private fun FloatingOverlay(
-        resultText: String,
-        statusText: String,
-        state: OverlayState,
-        onPauseToggle: () -> Unit,
-        onClose: () -> Unit,
-        onRefresh: () -> Unit
-    ) {
-        var offsetX by remember { mutableFloatStateOf(0f) }
-        var offsetY by remember { mutableFloatStateOf(0f) }
-
-        // Collapsed = single bubble; Expanded = pill + result panel.
-        // Starts collapsed. Refresh forces collapse (bubble shows loading),
-        // completion forces expand so the result/error is visible.
-        var panelOpen by remember { mutableStateOf(false) }
-        var userCardExpanded by remember { mutableStateOf(true) }
-
-        val showCard by remember(panelOpen, userCardExpanded, state, resultText, statusText) {
-            derivedStateOf {
-                panelOpen &&
-                    userCardExpanded &&
-                    state !is OverlayState.Loading &&
-                    (resultText.isNotEmpty() || statusText.isNotEmpty())
-            }
-        }
-
-        // Drive panel open/close from processing state:
-        //  - Loading  -> collapse to bubble (show spinner on the ball)
-        //  - Idle/Error with content -> auto-expand panel
-        LaunchedEffect(state) {
-            when (state) {
-                is OverlayState.Loading -> panelOpen = false
-                is OverlayState.Idle, is OverlayState.Error ->
-                    if (resultText.isNotEmpty() || statusText.isNotEmpty()) panelOpen = true
-            }
-        }
-
+    private fun BubbleContent() {
         Box(
             modifier = Modifier
-                .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
-                .pointerInput(panelOpen) {
-                    // Whole overlay is draggable; tap is handled inside each surface.
-                    detectDragGestures { change, dragAmount ->
-                        change.consume()
-                        offsetX += dragAmount.x
-                        offsetY += dragAmount.y
-                    }
-                }
-        ) {
-            // Bubble ↔ Panel cross-fade. Bubble is always composed so its
-            // position/drag is preserved while the panel slides in.
-            Bubble(
-                state = state,
-                visible = !panelOpen,
-                onClick = { panelOpen = true },
-                onLongClick = { onClose() }   // long-press the ball to stop the service
-            )
-
-            AnimatedVisibility(
-                visible = panelOpen,
-                enter = fadeIn(animationSpec = tween(180)) +
-                    expandVertically(animationSpec = spring(dampingRatio = 0.8f, stiffness = 320f)),
-                exit = fadeOut(animationSpec = tween(140)) +
-                    shrinkVertically(
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioNoBouncy,
-                            stiffness = Spring.StiffnessMedium
+                .size(56.dp)
+                .clip(CircleShape)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(OverlayColors.PillBgTop, OverlayColors.PillBgBottom)
+                    )
+                )
+                .border(
+                    width = 1.dp,
+                    brush = Brush.sweepGradient(
+                        listOf(
+                            OverlayColors.Accent.copy(alpha = 0.7f),
+                            OverlayColors.AccentSecondary.copy(alpha = 0.4f),
+                            OverlayColors.Accent.copy(alpha = 0.7f)
                         )
-                    )
-            ) {
-                Column(modifier = Modifier.widthIn(max = 280.dp)) {
-                    ControlPill(
-                        state = state,
-                        showCard = showCard,
-                        onRefresh = onRefresh,
-                        onPauseToggle = onPauseToggle,
-                        onExpandToggle = { userCardExpanded = !userCardExpanded },
-                        onClose = { panelOpen = false }
-                    )
-
-                    AnimatedVisibility(
-                        visible = showCard,
-                        enter = expandVertically(
-                            animationSpec = spring(dampingRatio = 0.75f, stiffness = 300f)
-                        ) + fadeIn(animationSpec = tween(220)),
-                        exit = shrinkVertically(
-                            animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioNoBouncy,
-                                stiffness = Spring.StiffnessMedium
-                            )
-                        ) + fadeOut(animationSpec = tween(150))
-                    ) {
-                        Column {
-                            Spacer(Modifier.height(6.dp))
-                            ResultCard(
-                                text = resultText,
-                                status = statusText,
-                                isError = state is OverlayState.Error,
-                                onCopy = {
-                                    val clipboard = context.getSystemService(
-                                        Context.CLIPBOARD_SERVICE
-                                    ) as ClipboardManager
-                                    clipboard.setPrimaryClip(
-                                        ClipData.newPlainText(
-                                            "translation",
-                                            resultText.ifEmpty { statusText }
-                                        )
-                                    )
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // ── Collapsed bubble (single ball) ──
-
-    @OptIn(ExperimentalFoundationApi::class)
-    @Composable
-    private fun Bubble(
-        state: OverlayState,
-        visible: Boolean,
-        onClick: () -> Unit,
-        onLongClick: () -> Unit
-    ) {
-        AnimatedVisibility(
-            visible = visible,
-            enter = fadeIn(animationSpec = tween(160)) + scaleIn(animationSpec = spring(stiffness = 360f)),
-            exit = fadeOut(animationSpec = tween(120)) + scaleOut(animationSpec = tween(120))
-        ) {
-            val interactionSource = remember { MutableInteractionSource() }
-            val pressed by interactionSource.collectIsPressedAsState()
-            val scale by animateFloatAsState(
-                targetValue = if (pressed) 0.9f else 1f,
-                animationSpec = tween(90),
-                label = "bubblePress"
-            )
-
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .scale(scale)
-                    .clip(CircleShape)
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(OverlayColors.PillBgTop, OverlayColors.PillBgBottom)
-                        )
-                    )
-                    .border(
-                        width = 1.dp,
-                        brush = Brush.sweepGradient(
-                            listOf(
-                                OverlayColors.Accent.copy(alpha = 0.7f),
-                                OverlayColors.AccentSecondary.copy(alpha = 0.4f),
-                                OverlayColors.Accent.copy(alpha = 0.7f)
-                            )
-                        ),
-                        shape = CircleShape
-                    )
-                    .combinedClickable(
-                        interactionSource = interactionSource,
-                        indication = null,
-                        onClick = onClick,
-                        onLongClick = onLongClick
                     ),
-                contentAlignment = Alignment.Center
-            ) {
-                when (state) {
-                    is OverlayState.Loading -> LoadingRing()
-                    else -> Box(
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Crossfade(
+                targetState = overlayState is OverlayState.Loading,
+                animationSpec = tween(180),
+                label = "bubbleContent"
+            ) { loading ->
+                if (loading) {
+                    LoadingRing()
+                } else {
+                    Box(
                         modifier = Modifier
                             .size(40.dp)
                             .clip(CircleShape)
@@ -444,15 +464,47 @@ class OverlayManager(private val context: Context) {
         )
     }
 
-    // ── Control pill ──
+    /** Expanded panel content: a control pill (with a drag handle on its
+     *  leading edge) plus the result card. Buttons are real Compose clicks;
+     *  dragging is scoped to the leading handle so it never fights the buttons. */
+    @Composable
+    private fun PanelContent() {
+        Column(modifier = Modifier.widthIn(max = 280.dp)) {
+            ControlPill(
+                state = overlayState,
+                onRefresh = { onRefresh?.invoke() },
+                onPauseToggle = { onPauseToggle?.invoke() },
+                onClose = { onClose?.invoke() }
+            )
+
+            // Result card is always laid out when the panel is open (no inner
+            // AnimatedVisibility) — that's the whole point: the panel's size
+            // only changes when text length actually changes.
+            Spacer(Modifier.height(6.dp))
+            ResultCard(
+                text = resultText,
+                status = statusText,
+                isError = overlayState is OverlayState.Error,
+                onCopy = {
+                    val clipboard = context.getSystemService(
+                        Context.CLIPBOARD_SERVICE
+                    ) as ClipboardManager
+                    clipboard.setPrimaryClip(
+                        ClipData.newPlainText(
+                            "translation",
+                            resultText.ifEmpty { statusText }
+                        )
+                    )
+                }
+            )
+        }
+    }
 
     @Composable
     private fun ControlPill(
         state: OverlayState,
-        showCard: Boolean,
         onRefresh: () -> Unit,
         onPauseToggle: () -> Unit,
-        onExpandToggle: () -> Unit,
         onClose: () -> Unit
     ) {
         val pillShape = RoundedCornerShape(20.dp)
@@ -469,22 +521,37 @@ class OverlayManager(private val context: Context) {
         ) {
             Row(
                 modifier = Modifier
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                    .padding(horizontal = 6.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(0.dp)
             ) {
-                // Leading icon: pulsing dot when loading, translate icon otherwise
-                when (state) {
-                    is OverlayState.Loading -> PulsingDot()
-                    else -> Icon(
-                        imageVector = Icons.Filled.Translate,
-                        contentDescription = "Translate",
-                        tint = OverlayColors.Accent,
-                        modifier = Modifier.size(18.dp)
-                    )
+                // Drag handle: the leading icon area. Dragging here moves the
+                // panel window (and keeps the bubble's stored position in sync).
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .pointerInput(Unit) {
+                            detectDragGestures { change, dragAmount ->
+                                change.consume()
+                                // dragAmount is already in px; handleDrag wants px.
+                                handleDrag(dragAmount.x.toInt(), dragAmount.y.toInt())
+                            }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    when (state) {
+                        is OverlayState.Loading -> PulsingDot()
+                        else -> Icon(
+                            imageVector = Icons.Filled.Translate,
+                            contentDescription = "拖动",
+                            tint = OverlayColors.Accent,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
 
-                Spacer(Modifier.width(4.dp))
+                Spacer(Modifier.width(2.dp))
 
                 PillIconButton(Icons.Filled.Refresh, "Refresh") { onRefresh() }
                 PillIconButton(
@@ -492,7 +559,6 @@ class OverlayManager(private val context: Context) {
                     else Icons.Filled.PlayArrow,
                     "Pause/Resume"
                 ) { onPauseToggle() }
-                ExpandChevron(expanded = showCard) { onExpandToggle() }
                 PillIconButton(Icons.Filled.Close, "Close") { onClose() }
             }
 
@@ -526,28 +592,6 @@ class OverlayManager(private val context: Context) {
                 contentDescription = desc,
                 tint = Color.White.copy(alpha = 0.85f),
                 modifier = Modifier.size(16.dp)
-            )
-        }
-    }
-
-    @Composable
-    private fun ExpandChevron(expanded: Boolean, onClick: () -> Unit) {
-        val rotation by animateFloatAsState(
-            targetValue = if (expanded) 180f else 0f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessMedium
-            ),
-            label = "chevron"
-        )
-        IconButton(onClick = onClick, modifier = Modifier.size(32.dp)) {
-            Icon(
-                imageVector = Icons.Filled.KeyboardArrowDown,
-                contentDescription = if (expanded) "折叠" else "展开",
-                tint = Color.White.copy(alpha = 0.85f),
-                modifier = Modifier
-                    .size(16.dp)
-                    .rotate(rotation)
             )
         }
     }
@@ -688,5 +732,82 @@ class OverlayLifecycleOwner : SavedStateRegistryOwner, ViewModelStoreOwner {
 
     fun performRestore(savedState: android.os.Bundle?) {
         savedStateRegistryController.performRestore(savedState)
+    }
+}
+
+// ─────────────────────────── Overlay Touch Listener ──────────────────────
+//
+// Native touch handling for the BUBBLE window only (the panel drags via a
+// Compose drag handle so its buttons keep working). Distinguishes tap (toggle
+// open state) from drag (move both windows' stored position) from long-press
+// (close the service). Reports drag deltas to the manager via [onDragBy] so
+// the manager keeps bubble + panel positions in sync.
+
+private class OverlayTouchListener(
+    private val context: Context,
+    private val onTap: () -> Unit,
+    private val onDragBy: (dx: Int, dy: Int) -> Unit,
+    private val onLongPress: () -> Unit
+) : View.OnTouchListener {
+
+    private var initialTouchX = 0f
+    private var initialTouchY = 0f
+    private var isDragging = false
+    private var longPressHandled = false
+
+    private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
+    private val longPressTimeout = ViewConfiguration.getLongPressTimeout().toLong()
+    private val handler = Handler(Looper.getMainLooper())
+
+    private val longPressRunnable = Runnable {
+        if (!isDragging && !longPressHandled) {
+            longPressHandled = true
+            onLongPress()
+        }
+    }
+
+    override fun onTouch(v: View, event: MotionEvent): Boolean {
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                initialTouchX = event.rawX
+                initialTouchY = event.rawY
+                isDragging = false
+                longPressHandled = false
+                handler.postDelayed(longPressRunnable, longPressTimeout)
+            }
+            MotionEvent.ACTION_MOVE -> {
+                val dx = event.rawX - initialTouchX
+                val dy = event.rawY - initialTouchY
+                if (!isDragging && (Math.abs(dx) > touchSlop || Math.abs(dy) > touchSlop)) {
+                    isDragging = true
+                    handler.removeCallbacks(longPressRunnable)
+                }
+                if (isDragging) {
+                    // Move one MOVE-step at a time using the delta since the
+                    // previous MOVE, so the window tracks the finger 1:1.
+                    onDragBy(dx.toInt() - lastDragX, dy.toInt() - lastDragY)
+                    lastDragX = dx.toInt()
+                    lastDragY = dy.toInt()
+                }
+            }
+            MotionEvent.ACTION_UP -> {
+                handler.removeCallbacks(longPressRunnable)
+                if (!isDragging && !longPressHandled) onTap()
+                resetDrag()
+            }
+            MotionEvent.ACTION_CANCEL -> {
+                handler.removeCallbacks(longPressRunnable)
+                resetDrag()
+            }
+        }
+        return true
+    }
+
+    private var lastDragX = 0
+    private var lastDragY = 0
+    private fun resetDrag() {
+        isDragging = false
+        lastDragX = 0
+        lastDragY = 0
     }
 }

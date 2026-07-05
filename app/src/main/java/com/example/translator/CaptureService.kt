@@ -106,9 +106,27 @@ class CaptureService : Service() {
     }
 
     private fun startProjection(resultCode: Int, resultData: Intent) {
+        // Tear down any previous projection first: Android 14+ forbids
+        // re-using a MediaProjection token / creating multiple VirtualDisplays
+        // on the same instance (throws SecurityException).
+        stopProjection()
+
         val mpManager =
             getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-        mediaProjection = mpManager.getMediaProjection(resultCode, resultData)
+        val projection = try {
+            mpManager.getMediaProjection(resultCode, resultData)
+        } catch (e: SecurityException) {
+            // Token reused or expired — surface a clear error instead of crashing.
+            overlayManager?.showError("屏幕捕获授权已失效，请重新开始翻译服务")
+            stopSelf()
+            return
+        }
+        if (projection == null) {
+            overlayManager?.showError("无法获取屏幕捕获授权，请重试")
+            stopSelf()
+            return
+        }
+        mediaProjection = projection
         mediaProjection?.registerCallback(object : MediaProjection.Callback() {
             override fun onStop() {
                 stopSelf()
@@ -125,7 +143,12 @@ class CaptureService : Service() {
         val metrics = resources.displayMetrics
         val rect = android.graphics.Rect(0, 0, metrics.widthPixels, metrics.heightPixels / 2)
         captureProcessor?.updateCropRect(rect)
-        captureProcessor?.start()
+        try {
+            captureProcessor?.start()
+        } catch (e: SecurityException) {
+            overlayManager?.showError("屏幕捕获启动失败，请重新开始翻译服务")
+            stopSelf()
+        }
     }
 
     private fun handleOcrText(text: String) {
