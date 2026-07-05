@@ -91,6 +91,38 @@ class DeepSeekHttpTest {
     }
 
     /**
+     * Providers that don't support JSON mode (e.g. Ollama) must omit
+     * `response_format` from the request body — the field is set to null.
+     */
+    @Test
+    fun jsonModeDisabledOmitsResponseFormat() = runBlocking {
+        val body = """
+            {
+              "choices": [
+                {"message": {"role":"assistant","content":"{\"translation\":\"你好\"}"}}
+              ]
+            }
+        """.trimIndent()
+        server.enqueue(MockResponse().setResponseCode(200).setBody(body))
+
+        val noJsonClient = DeepSeekClient(
+            apiKey = "sk-test",
+            baseUrl = server.url("/").toString(),
+            modelName = "qwen2.5",
+            supportsJsonMode = false
+        )
+        noJsonClient.translate("Hello")
+
+        val recorded = server.takeRequest()
+        val requestBody = recorded.body.readUtf8()
+        // When JSON mode is off, response_format must NOT appear in the body.
+        assertTrue(
+            "response_format should be absent when supportsJsonMode=false",
+            !requestBody.contains("response_format")
+        )
+    }
+
+    /**
      * Regression: cancelling an in-flight translate() must propagate the
      * CancellationException instead of returning it as a TranslationOutcome.Error
      * (which previously surfaced "StandaloneCoroutine was canceled" to the user).

@@ -123,15 +123,23 @@ fun detectLanguage(text: String): TextLanguage {
 }
 
 /**
- * DeepSeek chat client. Builds a JSON-mode request using a language-specific
+ * OpenAI-compatible chat client. Builds a request using a language-specific
  * prompt template and parses the returned JSON into a [TranslationResult].
+ * Works against any provider that speaks the `/chat/completions` protocol
+ * (DeepSeek, OpenAI, OpenRouter, Qwen, Zhipu, Moonshot, Ollama, ...).
  *
  * Constructed per capture session with the user's stored preferences.
+ *
+ * @param supportsJsonMode when true, `response_format: json_object` is sent to
+ *   enforce strict JSON. Some endpoints (notably local Ollama models) reject
+ *   this, so it can be turned off — the tolerant parser then handles a
+ *   free-form JSON reply.
  */
 class DeepSeekClient(
     private val apiKey: String,
     private val baseUrl: String = "https://api.deepseek.com/",
-    private val modelName: String = DEFAULT_MODEL
+    private val modelName: String = DEFAULT_MODEL,
+    private val supportsJsonMode: Boolean = true
 ) {
     private val api: DeepSeekApi
     private val gson = Gson()
@@ -157,8 +165,12 @@ class DeepSeekClient(
     /** Translate and analyze [text]. Returns a structured outcome. */
     suspend fun translate(text: String): TranslationOutcome {
         val cleaned = text.trim()
-        if (cleaned.isEmpty() || apiKey.isBlank()) {
-            return TranslationOutcome.Error("No text or no API key configured", ErrorCode.EMPTY_TEXT)
+        if (cleaned.isEmpty()) {
+            return TranslationOutcome.Error("No text to translate", ErrorCode.EMPTY_TEXT)
+        }
+        // Local servers (needsApiKey=false) may run without a key.
+        if (apiKey.isBlank() && supportsJsonMode) {
+            return TranslationOutcome.Error("未配置 API Key", ErrorCode.EMPTY_TEXT)
         }
 
         val language = detectLanguage(cleaned)
@@ -170,7 +182,9 @@ class DeepSeekClient(
                 Message("system", systemPrompt),
                 Message("user", cleaned)
             ),
-            responseFormat = ResponseFormat("json_object")
+            // Only enforce JSON mode when the provider supports it; otherwise
+            // rely on the prompt + tolerant parsing.
+            responseFormat = if (supportsJsonMode) ResponseFormat("json_object") else null
         )
 
         return try {
@@ -182,7 +196,7 @@ class DeepSeekClient(
                 )
             }
             val content = response.body()?.choices?.firstOrNull()?.message?.content
-                ?: return TranslationOutcome.Error("Empty response from server", ErrorCode.BAD_RESPONSE)
+                ?: return TranslationOutcome.Error("服务器返回为空", ErrorCode.BAD_RESPONSE)
             parseContent(content, cleaned, language)
         } catch (e: CancellationException) {
             // Coroutine cancellation is cooperative control flow, not an error.
@@ -195,7 +209,7 @@ class DeepSeekClient(
                 mapHttpCode(e.code())
             )
         } catch (e: Exception) {
-            TranslationOutcome.Error(e.message ?: "Network error", ErrorCode.NETWORK)
+            TranslationOutcome.Error(e.message ?: "网络错误", ErrorCode.NETWORK)
         }
     }
 
@@ -275,11 +289,11 @@ class DeepSeekClient(
     private fun httpErrorMessage(code: Int, body: String?): String {
         val suffix = body?.take(200)?.let { " ($it)" } ?: ""
         return when (code) {
-            401, 403 -> "Invalid API key (HTTP $code)$suffix"
-            402 -> "Insufficient balance (HTTP 402)$suffix"
-            429 -> "Rate limited, please slow down (HTTP 429)$suffix"
-            in 500..599 -> "DeepSeek server error (HTTP $code)$suffix"
-            else -> "Request failed (HTTP $code)$suffix"
+            401, 403 -> "API Key 无效或无权限 (HTTP $code)$suffix"
+            402 -> "余额不足 (HTTP 402)$suffix"
+            429 -> "请求过于频繁，请稍候 (HTTP 429)$suffix"
+            in 500..599 -> "服务器错误 (HTTP $code)$suffix"
+            else -> "请求失败 (HTTP $code)$suffix"
         }
     }
 

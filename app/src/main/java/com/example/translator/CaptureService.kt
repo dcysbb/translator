@@ -48,19 +48,39 @@ class CaptureService : Service() {
         super.onCreate()
         createNotificationChannel()
         overlayManager = OverlayManager(this).also { om ->
-            om.onPauseToggle = {
-                paused = !paused
-                if (paused) captureProcessor?.pause() else captureProcessor?.resume()
-            }
             om.onClose = { stopSelf() }
             om.onRefresh = { forceRefresh() }
+            om.onSelectRegion = { om.showSelectionOverlay() }
+            om.onRequestRebuildClient = { rebuildClient() }
+            om.onSelectionResult = { rect -> handleSelectionResult(rect) }
         }
         rebuildClient()
     }
 
+    /** User-chosen screen region to OCR. Null until the user draws one. */
+    private var selectionRect: android.graphics.Rect? = null
+
+    private fun handleSelectionResult(rect: android.graphics.Rect?) {
+        if (rect == null) {
+            overlayManager?.updateStatus("已取消选区")
+            return
+        }
+        selectionRect = rect
+        captureProcessor?.updateCropRect(rect)
+        overlayManager?.updateStatus("选区已更新")
+        // Immediately capture the freshly chosen region.
+        captureProcessor?.triggerCapture()
+    }
+
     private fun rebuildClient() {
         val prefs = PreferencesManager(this)
-        deepSeekClient = DeepSeekClient(prefs.apiKey, prefs.baseUrl, prefs.modelName)
+        val provider = prefs.currentProvider
+        deepSeekClient = DeepSeekClient(
+            apiKey = prefs.apiKey,
+            baseUrl = provider.baseUrl,
+            modelName = prefs.modelName,
+            supportsJsonMode = provider.supportsJsonMode
+        )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -134,15 +154,19 @@ class CaptureService : Service() {
         }, null)
 
         ocrCache.reset()
-        captureProcessor = ScreenCaptureProcessor(this, mediaProjection!!) { text ->
-            handleOcrText(text)
+        captureProcessor = ScreenCaptureProcessor(
+            context = this,
+            mediaProjection = mediaProjection!!,
+            getOverlayBounds = { overlayManager?.getOverlayBounds() }
+        ) { text ->
+            scope.launch {
+                handleOcrText(text)
+            }
         }
 
-        // MVP selection rect: top half of the screen. A future version will let
-        // the user drag a selection box via the overlay.
-        val metrics = resources.displayMetrics
-        val rect = android.graphics.Rect(0, 0, metrics.widthPixels, metrics.heightPixels / 2)
-        captureProcessor?.updateCropRect(rect)
+        // Apply any user-chosen selection; if none yet, forceRefresh will prompt
+        // the user to draw one before capturing.
+        selectionRect?.let { captureProcessor?.updateCropRect(it) }
         try {
             captureProcessor?.start()
         } catch (e: SecurityException) {
@@ -152,9 +176,6 @@ class CaptureService : Service() {
     }
 
     private fun handleOcrText(text: String) {
-        if (paused) return
-        if (!ocrCache.shouldTranslate(text)) return
-        ocrCache.remember(text)
         requestTranslation(text)
     }
 
@@ -164,9 +185,13 @@ class CaptureService : Service() {
      * refresh button.
      */
     private fun forceRefresh() {
-        val text = lastOcrText
-        if (text.isBlank()) return
-        requestTranslation(text)
+        android.util.Log.d("RefreshTrace", "forceRefresh: captureProcessor=${captureProcessor != null}, hasSelection=${selectionRect != null}")
+        // No selection yet → ask the user to draw one first.
+        if (selectionRect == null) {
+            overlayManager?.showSelectionOverlay()
+            return
+        }
+        captureProcessor?.triggerCapture()
     }
 
     private var lastOcrText: String = ""
@@ -184,8 +209,11 @@ class CaptureService : Service() {
                     return@withLock
                 }
                 when (val outcome = client.translate(text)) {
-                    is TranslationOutcome.Success ->
-                        overlayManager?.updateText(formatResult(outcome.result))
+                    is TranslationOutcome.Success -> {
+                        val formatted = formatResult(outcome.result)
+                        overlayManager?.updateText(formatted)
+                        overlayManager?.addToHistory(text, formatted)
+                    }
                     is TranslationOutcome.Error ->
                         overlayManager?.showError(outcome.message)
                 }

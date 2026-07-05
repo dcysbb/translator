@@ -46,6 +46,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.PlayArrow
@@ -85,24 +86,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 // ──────────────────────────────────────────────────────────────────────────────
-//  Color Palette
+//  Color Palette  (delegates to the shared GlassPalette for the liquid-glass look)
 // ──────────────────────────────────────────────────────────────────────────────
-private val BgDark1 = Color(0xFF0D0D1A)
-private val BgDark2 = Color(0xFF1A1A2E)
-private val BgDark3 = Color(0xFF16213E)
-private val AccentTeal = Color(0xFF00D4AA)
-private val AccentCyan = Color(0xFF00B4D8)
-private val AccentPurple = Color(0xFF7B2FBE)
-private val TextPrimary = Color.White
-private val TextSecondary = Color(0xFFA0AEC0)
-private val ErrorRed = Color(0xFFFF6B6B)
-private val SuccessGreen = Color(0xFF00D4AA)
+private val BgDark1 get() = GlassPalette.BackdropTop
+private val BgDark2 get() = GlassPalette.BackdropMid
+private val BgDark3 get() = GlassPalette.BackdropBottom
+private val AccentTeal get() = GlassPalette.Accent
+private val AccentCyan get() = GlassPalette.AccentSecondary
+private val AccentPurple get() = GlassPalette.AccentPurple
+private val TextPrimary get() = GlassPalette.TextPrimary
+private val TextSecondary get() = GlassPalette.TextSecondary
+private val ErrorRed get() = GlassPalette.ErrorText
+private val SuccessGreen get() = GlassPalette.SuccessGreen
 private val CardBg = Color(0xFF111128)
-private val CardBorder = Color.White.copy(alpha = 0.08f)
+private val CardBorder get() = GlassPalette.BorderSubtle
 
-private val BgGradient = Brush.verticalGradient(listOf(BgDark1, BgDark2, BgDark3))
-private val AccentGradient = Brush.horizontalGradient(listOf(AccentTeal, AccentCyan))
-private val AccentGradientVertical = Brush.verticalGradient(listOf(AccentTeal, AccentCyan))
+private val BgGradient get() = GlassPalette.BgGradient
+private val AccentGradient get() = GlassPalette.AccentGradient
+private val AccentGradientVertical = Brush.verticalGradient(listOf(GlassPalette.Accent, GlassPalette.AccentSecondary))
 
 // ──────────────────────────────────────────────────────────────────────────────
 //  MainActivity  (all original logic preserved)
@@ -489,34 +490,9 @@ fun DarkGlassCard(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val shape = RoundedCornerShape(20.dp)
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        Color.White.copy(alpha = 0.06f),
-                        Color.White.copy(alpha = 0.02f)
-                    )
-                )
-            )
-            .drawBehind {
-                // subtle inner bg
-                drawRect(CardBg.copy(alpha = 0.6f))
-            }
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        Color.White.copy(alpha = 0.04f),
-                        Color.Transparent
-                    )
-                )
-            )
-            .border(1.dp, CardBorder, shape),
-        content = content
-    )
+    // Liquid-glass: translucent frosted fill, specular top highlight,
+    // soft shadow, hairline rim. Replaces the old near-opaque dark card.
+    LiquidGlassCard(modifier = modifier, cornerRadius = 26.dp, elevation = 14.dp, content = content)
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -537,7 +513,8 @@ fun PrimaryActionButton(
         label = "primaryBtnScale"
     )
 
-    val shape = RoundedCornerShape(16.dp)
+    val shape = RoundedCornerShape(18.dp)
+    val accentAlpha = if (isPressed) 0.32f else 0.22f
 
     Box(
         modifier = modifier
@@ -545,7 +522,16 @@ fun PrimaryActionButton(
             .height(56.dp)
             .scale(scale)
             .clip(shape)
-            .background(AccentGradient, shape)
+            .then(
+                Modifier.liquidGlass(shape, elevation = 14.dp, pressed = isPressed)
+            )
+            // Accent-tinted overlay so the primary CTA still reads as the focal action.
+            .drawBehind {
+                drawRect(
+                    brush = AccentGradient,
+                    alpha = accentAlpha
+                )
+            }
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -560,13 +546,13 @@ fun PrimaryActionButton(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = BgDark1,
+                tint = Color.White,
                 modifier = Modifier.size(22.dp)
             )
             Spacer(Modifier.width(10.dp))
             Text(
                 text = text,
-                color = BgDark1,
+                color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
             )
@@ -589,21 +575,15 @@ fun SecondaryActionButton(
         label = "secondaryBtnScale"
     )
 
-    val shape = RoundedCornerShape(14.dp)
+    val shape = RoundedCornerShape(16.dp)
 
     Box(
         modifier = modifier
             .height(48.dp)
             .scale(scale)
             .clip(shape)
-            .background(Color.White.copy(alpha = 0.04f), shape)
-            .border(
-                width = 1.dp,
-                brush = Brush.horizontalGradient(
-                    listOf(AccentTeal.copy(alpha = 0.4f), AccentCyan.copy(alpha = 0.25f))
-                ),
-                shape = shape
-            )
+            .then(Modifier.liquidGlass(shape, elevation = 8.dp, pressed = isPressed))
+            .glassAccentBorder(shape)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -637,11 +617,13 @@ fun SecondaryActionButton(
 // ──────────────────────────────────────────────────────────────────────────────
 @Composable
 fun SettingsScreen(prefs: PreferencesManager, onBack: () -> Unit) {
-    var apiKey by remember { mutableStateOf(prefs.apiKey) }
-    var modelName by remember { mutableStateOf(prefs.modelName) }
-    var baseUrl by remember { mutableStateOf(prefs.baseUrl) }
-    var intervalMs by remember { mutableStateOf(prefs.recognitionIntervalMs.toString()) }
+    var providerId by remember { mutableStateOf(prefs.currentProviderId) }
     var wifiOnly by remember { mutableStateOf(prefs.wifiOnly) }
+    // Fields are re-read when the provider changes (keyed on providerId) so
+    // switching presets swaps in that provider's saved key/model.
+    var apiKey by remember(providerId) { mutableStateOf(prefs.getApiKey(providerId)) }
+    var modelName by remember(providerId) { mutableStateOf(prefs.getModel(providerId).ifBlank { ModelProviders.byId(providerId).defaultModel }) }
+    var customBaseUrl by remember(providerId) { mutableStateOf(prefs.customBaseUrl) }
     var apiKeyVisible by remember { mutableStateOf(false) }
 
     Box(
@@ -681,8 +663,8 @@ fun SettingsScreen(prefs: PreferencesManager, onBack: () -> Unit) {
 
             Spacer(Modifier.height(24.dp))
 
-            // ── API 配置 Group ────────────────────────────────────────────
-            SettingsSectionHeader("API 配置")
+            // ── 模型供应商 Group ────────────────────────────────────────
+            SettingsSectionHeader("模型供应商")
             Spacer(Modifier.height(10.dp))
 
             DarkGlassCard {
@@ -690,55 +672,79 @@ fun SettingsScreen(prefs: PreferencesManager, onBack: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // API Key with visibility toggle
-                    DarkTextField(
-                        label = "DeepSeek API Key",
-                        value = apiKey,
-                        onValueChange = {
-                            apiKey = it
-                            prefs.apiKey = it
-                        },
-                        visualTransformation = if (apiKeyVisible) VisualTransformation.None
-                        else PasswordVisualTransformation(),
-                        trailingIcon = {
-                            IconButton(onClick = { apiKeyVisible = !apiKeyVisible }) {
-                                Icon(
-                                    imageVector = if (apiKeyVisible) Icons.Rounded.VisibilityOff
-                                    else Icons.Rounded.Visibility,
-                                    contentDescription = "切换可见性",
-                                    tint = TextSecondary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
+                    ProviderSelector(
+                        providers = ModelProviders.all,
+                        selectedId = providerId,
+                        onSelect = { id ->
+                            providerId = id
+                            prefs.currentProviderId = id
                         }
                     )
+
+                    val provider = ModelProviders.byId(providerId)
+
+                    // API Key — hidden for keyless local servers (Ollama).
+                    if (provider.needsApiKey) {
+                        DarkTextField(
+                            label = "API Key",
+                            value = apiKey,
+                            onValueChange = {
+                                apiKey = it
+                                prefs.setApiKey(providerId, it)
+                            },
+                            visualTransformation = if (apiKeyVisible) VisualTransformation.None
+                            else PasswordVisualTransformation(),
+                            trailingIcon = {
+                                IconButton(onClick = { apiKeyVisible = !apiKeyVisible }) {
+                                    Icon(
+                                        imageVector = if (apiKeyVisible) Icons.Rounded.VisibilityOff
+                                        else Icons.Rounded.Visibility,
+                                        contentDescription = "切换可见性",
+                                        tint = TextSecondary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                        )
+                    }
 
                     DarkTextField(
                         label = "模型名称",
                         value = modelName,
                         onValueChange = {
                             modelName = it
-                            prefs.modelName = it
+                            prefs.setModel(providerId, it)
                         }
                     )
 
-                    DarkTextField(
-                        label = "Base URL",
-                        value = baseUrl,
-                        onValueChange = {
-                            baseUrl = it
-                            prefs.baseUrl = it
-                        }
-                    )
+                    // Base URL only for the Custom provider.
+                    if (providerId == ModelProviders.CUSTOM_ID) {
+                        DarkTextField(
+                            label = "Base URL",
+                            value = customBaseUrl,
+                            onValueChange = {
+                                customBaseUrl = it
+                                prefs.customBaseUrl = it
+                            }
+                        )
+                    }
+
+                    if (!provider.supportsJsonMode) {
+                        Text(
+                            "此供应商使用兼容模式解析（不强制 JSON 模式）",
+                            fontSize = 11.sp,
+                            color = TextSecondary
+                        )
+                    }
                 }
             }
 
             Spacer(Modifier.height(24.dp))
 
-            // ── 识别设置 Group ────────────────────────────────────────────
-            SettingsSectionHeader("识别设置")
+            // ── 高级设置 Group ────────────────────────────────────────────
+            SettingsSectionHeader("高级设置")
             Spacer(Modifier.height(10.dp))
 
             DarkGlassCard {
@@ -748,14 +754,6 @@ fun SettingsScreen(prefs: PreferencesManager, onBack: () -> Unit) {
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    DarkTextField(
-                        label = "识别间隔（ms，300-5000）",
-                        value = intervalMs,
-                        onValueChange = {
-                            intervalMs = it
-                            it.toLongOrNull()?.let { ms -> prefs.recognitionIntervalMs = ms }
-                        }
-                    )
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -811,6 +809,43 @@ private fun SettingsSectionHeader(title: String) {
         letterSpacing = 1.2.sp,
         modifier = Modifier.padding(start = 4.dp)
     )
+}
+
+/** Horizontally-scrolling provider chips. The selected one is accent-tinted. */
+@Composable
+private fun ProviderSelector(
+    providers: List<ModelProvider>,
+    selectedId: String,
+    onSelect: (String) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        providers.forEach { provider ->
+            val selected = provider.id == selectedId
+            val shape = RoundedCornerShape(50)
+            Box(
+                modifier = Modifier
+                    .clip(shape)
+                    .then(
+                        if (selected) Modifier.liquidGlass(shape, elevation = 4.dp, pressed = true)
+                        else Modifier.border(1.dp, CardBorder, shape)
+                    )
+                    .clickable { onSelect(provider.id) }
+                    .padding(horizontal = 14.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    provider.displayName,
+                    fontSize = 13.sp,
+                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                    color = if (selected) AccentTeal else TextSecondary
+                )
+            }
+        }
+    }
 }
 
 @Composable
