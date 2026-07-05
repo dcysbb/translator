@@ -40,3 +40,8 @@ captures/
 *.log
 .DS_Store
 Thumbs.db
+
+# 反编译临时产物与工具(仅本地使用,不入库)
+_codex_v010_inspect/
+_codex_v010_ref/
+_tools/
