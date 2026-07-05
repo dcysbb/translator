@@ -1,0 +1,6 @@
+<resources>
+    <color name="translator_bg">#FAFDFC</color>
+    <color name="translator_primary">#00696D</color>
+    <color name="translator_accent">#4E607C</color>
+    <color name="ic_launcher_background">#FAFDFC</color>
+</resources>
