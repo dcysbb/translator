@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.media.projection.MediaProjectionManager
 import android.net.Uri
 import android.os.Build
@@ -25,7 +26,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.core.view.GravityCompat
-import kotlin.math.min
 import com.poozh.translator.data.AppSettings
 import com.poozh.translator.data.HistoryItem
 import com.poozh.translator.data.HistoryManager
@@ -91,7 +91,6 @@ class MainActivity : Activity() {
         if (currentTab == AppTab.Console) {
             refreshStatus()
         } else if (currentTab == AppTab.History) {
-            // Reload history to show any new translations made via overlay
             switchTab(AppTab.History)
         }
     }
@@ -117,8 +116,8 @@ class MainActivity : Activity() {
     @Deprecated("Deprecated by Android framework")
     override fun onBackPressed() {
         val drawer = drawerRef
-        if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START)
+        if (drawer != null && drawer.isDrawerOpen(Gravity.LEFT)) {
+            drawer.closeDrawer(Gravity.LEFT)
         } else {
             @Suppress("DEPRECATION")
             super.onBackPressed()
@@ -143,10 +142,8 @@ class MainActivity : Activity() {
             setPadding(dp(screenMargin()), dp(20), dp(screenMargin()), dp(32))
         }
 
-        // Top bar: hamburger + title
         main.addView(mainTopBar(drawer))
 
-        // Scroll view for the tab content
         val scrollRoot = ScrollView(this).apply {
             clipToPadding = false
             isFillViewport = true
@@ -163,23 +160,39 @@ class MainActivity : Activity() {
         ))
 
         // ── Left Navigation Drawer ──
-        val drawerScroll = ScrollView(this).apply { clipToPadding = false }
+        val drawerScroll = ScrollView(this).apply {
+            clipToPadding = false
+            isFillViewport = true
+            
+            // MD3 Nav Drawer has 16dp rounded corners on the right edge
+            val radius = dp(16).toFloat()
+            val bg = GradientDrawable().apply {
+                setColor(Md3.light.surfaceContainerLow)
+                cornerRadii = floatArrayOf(
+                    0f, 0f,           // Top-Left
+                    radius, radius,   // Top-Right
+                    radius, radius,   // Bottom-Right
+                    0f, 0f            // Bottom-Left
+                )
+            }
+            background = bg
+        }
+        
         val drawerContent = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Md3.light.surfaceContainerLow)
-            setPadding(dp(16), dp(28), dp(16), dp(32))
+            setPadding(dp(12), dp(28), dp(12), dp(32))
         }
         
         // Drawer Header
         drawerContent.addView(TextView(this).apply {
             text = "屏幕翻译"
             Md3.applyTextStyle(this, Md3TextStyle.HeadlineSmall, Md3.light.primary)
-            setPadding(0, 0, 0, dp(4))
+            setPadding(dp(12), 0, 0, dp(4))
         })
         drawerContent.addView(TextView(this).apply {
             text = "实时 OCR 选区翻译工具"
             Md3.applyTextStyle(this, Md3TextStyle.BodySmall, Md3.light.onSurfaceVariant)
-            setPadding(0, 0, 0, dp(24))
+            setPadding(dp(12), 0, 0, dp(24))
         })
 
         // Drawer Menu Items
@@ -188,20 +201,21 @@ class MainActivity : Activity() {
         }
 
         val tabActions = listOf(
-            AppTab.Console to "翻译控制台",
-            AppTab.Settings to "连接与配置",
-            AppTab.History to "历史记录",
-            AppTab.Guide to "使用指南"
+            Triple(AppTab.Console, "\uD83C\uDFAE", "翻译控制台"),
+            Triple(AppTab.Settings, "\u2699\uFE0F", "连接与配置"),
+            Triple(AppTab.History, "\uD83D\uDCCB", "历史记录"),
+            Triple(AppTab.Guide, "\uD83D\uDCD6", "使用指南")
         )
 
-        for ((tab, label) in tabActions) {
-            drawerMenuLayout!!.addView(drawerMenuItem(tab, label) {
+        for ((tab, icon, label) in tabActions) {
+            drawerMenuLayout!!.addView(drawerMenuItem(tab, icon, label) {
                 switchTab(tab)
             })
         }
         drawerContent.addView(drawerMenuLayout!!)
 
         drawerScroll.addView(drawerContent)
+        
         // Add main content (must be first in DrawerLayout)
         val mainParams = DrawerLayout.LayoutParams(
             DrawerLayout.LayoutParams.MATCH_PARENT,
@@ -210,22 +224,16 @@ class MainActivity : Activity() {
         drawer.addView(main, mainParams)
 
         // Add drawer menu (must be after main content)
-        // M3 modal navigation drawer: fixed width (360dp standard / 240dp
-        // compact), capped to 90% of the screen so it never fully covers the
-        // main content. The previous 0.82×screen-width left a wide blank area
-        // because the drawer holds only a short nav list.
-        val maxDrawerWidth = (resources.displayMetrics.widthPixels * 0.9f).toInt()
-        val drawerWidth = min(dp(360), maxDrawerWidth)
+        val drawerWidth = (resources.displayMetrics.widthPixels * 0.82f).toInt()
         val drawerParams = DrawerLayout.LayoutParams(
             drawerWidth,
             DrawerLayout.LayoutParams.MATCH_PARENT
-        ).apply { gravity = GravityCompat.START }
+        ).apply { gravity = Gravity.LEFT }
         drawer.addView(drawerScroll, drawerParams)
 
         setContentView(drawer)
         drawerRef = drawer
 
-        // Default to Console tab
         switchTab(AppTab.Console)
     }
 
@@ -237,24 +245,27 @@ class MainActivity : Activity() {
             minHeight = dp(48)
             isClickable = true
             isFocusable = true
-            Md3.applyTextStyle(this, Md3TextStyle.TitleLarge, Md3.light.primary)
+            Md3.applyTextStyle(this, Md3TextStyle.TitleLarge, Md3.light.onSurfaceVariant)
             background = Md3.ripple(this@MainActivity, Color.TRANSPARENT, 999f)
             setOnClickListener {
-                drawer.openDrawer(GravityCompat.START)
+                drawer.openDrawer(Gravity.LEFT)
             }
         }
         
         mainTitle = TextView(this).apply {
             text = "翻译控制台"
-            Md3.applyTextStyle(this, Md3TextStyle.HeadlineSmall, Md3.light.onSurface)
-            setPadding(dp(12), 0, 0, 0)
+            // M3 Top App Bar: TitleLarge, onSurface color
+            Md3.applyTextStyle(this, Md3TextStyle.TitleLarge, Md3.light.onSurface)
+            setPadding(dp(4), 0, 0, 0)
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         }
         
+        // M3 Small Top App Bar: 64dp height, center-aligned vertically
         return LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(0, dp(4), 0, dp(12))
+            minimumHeight = dp(64)
+            setPadding(dp(4), 0, dp(4), 0)
             addView(hamburger)
             addView(mainTitle)
         }
@@ -262,9 +273,8 @@ class MainActivity : Activity() {
 
     private fun switchTab(tab: AppTab) {
         currentTab = tab
-        drawerRef?.closeDrawer(GravityCompat.START)
+        drawerRef?.closeDrawer(Gravity.LEFT)
         
-        // Update Title
         mainTitle.text = when (tab) {
             AppTab.Console -> "翻译控制台"
             AppTab.Settings -> "连接与配置"
@@ -274,7 +284,6 @@ class MainActivity : Activity() {
         
         updateDrawerSelection()
         
-        // Reload container views
         pageContainer.removeAllViews()
         when (tab) {
             AppTab.Console -> {
@@ -297,19 +306,39 @@ class MainActivity : Activity() {
         Md3Motion.enter(pageContainer, dp(8).toFloat())
     }
 
-    private fun drawerMenuItem(tab: AppTab, label: String, action: () -> Unit): TextView {
-        return TextView(this).apply {
-            text = label
+    private fun drawerMenuItem(tab: AppTab, icon: String, label: String, action: () -> Unit): LinearLayout {
+        return LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            minHeight = dp(48)
-            setPadding(dp(20), 0, dp(20), 0)
+            minimumHeight = dp(56) // M3 navigation drawer: 56dp item height
+            setPadding(dp(16), 0, dp(24), 0)
             tag = tab
             isClickable = true
             isFocusable = true
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                dp(48)
-            ).apply { bottomMargin = dp(4) }
+                dp(56)
+            ).apply {
+                bottomMargin = dp(2)
+                topMargin = dp(2)
+            }
+
+            // M3 Leading icon in drawer item
+            val iconView = TextView(this@MainActivity).apply {
+                text = icon
+                textSize = 20f
+                gravity = Gravity.CENTER
+                minWidth = dp(24)
+                setPadding(0, 0, dp(12), 0)
+            }
+            addView(iconView)
+
+            val labelView = TextView(this@MainActivity).apply {
+                text = label
+                tag = "label"
+            }
+            addView(labelView)
+
             setOnClickListener {
                 action()
             }
@@ -320,26 +349,30 @@ class MainActivity : Activity() {
         val menuLayout = drawerMenuLayout ?: return
         val activeTab = currentTab
         for (i in 0 until menuLayout.childCount) {
-            val item = menuLayout.getChildAt(i) as? TextView ?: continue
+            val item = menuLayout.getChildAt(i) as? LinearLayout ?: continue
             val itemTab = item.tag as? AppTab ?: continue
             val selected = itemTab == activeTab
-            Md3.applyTextStyle(
-                item,
-                Md3TextStyle.LabelLarge,
-                if (selected) Md3.light.onSecondaryContainer else Md3.light.onSurface
-            )
+            // Apply style to the label child
+            val labelView = item.findViewWithTag<TextView>("label")
+            if (labelView != null) {
+                Md3.applyTextStyle(
+                    labelView,
+                    Md3TextStyle.LabelLarge,
+                    if (selected) Md3.light.onSecondaryContainer else Md3.light.onSurfaceVariant
+                )
+            }
+            // M3 Nav Drawer: active indicator is pill-shaped secondaryContainer fill
             item.background = Md3.ripple(
                 context = this,
                 fillColor = if (selected) Md3.light.secondaryContainer else Color.TRANSPARENT,
-                radiusDp = 999f,
-                rippleColor = Md3.withAlpha(Md3.light.primary, 0.14f)
+                radiusDp = 999f, // Full pill shape per M3 spec
+                rippleColor = Md3.withAlpha(Md3.light.primary, 0.12f)
             )
         }
     }
 
     private fun buildStatusCard(): LinearLayout {
         return card("服务状态").apply {
-            // Overlay status row
             val overlayRow = LinearLayout(this@MainActivity).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
@@ -370,7 +403,6 @@ class MainActivity : Activity() {
             }
             addView(overlayRow)
 
-            // Capture status row
             val captureRow = LinearLayout(this@MainActivity).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
@@ -399,7 +431,6 @@ class MainActivity : Activity() {
             }
             addView(captureRow)
 
-            // Running status row
             val serviceRow = LinearLayout(this@MainActivity).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
@@ -470,14 +501,27 @@ class MainActivity : Activity() {
                 val btnSave = actionButton("保存设置", Md3ButtonStyle.Filled) { saveSettings() }.apply {
                     layoutParams = LinearLayout.LayoutParams(0, dp(48), 1.2f).apply { rightMargin = dp(8) }
                 }
-                val btnClear = actionButton("清除 Key", Md3ButtonStyle.Outlined) {
-                    settings.clearApiKey()
-                    apiKeyInput.setText("")
-                    Toast.makeText(this@MainActivity, "API Key 已清除", Toast.LENGTH_SHORT).show()
-                    refreshStatus()
-                }.apply {
+                
+                // M3 destructive action: Outlined red style matching error palette
+                val btnClear = TextView(this@MainActivity).apply {
+                    text = "清除 Key"
+                    gravity = Gravity.CENTER
+                    minHeight = dp(48)
+                    Md3.applyTextStyle(this, Md3TextStyle.LabelLarge, Md3.light.error)
+                    background = Md3.ripple(
+                        context = this@MainActivity,
+                        fillColor = Color.TRANSPARENT,
+                        radiusDp = 999f,
+                        strokeColor = Md3.light.error
+                    )
+                    setOnClickListener {
+                        settings.clearApiKey()
+                        apiKeyInput.setText("")
+                        Toast.makeText(this@MainActivity, "API Key 已清除", Toast.LENGTH_SHORT).show()
+                        refreshStatus()
+                    }
+                    Md3.bindStateLayer(this)
                     layoutParams = LinearLayout.LayoutParams(0, dp(48), 0.8f)
-                    setTextColor(Md3.light.error)
                 }
 
                 addView(btnSave)
@@ -652,9 +696,11 @@ class MainActivity : Activity() {
 
         if (::overlayDot.isInitialized) {
             val hasOverlay = Settings.canDrawOverlays(this)
+            
+            // Clean M3 color mapping: Success uses primary teal, failure uses error red
             overlayDot.background = Md3.surface(
                 context = this,
-                color = if (hasOverlay) Color.rgb(0, 212, 170) else Color.rgb(255, 107, 107),
+                color = if (hasOverlay) Md3.light.primary else Md3.light.error,
                 radiusDp = 999f
             )
             overlayText.text = if (hasOverlay) "悬浮窗权限：已授权" else "悬浮窗权限：未授权"
@@ -663,7 +709,7 @@ class MainActivity : Activity() {
             val hasCapture = FloatingTranslatorService.isCaptureActive
             captureDot.background = Md3.surface(
                 context = this,
-                color = if (hasCapture) Color.rgb(0, 212, 170) else Color.rgb(255, 107, 107),
+                color = if (hasCapture) Md3.light.primary else Md3.light.error,
                 radiusDp = 999f
             )
             captureText.text = if (hasCapture) "屏幕截图捕获：已就绪" else "屏幕截图捕获：未授权"
@@ -672,7 +718,7 @@ class MainActivity : Activity() {
             val running = FloatingTranslatorService.isRunning
             serviceDot.background = Md3.surface(
                 context = this,
-                color = if (running) Color.rgb(0, 212, 170) else Color.rgb(180, 180, 180),
+                color = if (running) Md3.light.primary else Color.rgb(180, 180, 180),
                 radiusDp = 999f
             )
             serviceText.text = if (running) "服务运行状态：正在运行" else "服务运行状态：已停止"
@@ -715,15 +761,17 @@ class MainActivity : Activity() {
         return LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(16), dp(16), dp(16), dp(16))
+            // M3 Outlined Card: medium (12dp) corner radius, outlineVariant border
             background = Md3.surface(
                 context = this@MainActivity,
                 color = Md3.light.surfaceContainerLow,
-                radiusDp = 16f,
+                radiusDp = 12f,
                 strokeColor = Md3.light.outlineVariant
             )
             addView(TextView(this@MainActivity).apply {
                 text = title
-                Md3.applyTextStyle(this, Md3TextStyle.TitleMedium, Md3.light.primary)
+                // M3: card titles use onSurface, not primary
+                Md3.applyTextStyle(this, Md3TextStyle.TitleMedium, Md3.light.onSurface)
                 setPadding(0, 0, 0, dp(12))
             })
         }
@@ -839,12 +887,14 @@ class MainActivity : Activity() {
             }
         }
 
+        // Compliant MD3 Outlined Text Field container layout
         val container = FrameLayout(this).apply {
-            background = Md3.ripple(
+            background = Md3.surface(
                 context = this@MainActivity,
-                fillColor = Md3.light.surfaceContainerHighest,
+                color = Color.TRANSPARENT, // Clean transparent background
                 radiusDp = 8f,
-                strokeColor = Md3.light.outline
+                strokeColor = Md3.light.outline, // Inactive outline state
+                strokeWidthDp = 1f
             )
 
             val editParams = FrameLayout.LayoutParams(
@@ -861,7 +911,7 @@ class MainActivity : Activity() {
                     text = "显示"
                     gravity = Gravity.CENTER
                     setPadding(dp(12), 0, dp(12), 0)
-                    Md3.applyTextStyle(this, Md3TextStyle.LabelMedium, Md3.light.primary)
+                    Md3.applyTextStyle(this, Md3TextStyle.LabelLarge, Md3.light.primary)
                     isClickable = true
                     isFocusable = true
                     background = Md3.ripple(this@MainActivity, Color.TRANSPARENT, 4f)
@@ -888,6 +938,27 @@ class MainActivity : Activity() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 dp(56)
             ).apply { bottomMargin = dp(12) }
+        }
+
+        // Active/inactive state outline transition animation matching MD3 specs
+        edit.setOnFocusChangeListener { _, hasFocus ->
+            container.background = if (hasFocus) {
+                Md3.surface(
+                    context = this@MainActivity,
+                    color = Color.TRANSPARENT,
+                    radiusDp = 8f,
+                    strokeColor = Md3.light.primary, // Focused active stroke (2dp thick primary color)
+                    strokeWidthDp = 2f
+                )
+            } else {
+                Md3.surface(
+                    context = this@MainActivity,
+                    color = Color.TRANSPARENT,
+                    radiusDp = 8f,
+                    strokeColor = Md3.light.outline, // Unfocused standard stroke (1dp thick outline color)
+                    strokeWidthDp = 1f
+                )
+            }
         }
 
         parent.addView(container)
@@ -925,6 +996,14 @@ class MainActivity : Activity() {
         val seek = SeekBar(this).apply {
             val pct = ((opacity - 0.3f) / 0.7f * 100f).toInt().coerceIn(0, 100)
             progress = pct
+            
+            // Set M3 progress track and thumb colors
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                progressTintList = ColorStateList.valueOf(Md3.light.primary)
+                thumbTintList = ColorStateList.valueOf(Md3.light.primary)
+                progressBackgroundTintList = ColorStateList.valueOf(Md3.light.outlineVariant)
+            }
+            
             setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                     val value = 0.3f + (progress / 100f) * 0.7f

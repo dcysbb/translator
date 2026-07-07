@@ -36,6 +36,7 @@ import com.poozh.translator.data.AppSettings
 import com.poozh.translator.data.DeepSeekClient
 import com.poozh.translator.data.ModelProviders
 import com.poozh.translator.data.SettingsSnapshot
+import com.poozh.translator.data.HistoryManager
 import com.poozh.translator.model.AnalysisResult
 import com.poozh.translator.model.LanguageDetector
 import com.poozh.translator.model.RefreshAction
@@ -84,6 +85,8 @@ class FloatingTranslatorService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        instance = this
+        isRunning = true
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         settings = AppSettings(this)
         ensureForeground()
@@ -108,6 +111,8 @@ class FloatingTranslatorService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        instance = null
+        isRunning = false
         currentCall?.cancel()
         captureController?.release()
         captureController = null
@@ -149,6 +154,17 @@ class FloatingTranslatorService : Service() {
             return
         }
         mediaProjection = projection
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            try {
+                startForeground(
+                    NOTIFICATION_ID,
+                    buildNotification(),
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+                )
+            } catch (e: Throwable) {
+                android.util.Log.e("FloatingTranslatorService", "Failed to promote FGS to mediaProjection", e)
+            }
+        }
         showStatus("屏幕捕获已就绪")
         if (selectionRect == null) showSelectionOverlay()
     }
@@ -554,6 +570,12 @@ class FloatingTranslatorService : Service() {
                     runOnMain {
                         translating = false
                         lastResult = result
+                        HistoryManager.addHistory(
+                            context = this@FloatingTranslatorService,
+                            original = text,
+                            translated = result.toDisplayText(),
+                            providerId = snapshot.providerId
+                        )
                         showReadingPage()
                         showStatus("翻译完成")
                     }
@@ -679,21 +701,9 @@ class FloatingTranslatorService : Service() {
 
     private fun ensureForeground() {
         createNotificationChannel()
-        // Android 14+ requires the mediaProjection FGS type to be passed to
-        // startForeground (and declared in the manifest), otherwise the
-        // platform throws ForegroundServiceTypeNotAllowedException /
-        // SecurityException when MediaProjection.createVirtualDisplay runs.
-        // Catch Throwable so a denied FGS surfaces a Toast instead of crashing.
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                startForeground(
-                    NOTIFICATION_ID,
-                    buildNotification(),
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
-                )
-            } else {
-                startForeground(NOTIFICATION_ID, buildNotification())
-            }
+            // Start as standard foreground service first.
+            startForeground(NOTIFICATION_ID, buildNotification())
         } catch (e: Throwable) {
             android.util.Log.e("FloatingTranslatorService", "startForeground failed", e)
             Toast.makeText(this, "无法启动翻译服务：${e.localizedMessage ?: e::class.simpleName}", Toast.LENGTH_LONG).show()
@@ -788,8 +798,23 @@ class FloatingTranslatorService : Service() {
                     if (moved < dp(8)) {
                         view.performClick()
                         onClick?.invoke()
+                        onDragFinished?.invoke(params)
+                    } else {
+                        if (dragTarget == bubbleView) {
+                            val screenWidth = resources.displayMetrics.widthPixels
+                            val bubbleWidth = params.width
+                            val targetX = if (params.x + bubbleWidth / 2 < screenWidth / 2) {
+                                0
+                            } else {
+                                screenWidth - bubbleWidth
+                            }
+                            animateBubbleToEdge(dragTarget, params, targetX) {
+                                onDragFinished?.invoke(params)
+                            }
+                        } else {
+                            onDragFinished?.invoke(params)
+                        }
                     }
-                    onDragFinished?.invoke(params)
                     true
                 }
 
@@ -801,6 +826,28 @@ class FloatingTranslatorService : Service() {
                 else -> false
             }
         }
+    }
+
+    private fun animateBubbleToEdge(
+        dragTarget: View,
+        params: WindowManager.LayoutParams,
+        targetX: Int,
+        onFinished: () -> Unit
+    ) {
+        val animator = android.animation.ValueAnimator.ofInt(params.x, targetX).apply {
+            duration = 200L
+            interpolator = android.view.animation.DecelerateInterpolator()
+            addUpdateListener { animation ->
+                params.x = animation.animatedValue as Int
+                runCatching { windowManager.updateViewLayout(dragTarget, params) }
+            }
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) {
+                    onFinished()
+                }
+            })
+        }
+        animator.start()
     }
 
     private fun resizeHandle(params: WindowManager.LayoutParams): TextView {
@@ -1035,6 +1082,12 @@ class FloatingTranslatorService : Service() {
     }
 
     companion object {
+        var isRunning = false
+        val isCaptureActive: Boolean
+            get() = instance?.mediaProjection != null
+
+        private var instance: FloatingTranslatorService? = null
+
         const val ACTION_SHOW = "com.poozh.translator.action.SHOW"
         const val ACTION_STOP = "com.poozh.translator.action.STOP"
         const val ACTION_REQUEST_CAPTURE = "com.poozh.translator.action.REQUEST_CAPTURE"

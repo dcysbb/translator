@@ -11,7 +11,7 @@
 | ③ | 主界面 M3 侧滑抽屉重构 | ✅ | `MainActivity.kt`, `build.gradle` |
 | ④ | 悬浮窗非线性缩放动画 | ✅ | `Md3Motion.kt`, `FloatingTranslatorService.kt` |
 | 🧪 | 编译 + 单测 + Pixel 验证 | ✅ | — |
-| 📦 | 提交 + release v0.3.0 | 🔄 | — |
+| 📦 | 提交 + release v0.3.0 | ✅ | — |
 
 ## 详细进展
 
@@ -85,3 +85,7 @@
 ## 收尾
 - versionCode 5→6, versionName 0.2.3→0.3.0
 - APK: `translator-v0.3.0-debug.apk`
+- commit: `182a48d`，已 push 到 `codex/material3-translator-app`
+- tag: `v0.3.0` 已推送
+- GitHub Release: https://github.com/dcysbb/translator/releases/tag/v0.3.0
+- 全部完成 ✅
