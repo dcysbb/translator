@@ -32,8 +32,9 @@ class DeepSeekClient(
         settings: SettingsSnapshot,
         callback: ResultCallback
     ): Call? {
-        if (settings.apiKey.isBlank() && ModelProviders.requiresApiKey(settings.baseUrl)) {
-            callback.onFailure("请先在主界面填写 ${ModelProviders.displayName(settings.baseUrl)} API Key")
+        val provider = ModelProviders.byId(settings.providerId)
+        if (settings.apiKey.isBlank() && provider.requiresApiKey) {
+            callback.onFailure("请先在主界面填写 ${provider.name} API Key")
             return null
         }
         if (text.isBlank()) {
@@ -41,7 +42,7 @@ class DeepSeekClient(
             return null
         }
 
-        val body = buildRequestJson(text, language, settings.model).toString()
+        val body = buildRequestJson(text, language, settings.model, provider.supportsJsonMode).toString()
             .toRequestBody(JSON_MEDIA_TYPE)
         val request = Request.Builder()
             .url(settings.baseUrl)
@@ -64,7 +65,7 @@ class DeepSeekClient(
                 response.use {
                     val responseBody = it.body?.string().orEmpty()
                     if (!it.isSuccessful) {
-                        callback.onFailure("${ModelProviders.displayName(settings.baseUrl)} HTTP ${it.code}: ${responseBody.take(240)}")
+                        callback.onFailure("${provider.name} HTTP ${it.code}: ${responseBody.take(240)}")
                         return
                     }
                     runCatching {
@@ -84,17 +85,28 @@ class DeepSeekClient(
         return call
     }
 
-    private fun buildRequestJson(text: String, language: TextLanguage, model: String): JSONObject {
+    private fun buildRequestJson(
+        text: String,
+        language: TextLanguage,
+        model: String,
+        supportsJsonMode: Boolean
+    ): JSONObject {
         val messages = JSONArray()
             .put(JSONObject().put("role", "system").put("content", DeepSeekPrompt.systemPrompt(language)))
             .put(JSONObject().put("role", "user").put("content", DeepSeekPrompt.userPrompt(text, language)))
 
-        return JSONObject()
+        val json = JSONObject()
             .put("model", model)
             .put("messages", messages)
             .put("temperature", 0.2)
             .put("stream", false)
-            .put("response_format", JSONObject().put("type", "json_object"))
+        // Only enforce JSON mode when the provider supports it; otherwise rely
+        // on the prompt + tolerant parsing (some endpoints, e.g. local Ollama,
+        // reject response_format with a 400).
+        if (supportsJsonMode) {
+            json.put("response_format", JSONObject().put("type", "json_object"))
+        }
+        return json
     }
 
     companion object {

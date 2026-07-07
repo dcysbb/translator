@@ -83,31 +83,52 @@ class ScreenCaptureController(
         imageReader = reader
 
         mediaProjection.registerCallback(projectionCallback, mainHandler)
-        virtualDisplay = mediaProjection.createVirtualDisplay(
-            "ScreenTranslator",
-            width,
-            height,
-            density,
-            DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-            reader.surface,
-            null,
-            captureHandler
-        )
+        // createVirtualDisplay throws SecurityException / IllegalStateException on
+        // Android 14+ if the projection isn't active or the FGS type isn't allowed.
+        // Wrap it so a failure cleans up half-built resources and reports a clear
+        // error instead of crashing.
+        virtualDisplay = try {
+            mediaProjection.createVirtualDisplay(
+                "ScreenTranslator",
+                width,
+                height,
+                density,
+                DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+                reader.surface,
+                null,
+                captureHandler
+            )
+        } catch (e: Throwable) {
+            runCatching { mediaProjection.unregisterCallback(projectionCallback) }
+            releaseDisplay()
+            mainHandler.post { errorCallback("屏幕捕获启动失败，请重新授权：${e.localizedMessage ?: e::class.simpleName}") }
+            null
+        }
     }
 
     private fun captureLatestFrame(): Boolean {
-        val reader = imageReader ?: return false
-        val image = runCatching { reader.acquireLatestImage() }.getOrNull() ?: return false
+        val reader = imageReader ?: run {
+            android.util.Log.w(TAG, "captureLatestFrame: imageReader is null")
+            return false
+        }
+        val image = runCatching { reader.acquireLatestImage() }.getOrNull() ?: run {
+            android.util.Log.w(TAG, "captureLatestFrame: no frame available yet")
+            return false
+        }
         image.use { current ->
             val bitmap = imageToBitmap(current)
-            val cropRect = selectionProvider()?.let { sanitizeRect(it, bitmap.width, bitmap.height) }
+            val rawSelection = selectionProvider()
+            val cropRect = rawSelection?.let { sanitizeRect(it, bitmap.width, bitmap.height) }
                 ?: Rect(0, 0, bitmap.width, bitmap.height)
+            android.util.Log.d(TAG, "captureLatestFrame: bitmap=${bitmap.width}x${bitmap.height}, selection=$rawSelection, cropRect=$cropRect")
             if (cropRect.width() < 8 || cropRect.height() < 8) {
+                android.util.Log.w(TAG, "captureLatestFrame: cropRect too small, dropping")
                 bitmap.recycle()
                 return false
             }
             val cropped = Bitmap.createBitmap(bitmap, cropRect.left, cropRect.top, cropRect.width(), cropRect.height())
             bitmap.recycle()
+            android.util.Log.d(TAG, "captureLatestFrame: cropped=${cropped.width}x${cropped.height}, delivering")
             mainHandler.post { frameCallback(cropped) }
             return true
         }
@@ -156,6 +177,10 @@ class ScreenCaptureController(
     }
 
     companion object {
+        private const val TAG = "ScreenCaptureCtrl"
         private const val INITIAL_FRAME_DELAY_MS = 240L
+        /** How long to wait after flushing the buffer before grabbing the frame
+         *  we actually OCR — lets the compositor settle after a transition. */
+        private const val SETTLE_DELAY_MS = 150L
     }
 }

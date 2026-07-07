@@ -7,8 +7,10 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.graphics.Outline
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
@@ -65,6 +67,9 @@ class FloatingTranslatorService : Service() {
     private var selectionRect: android.graphics.Rect? = null
     private var ocrBusy = false
     private var translating = false
+    /** Re-capture attempts made when OCR returned a blank frame (transient
+     *  frame from mid-transition). Reset on a non-blank result or failure. */
+    private var blankFrameRetries = 0
     private var lastStableText = ""
     private var lastResult: AnalysisResult? = null
     private var currentCall: Call? = null
@@ -89,6 +94,11 @@ class FloatingTranslatorService : Service() {
         when (intent?.action) {
             ACTION_SHOW, null -> if (Settings.canDrawOverlays(this)) addBubble()
             ACTION_CAPTURE_RESULT -> handleCaptureResult(intent)
+            ACTION_REFRESH_SETTINGS -> {
+                // Settings changed in the UI — force the next refresh to re-read
+                // the latest snapshot (cheap; the client already reads on demand).
+                lastStableText = ""
+            }
             ACTION_STOP -> stopSelf()
         }
         return START_STICKY
@@ -109,8 +119,12 @@ class FloatingTranslatorService : Service() {
 
     private fun handleCaptureResult(intent: Intent) {
         val resultCode = intent.getIntExtra(EXTRA_RESULT_CODE, 0)
-        @Suppress("DEPRECATION")
-        val data = intent.getParcelableExtra<Intent>(EXTRA_RESULT_DATA)
+        val data: Intent? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(EXTRA_RESULT_DATA, Intent::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getParcelableExtra<Intent>(EXTRA_RESULT_DATA)
+        }
         if (resultCode == 0 || data == null) {
             showStatus("屏幕捕获授权无效")
             return
@@ -119,7 +133,21 @@ class FloatingTranslatorService : Service() {
         captureController?.release()
         captureController = null
         val manager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-        mediaProjection = manager.getMediaProjection(resultCode, data)
+        // getMediaProjection can throw on Android 14+ when the projection token
+        // has expired or the FGS type isn't allowed. Catch + null-check so a
+        // denied/expired projection surfaces a friendly status instead of a crash.
+        val projection = try {
+            manager.getMediaProjection(resultCode, data)
+        } catch (e: Throwable) {
+            android.util.Log.e("FloatingTranslatorService", "getMediaProjection failed", e)
+            showStatus("屏幕捕获授权已失效，请重新授权")
+            return
+        }
+        if (projection == null) {
+            showStatus("无法获取屏幕捕获授权，请重试")
+            return
+        }
+        mediaProjection = projection
         showStatus("屏幕捕获已就绪")
         if (selectionRect == null) showSelectionOverlay()
     }
@@ -426,11 +454,25 @@ class FloatingTranslatorService : Service() {
         recognizer.recognize(bitmap, object : ScreenTextRecognizer.Callback {
             override fun onSuccess(text: String) {
                 ocrBusy = false
+                android.util.Log.d("OcrTrace", "OCR len=${text.length} blank=${text.isBlank()} retry=$blankFrameRetries")
+                if (text.isBlank() && blankFrameRetries < MAX_BLANK_FRAME_RETRIES) {
+                    // The captured frame was likely a transient/blank frame from
+                    // mid-transition (app switch, overlay hide). Wait briefly for
+                    // the screen to settle and re-capture before declaring "no
+                    // text" — the next frame almost always has real content.
+                    blankFrameRetries++
+                    Handler(mainLooper).postDelayed({ captureController?.captureOnce() }, BLANK_RETRY_DELAY_MS)
+                    showStatus("正在重新截取画面…")
+                    return
+                }
+                blankFrameRetries = 0
                 handleRecognizedText(text, forceTranslate = false)
             }
 
             override fun onFailure(message: String) {
                 ocrBusy = false
+                android.util.Log.w("OcrTrace", "OCR onFailure: $message")
+                blankFrameRetries = 0
                 showStatus(message)
             }
         })
@@ -609,7 +651,26 @@ class FloatingTranslatorService : Service() {
 
     private fun ensureForeground() {
         createNotificationChannel()
-        startForeground(NOTIFICATION_ID, buildNotification())
+        // Android 14+ requires the mediaProjection FGS type to be passed to
+        // startForeground (and declared in the manifest), otherwise the
+        // platform throws ForegroundServiceTypeNotAllowedException /
+        // SecurityException when MediaProjection.createVirtualDisplay runs.
+        // Catch Throwable so a denied FGS surfaces a Toast instead of crashing.
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(
+                    NOTIFICATION_ID,
+                    buildNotification(),
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+                )
+            } else {
+                startForeground(NOTIFICATION_ID, buildNotification())
+            }
+        } catch (e: Throwable) {
+            android.util.Log.e("FloatingTranslatorService", "startForeground failed", e)
+            Toast.makeText(this, "无法启动翻译服务：${e.localizedMessage ?: e::class.simpleName}", Toast.LENGTH_LONG).show()
+            stopSelf()
+        }
     }
 
     private fun buildNotification(): Notification {
@@ -904,10 +965,19 @@ class FloatingTranslatorService : Service() {
         const val ACTION_STOP = "com.poozh.translator.action.STOP"
         const val ACTION_REQUEST_CAPTURE = "com.poozh.translator.action.REQUEST_CAPTURE"
         const val ACTION_CAPTURE_RESULT = "com.poozh.translator.action.CAPTURE_RESULT"
+        /** Settings changed in the UI — tell the running service to pick them up. */
+        const val ACTION_REFRESH_SETTINGS = "com.poozh.translator.action.REFRESH_SETTINGS"
         const val EXTRA_RESULT_CODE = "extra_result_code"
         const val EXTRA_RESULT_DATA = "extra_result_data"
 
         private const val CHANNEL_ID = "screen_translator"
         private const val NOTIFICATION_ID = 3108
+
+        /** When OCR returns a blank frame, retry the capture this many times
+         *  before reporting "no text". A transient blank frame is common right
+         *  after an app switch or overlay transition; the next frame usually
+         *  has real content. */
+        private const val MAX_BLANK_FRAME_RETRIES = 2
+        private const val BLANK_RETRY_DELAY_MS = 250L
     }
 }

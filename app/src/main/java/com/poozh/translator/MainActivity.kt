@@ -37,6 +37,8 @@ class MainActivity : Activity() {
     private lateinit var baseUrlInput: EditText
     private lateinit var modelInput: EditText
     private lateinit var wifiOnlyInput: Switch
+    /** Provider currently selected in the UI chip row. Drives save() + chips. */
+    private var selectedProviderId: String = ModelProviders.DEFAULT_PROVIDER_ID
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,6 +76,7 @@ class MainActivity : Activity() {
 
     private fun buildContentView() {
         val snapshot = settings.load()
+        selectedProviderId = snapshot.providerId
         window.statusBarColor = Md3.light.surface
         window.navigationBarColor = Md3.light.surfaceContainer
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -138,9 +141,16 @@ class MainActivity : Activity() {
         }, blockParams(top = 16))
 
         root.addView(card("连接设置").apply {
-            addView(listLine("当前服务", ModelProviders.displayName(snapshot.baseUrl)))
+            addView(listLine("当前服务", ModelProviders.byId(snapshot.providerId).name))
             addView(providerPresetScroller(snapshot))
-            apiKeyInput = input("API Key / 本地服务可留空", "", password = true)
+            val preset = ModelProviders.byId(snapshot.providerId)
+            // Pre-fill the API key field with the current provider's saved key
+            // (empty for keyless providers) so users can see/edit it directly.
+            apiKeyInput = input(
+                hint = if (preset.requiresApiKey) "${preset.name} API Key" else "本地服务通常可留空",
+                value = snapshot.apiKey,
+                password = true
+            )
             baseUrlInput = input("Chat Completions URL", snapshot.baseUrl, password = false)
             modelInput = input("模型名称", snapshot.model, password = false)
             addView(apiKeyInput)
@@ -150,6 +160,7 @@ class MainActivity : Activity() {
             addView(actionButton("保存设置", Md3ButtonStyle.Filled) { saveSettings() })
             addView(actionButton("清除 API Key", Md3ButtonStyle.Text) {
                 settings.clearApiKey()
+                apiKeyInput.setText("")
                 Toast.makeText(this@MainActivity, "API Key 已清除", Toast.LENGTH_SHORT).show()
                 refreshStatus()
             })
@@ -184,32 +195,54 @@ class MainActivity : Activity() {
 
     private fun saveSettings() {
         val current = settings.load()
+        val providerId = selectedProviderId
         settings.save(
+            providerId = providerId,
             baseUrl = baseUrlInput.text.toString().trim(),
             model = modelInput.text.toString().trim(),
             intervalMs = current.intervalMs,
             wifiOnly = wifiOnlyInput.isChecked
         )
-        val apiKey = apiKeyInput.text.toString().trim()
-        if (apiKey.isNotBlank()) {
-            settings.saveApiKey(apiKey)
-            apiKeyInput.setText("")
-        }
+        // Per-provider key: persist what's in the field (may be empty = cleared).
+        settings.saveApiKey(providerId, apiKeyInput.text.toString().trim())
         Toast.makeText(this, "设置已保存", Toast.LENGTH_SHORT).show()
         refreshStatus()
+        // Tell the running service to pick up the new settings on its next pass.
+        startTranslatorService(
+            Intent(this, FloatingTranslatorService::class.java)
+                .setAction(FloatingTranslatorService.ACTION_REFRESH_SETTINGS)
+        )
     }
 
     private fun refreshStatus() {
         val snapshot = settings.load()
+        selectedProviderId = snapshot.providerId
         val overlay = if (Settings.canDrawOverlays(this)) "已授权" else "未授权"
         val key = if (snapshot.apiKey.isNotBlank()) "已保存" else "未设置"
         val network = if (snapshot.wifiOnly) "仅 Wi-Fi" else "不限网络"
-        statusText.text = "悬浮窗：$overlay\n模型服务：${ModelProviders.displayName(snapshot.baseUrl)}\nAPI Key：$key\n模型：${snapshot.model}\n网络：$network"
+        statusText.text = "悬浮窗：$overlay\n模型服务：${ModelProviders.byId(snapshot.providerId).name}\nAPI Key：$key\n模型：${snapshot.model}\n网络：$network"
     }
 
     private fun requestScreenCapture() {
         val projectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-        startActivityForResult(projectionManager.createScreenCaptureIntent(), REQUEST_MEDIA_PROJECTION)
+        // On Android 14+ the no-arg createScreenCaptureIntent() defaults to the
+        // "single app" (partial) consent flow, which only captures the chosen
+        // app's window. That breaks OCR: when the user returns to this app to
+        // draw the selection / tap refresh, the captured app goes to the
+        // background and stops rendering, so OCR gets a blank frame.
+        //
+        // createConfigForDefaultDisplay() forces a full-screen (whole display)
+        // capture session and skips the app chooser, so the projection keeps
+        // producing frames regardless of which app is in the foreground — which
+        // is what an always-on-top selection overlay needs.
+        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            projectionManager.createScreenCaptureIntent(
+                android.media.projection.MediaProjectionConfig.createConfigForDefaultDisplay()
+            )
+        } else {
+            projectionManager.createScreenCaptureIntent()
+        }
+        startActivityForResult(intent, REQUEST_MEDIA_PROJECTION)
     }
 
     private fun requestNotificationPermissionIfNeeded() {
@@ -259,7 +292,7 @@ class MainActivity : Activity() {
             setPadding(0, 0, dp(4), 0)
         }
         ModelProviders.presets.forEach { preset ->
-            row.addView(presetChip(preset, selected = ModelProviders.match(snapshot.baseUrl) == preset))
+            row.addView(presetChip(preset, selected = preset.id == snapshot.providerId))
         }
         return HorizontalScrollView(this).apply {
             isHorizontalScrollBarEnabled = false
@@ -298,10 +331,19 @@ class MainActivity : Activity() {
     }
 
     private fun applyProviderPreset(preset: ModelProviderPreset) {
+        // Switch the active provider immediately and load its saved (or default)
+        // model/url + saved key into the fields. baseUrl/model/key persist
+        // independently per provider, so toggling between chips never loses config.
+        selectedProviderId = preset.id
+        settings.selectProvider(preset.id)
+        val savedKey = settings.getApiKey(preset.id)
+        val savedModel = settings.getModel(preset.id).ifBlank { preset.defaultModel }
         baseUrlInput.setText(preset.baseUrl)
-        modelInput.setText(preset.defaultModel)
-        apiKeyInput.hint = if (preset.requiresApiKey) "请填写 ${preset.name} API Key" else "本地服务通常可留空"
-        Toast.makeText(this, "已填入 ${preset.name} 预设，保存后生效", Toast.LENGTH_SHORT).show()
+        modelInput.setText(savedModel)
+        apiKeyInput.setText(savedKey)
+        apiKeyInput.hint = if (preset.requiresApiKey) "${preset.name} API Key" else "本地服务通常可留空"
+        Toast.makeText(this, "已切换到 ${preset.name}", Toast.LENGTH_SHORT).show()
+        refreshStatus()
     }
 
     private fun input(hint: String, value: String, password: Boolean): EditText {

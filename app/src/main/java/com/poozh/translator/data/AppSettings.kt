@@ -23,31 +23,122 @@ class AppSettings(context: Context) {
     private val prefs: SharedPreferences =
         context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
+    // ───────────── Provider selection ─────────────
+    //
+    // The active provider id drives which key/model/baseUrl are returned by
+    // [load]. API key and model are stored per-provider so switching never
+    // loses a configured key/model.
+
+    /** The currently selected provider id (see [ModelProviders]). */
+    var currentProviderId: String
+        get() = prefs.getString(KEY_PROVIDER, ModelProviders.DEFAULT_PROVIDER_ID)
+            ?: ModelProviders.DEFAULT_PROVIDER_ID
+        private set(value) = prefs.edit().putString(KEY_PROVIDER, value).apply()
+
+    fun getApiKey(providerId: String): String =
+        decrypt(prefs.getString(apiKeyFor(providerId), "").orEmpty())
+
+    fun saveApiKey(providerId: String, apiKey: String) =
+        prefs.edit().putString(apiKeyFor(providerId), encrypt(apiKey.trim())).apply()
+
+    fun getModel(providerId: String): String =
+        prefs.getString(modelKeyFor(providerId), "").orEmpty()
+
+    fun saveModel(providerId: String, model: String) =
+        prefs.edit().putString(modelKeyFor(providerId), model).apply()
+
+    private fun apiKeyFor(providerId: String) = "api_key_$providerId"
+    private fun modelKeyFor(providerId: String) = "model_$providerId"
+
+    /** Switch the active provider and persist it. */
+    fun selectProvider(providerId: String) {
+        currentProviderId = providerId
+    }
+
     fun load(): SettingsSnapshot {
+        migrateLegacyIfNeeded()
+        // Always repair a known-bad Paratera model id (case-sensitive on the
+        // provider). Cheap and idempotent.
+        fixParateraModelName()
+        val provider = ModelProviders.byId(currentProviderId)
+        val model = getModel(provider.id).ifBlank { provider.defaultModel }
+        // baseUrl falls back to the preset; users can override per-provider via
+        // [saveBaseUrl] (the UI normally just uses the preset value).
+        val baseUrl = prefs.getString(baseUrlFor(provider.id), null) ?: provider.baseUrl
         return SettingsSnapshot(
-            apiKey = decrypt(prefs.getString(KEY_API_KEY, "").orEmpty()),
-            baseUrl = prefs.getString(KEY_BASE_URL, DEFAULT_BASE_URL).orEmpty().ifBlank { DEFAULT_BASE_URL },
-            model = prefs.getString(KEY_MODEL, DEFAULT_MODEL).orEmpty().ifBlank { DEFAULT_MODEL },
+            providerId = provider.id,
+            apiKey = getApiKey(provider.id),
+            baseUrl = baseUrl,
+            model = model,
             intervalMs = prefs.getLong(KEY_INTERVAL_MS, DEFAULT_INTERVAL_MS).coerceIn(500L, 5000L),
             wifiOnly = prefs.getBoolean(KEY_WIFI_ONLY, false)
         )
     }
 
-    fun save(baseUrl: String, model: String, intervalMs: Long, wifiOnly: Boolean) {
+    fun save(
+        providerId: String,
+        baseUrl: String,
+        model: String,
+        intervalMs: Long,
+        wifiOnly: Boolean
+    ) {
+        selectProvider(providerId)
         prefs.edit()
-            .putString(KEY_BASE_URL, baseUrl.ifBlank { DEFAULT_BASE_URL })
-            .putString(KEY_MODEL, model.ifBlank { DEFAULT_MODEL })
+            .putString(baseUrlFor(providerId), baseUrl.ifBlank { ModelProviders.byId(providerId).baseUrl })
+            .putString(modelKeyFor(providerId), model.ifBlank { ModelProviders.byId(providerId).defaultModel })
             .putLong(KEY_INTERVAL_MS, intervalMs.coerceIn(500L, 5000L))
             .putBoolean(KEY_WIFI_ONLY, wifiOnly)
             .apply()
     }
 
-    fun saveApiKey(apiKey: String) {
-        prefs.edit().putString(KEY_API_KEY, encrypt(apiKey.trim())).apply()
+    private fun baseUrlFor(providerId: String) = "base_url_$providerId"
+
+    /** Save the API key for the *current* provider (convenience for the UI). */
+    fun saveApiKeyForCurrent(apiKey: String) {
+        saveApiKey(currentProviderId, apiKey)
     }
 
     fun clearApiKey() {
-        prefs.edit().remove(KEY_API_KEY).apply()
+        prefs.edit().remove(apiKeyFor(currentProviderId)).apply()
+    }
+
+    /**
+     * One-time migrations:
+     * 1. Legacy flat `api_key`/`base_url`/`model` (pre-multi-provider) → the
+     *    current provider's slots, so existing users keep their config.
+     * 2. Seed bundled default API keys (e.g. the Paratera demo key) into their
+     *    providers, but only when the user hasn't already set/cleared one.
+     */
+    private fun migrateLegacyIfNeeded() {
+        if (prefs.getBoolean(KEY_MIGRATED, false)) return
+        // Legacy single-provider values → current provider.
+        val legacyKey = decrypt(prefs.getString(KEY_API_KEY_LEGACY, "").orEmpty())
+        if (legacyKey.isNotBlank() && getApiKey(currentProviderId).isEmpty()) {
+            saveApiKey(currentProviderId, legacyKey)
+        }
+        // Seed bundled keys.
+        for ((providerId, key) in DEFAULT_API_KEYS) {
+            if (getApiKey(providerId).isEmpty()) {
+                saveApiKey(providerId, key)
+            }
+        }
+        prefs.edit().putBoolean(KEY_MIGRATED, true).apply()
+        fixParateraModelName()
+    }
+
+    /**
+     * Earlier builds seeded Paratera with the wrong model id
+     * (`deepseek-v4-flash` / `deepseek-r1`, lowercase). Paratera's model ids
+     * are case-sensitive and the lowercase form is rejected with HTTP 400, so
+     * translations silently failed. Rewrite any known-bad value to the correct
+     * `DeepSeek-V4-Flash`. Idempotent — runs every launch but only writes when
+     * the stored value is one of the known-bad strings.
+     */
+    private fun fixParateraModelName() {
+        val current = getModel("paratera")
+        if (current in BAD_PARATERA_MODELS) {
+            saveModel("paratera", "DeepSeek-V4-Flash")
+        }
     }
 
     fun loadBubblePosition(defaultX: Int, defaultY: Int): Pair<Int, Int> {
@@ -135,9 +226,10 @@ class AppSettings(context: Context) {
         private const val GCM_IV_LENGTH_BYTES = 12
         private const val GCM_TAG_LENGTH_BITS = 128
 
-        private const val KEY_API_KEY = "api_key"
-        private const val KEY_BASE_URL = "base_url"
-        private const val KEY_MODEL = "model"
+        private const val KEY_PROVIDER = "current_provider_id"
+        private const val KEY_MIGRATED = "providers_migrated"
+        // Legacy flat keys (pre-multi-provider) — read once for migration only.
+        private const val KEY_API_KEY_LEGACY = "api_key"
         private const val KEY_INTERVAL_MS = "interval_ms"
         private const val KEY_WIFI_ONLY = "wifi_only"
         private const val KEY_BUBBLE_X = "bubble_x"
@@ -145,6 +237,27 @@ class AppSettings(context: Context) {
         private const val KEY_PANEL_X = "panel_x"
         private const val KEY_PANEL_Y = "panel_y"
         private const val KEY_PANEL_WIDTH = "panel_width"
+
+        /**
+         * API keys bundled with the APK so the listed providers work without the
+         * user having to sign up first. Seeded into prefs once (see
+         * [migrateLegacyIfNeeded]) only when the user hasn't already set their
+         * own key for that provider.
+         *
+         * ⚠️ Bundled keys ship in the APK — anyone with the APK has access.
+         * Replace with user-supplied keys before any public release.
+         */
+        private val DEFAULT_API_KEYS: Map<String, String> = mapOf(
+            "paratera" to "sk-kjO3KDWZ2XuUJG87sM8d6Q"
+        )
+
+        /** Paratera model ids that earlier builds seeded incorrectly. They are
+         *  rejected by the provider (HTTP 400 "no healthy deployments") because
+         *  Paratera ids are case-sensitive. Mapped to the correct value in
+         *  [fixParateraModelName]. */
+        private val BAD_PARATERA_MODELS: Set<String> = setOf(
+            "deepseek-v4-flash", "deepseek-r1", "deepseek-v3", "qwen2.5-72b-instruct"
+        )
         private const val KEY_PANEL_HEIGHT = "panel_height"
     }
 }
