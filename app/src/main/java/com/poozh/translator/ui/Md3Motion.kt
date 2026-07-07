@@ -60,6 +60,60 @@ object Md3Motion {
             .start()
     }
 
+    /**
+     * Scale the view INTO view from a small size, anchored at (pivotX, pivotY)
+     * — typically the floating bubble's center — so the panel reads as growing
+     * out of the bubble. Uses the M3 emphasizedDecelerate curve (non-linear,
+     * fast-then-ease) for an organic pop. Also fades alpha 0→1. The final alpha
+     * is [endAlpha] so it composes with the user's overlay-opacity setting.
+     */
+    fun scaleInFrom(
+        view: View,
+        pivotX: Float,
+        pivotY: Float,
+        startScale: Float = 0.35f,
+        endAlpha: Float = 1f,
+        duration: Long = 320L
+    ) {
+        view.pivotX = pivotX
+        view.pivotY = pivotY
+        view.scaleX = startScale
+        view.scaleY = startScale
+        view.alpha = 0f
+        view.animate()
+            .scaleX(1f)
+            .scaleY(1f)
+            .alpha(endAlpha)
+            .setDuration(duration)
+            .setInterpolator(emphasizedDecelerate)
+            .start()
+    }
+
+    /**
+     * Scale the view OUT toward (pivotX, pivotY) — the inverse of
+     * [scaleInFrom]: the panel shrinks back into the bubble and fades.
+     * emphasizedAccelerate (slow-then-fast) makes it feel "sucked in".
+     */
+    fun scaleOutTo(
+        view: View,
+        pivotX: Float,
+        pivotY: Float,
+        endScale: Float = 0.35f,
+        duration: Long = 220L,
+        endAction: () -> Unit
+    ) {
+        view.pivotX = pivotX
+        view.pivotY = pivotY
+        view.animate()
+            .scaleX(endScale)
+            .scaleY(endScale)
+            .alpha(0f)
+            .setDuration(duration)
+            .setInterpolator(emphasizedAccelerate)
+            .withEndAction(endAction)
+            .start()
+    }
+
     fun updateText(view: View, textChange: () -> Unit) {
         view.animate()
             .alpha(0.52f)

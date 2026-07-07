@@ -13,14 +13,18 @@ import android.provider.Settings
 import android.text.InputType
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.core.view.GravityCompat
 import com.poozh.translator.data.AppSettings
 import com.poozh.translator.data.ModelProviderPreset
 import com.poozh.translator.data.ModelProviders
@@ -39,6 +43,13 @@ class MainActivity : Activity() {
     private lateinit var wifiOnlyInput: Switch
     /** Provider currently selected in the UI chip row. Drives save() + chips. */
     private var selectedProviderId: String = ModelProviders.DEFAULT_PROVIDER_ID
+    /** Chip row container — kept so we can restyle chips when the selection
+     *  changes, instead of rebuilding the whole view tree. */
+    private var providerChipRow: LinearLayout? = null
+    /** "当前服务" line — refreshed when the provider changes. */
+    private var currentServiceLine: TextView? = null
+    /** The drawer layout — kept so [onBackPressed] can close it when open. */
+    private var drawerRef: DrawerLayout? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,19 +94,17 @@ class MainActivity : Activity() {
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         }
 
-        val scene = FrameLayout(this).apply { setBackgroundColor(Md3.light.surface) }
-        val root = LinearLayout(this).apply {
+        val drawer = DrawerLayout(this)
+
+        // ── Main content area ──────────────────────────────────────────────
+        val main = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
+            setBackgroundColor(Md3.light.surface)
             setPadding(dp(screenMargin()), dp(20), dp(screenMargin()), dp(32))
         }
-        val scroll = ScrollView(this).apply {
-            isFillViewport = true
-            clipToPadding = false
-            addView(root)
-        }
-
-        root.addView(appHeader())
-
+        // Top bar: hamburger + title.
+        main.addView(mainTopBar(drawer))
+        // Status card.
         statusText = TextView(this).apply {
             Md3.applyTextStyle(this, Md3TextStyle.BodyMedium, Md3.light.onSurface)
             setLineSpacing(dp(3).toFloat(), 1.0f)
@@ -106,9 +115,9 @@ class MainActivity : Activity() {
                 radiusDp = 12f
             )
         }
-        root.addView(statusText, blockParams(top = 16))
-
-        root.addView(card("翻译控制台").apply {
+        main.addView(statusText, blockParams(top = 16))
+        // Primary CTA: start the overlay service.
+        main.addView(card("翻译控制台").apply {
             addView(actionButton("启动悬浮翻译", Md3ButtonStyle.Filled) {
                 if (!Settings.canDrawOverlays(this@MainActivity)) {
                     Toast.makeText(this@MainActivity, "请先授权悬浮窗", Toast.LENGTH_SHORT).show()
@@ -121,31 +130,27 @@ class MainActivity : Activity() {
                 }
             })
             addView(actionButton("授权屏幕捕获", Md3ButtonStyle.FilledTonal) { requestScreenCapture() })
-            addView(actionButton("悬浮窗权限", Md3ButtonStyle.Outlined) {
-                startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
-            })
-            addView(actionButton("停止悬浮服务", Md3ButtonStyle.Text) {
-                startTranslatorService(
-                    Intent(this@MainActivity, FloatingTranslatorService::class.java)
-                        .setAction(FloatingTranslatorService.ACTION_STOP)
-                )
-                Toast.makeText(this@MainActivity, "悬浮服务已停止", Toast.LENGTH_SHORT).show()
-            })
         }, blockParams(top = 16))
 
-        root.addView(card("阅读面板").apply {
-            addView(listLine("悬浮窗", "屏幕边缘"))
-            addView(listLine("选区", "OCR 区域"))
-            addView(listLine("刷新", "识别并翻译"))
-            addView(listLine("复制", "阅读内容"))
-        }, blockParams(top = 16))
+        // ── Drawer (left slide-out) ────────────────────────────────────────
+        val drawerScroll = ScrollView(this).apply { clipToPadding = false }
+        val drawerContent = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor(Md3.light.surfaceContainerLow)
+            setPadding(dp(screenMargin()), dp(28), dp(screenMargin()), dp(32))
+        }
+        drawerContent.addView(TextView(this).apply {
+            text = "设置"
+            Md3.applyTextStyle(this, Md3TextStyle.HeadlineSmall, Md3.light.onSurface)
+            setPadding(0, 0, 0, dp(8))
+        })
 
-        root.addView(card("连接设置").apply {
-            addView(listLine("当前服务", ModelProviders.byId(snapshot.providerId).name))
+        // Group: 连接配置 (the connection-settings card, including provider chips).
+        drawerContent.addView(card("连接配置").apply {
+            currentServiceLine = listLine("当前服务", ModelProviders.byId(snapshot.providerId).name)
+            addView(currentServiceLine!!)
             addView(providerPresetScroller(snapshot))
             val preset = ModelProviders.byId(snapshot.providerId)
-            // Pre-fill the API key field with the current provider's saved key
-            // (empty for keyless providers) so users can see/edit it directly.
             apiKeyInput = input(
                 hint = if (preset.requiresApiKey) "${preset.name} API Key" else "本地服务通常可留空",
                 value = snapshot.apiKey,
@@ -166,30 +171,80 @@ class MainActivity : Activity() {
             })
         }, blockParams(top = 16))
 
-        scene.addView(
-            scroll,
-            FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
-            )
+        // Group: 屏幕捕获与权限.
+        drawerContent.addView(card("屏幕捕获与权限").apply {
+            addView(actionButton("授权屏幕捕获", Md3ButtonStyle.FilledTonal) { requestScreenCapture() })
+            addView(actionButton("悬浮窗权限", Md3ButtonStyle.Outlined) {
+                startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
+            })
+            addView(actionButton("停止悬浮服务", Md3ButtonStyle.Text) {
+                startTranslatorService(
+                    Intent(this@MainActivity, FloatingTranslatorService::class.java)
+                        .setAction(FloatingTranslatorService.ACTION_STOP)
+                )
+                Toast.makeText(this@MainActivity, "悬浮服务已停止", Toast.LENGTH_SHORT).show()
+            })
+        }, blockParams(top = 16))
+
+        // Group: 使用说明.
+        drawerContent.addView(card("使用说明").apply {
+            addView(listLine("悬浮窗", "屏幕边缘"))
+            addView(listLine("选区", "OCR 区域"))
+            addView(listLine("刷新", "识别并翻译"))
+            addView(listLine("复制", "阅读内容"))
+        }, blockParams(top = 16))
+
+        drawerScroll.addView(drawerContent)
+        val drawerWidth = (resources.displayMetrics.widthPixels * 0.84f).toInt()
+        val drawerParams = DrawerLayout.LayoutParams(
+            drawerWidth,
+            DrawerLayout.LayoutParams.MATCH_PARENT
+        ).apply { gravity = GravityCompat.START }
+        drawer.addView(drawerScroll, drawerParams)
+
+        // Main content fills the rest.
+        val mainParams = DrawerLayout.LayoutParams(
+            DrawerLayout.LayoutParams.MATCH_PARENT,
+            DrawerLayout.LayoutParams.MATCH_PARENT
         )
-        setContentView(scene)
-        Md3Motion.enter(root, dp(16).toFloat())
+        drawer.addView(main, mainParams)
+
+        setContentView(drawer)
+        drawerRef = drawer
+        Md3Motion.enter(main, dp(16).toFloat())
     }
 
-    private fun appHeader(): LinearLayout {
+    @Deprecated("Deprecated by Android framework")
+    override fun onBackPressed() {
+        // Close the drawer first instead of finishing the activity immediately.
+        val drawer = drawerRef
+        if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START)
+        } else {
+            @Suppress("DEPRECATION")
+            super.onBackPressed()
+        }
+    }
+
+    /** Top bar with a hamburger button that opens the drawer. */
+    private fun mainTopBar(drawer: DrawerLayout): LinearLayout {
+        val hamburger = ImageButton(this).apply {
+            setImageResource(android.R.drawable.ic_menu_sort_by_size)
+            setBackgroundColor(Color.TRANSPARENT)
+            setOnClickListener { drawer.openDrawer(GravityCompat.START) }
+            setPadding(dp(8), dp(8), dp(8), dp(8))
+        }
+        val title = TextView(this).apply {
+            text = "屏幕翻译"
+            Md3.applyTextStyle(this, Md3TextStyle.HeadlineMedium, Md3.light.onSurface)
+            setPadding(dp(8), 0, 0, 0)
+        }
         return LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
             setPadding(0, dp(8), 0, dp(4))
-            addView(TextView(this@MainActivity).apply {
-                text = "屏幕翻译"
-                Md3.applyTextStyle(this, Md3TextStyle.HeadlineMedium, Md3.light.onSurface)
-            })
-            addView(TextView(this@MainActivity).apply {
-                text = "悬浮 OCR 翻译"
-                Md3.applyTextStyle(this, Md3TextStyle.BodyLarge, Md3.light.onSurfaceVariant)
-                setPadding(0, dp(4), 0, 0)
-            })
+            addView(hamburger)
+            addView(title)
         }
     }
 
@@ -291,12 +346,23 @@ class MainActivity : Activity() {
             orientation = LinearLayout.HORIZONTAL
             setPadding(0, 0, dp(4), 0)
         }
+        providerChipRow = row
         ModelProviders.presets.forEach { preset ->
-            row.addView(presetChip(preset, selected = preset.id == snapshot.providerId))
+            row.addView(presetChip(preset))
         }
+        // Apply the initial selection styling (which chip is highlighted).
+        updateProviderChipStyles()
         return HorizontalScrollView(this).apply {
             isHorizontalScrollBarEnabled = false
+            isFillViewport = true
             addView(row)
+            // Don't steal taps from chips when there's nothing to scroll —
+            // without this the parent ScrollView/DrawerLayout can swallow the
+            // ACTION_UP and the chip's click listener never fires.
+            setOnTouchListener { v, event ->
+                v.parent?.requestDisallowInterceptTouchEvent(true)
+                false
+            }
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -304,30 +370,49 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun presetChip(preset: ModelProviderPreset, selected: Boolean): TextView {
+    private fun presetChip(preset: ModelProviderPreset): TextView {
         return TextView(this).apply {
             text = preset.name
             gravity = Gravity.CENTER
-            minHeight = dp(32)
+            isClickable = true
+            isFocusable = true
+            minHeight = dp(40)
+            minWidth = dp(64)
+            setPadding(dp(16), dp(8), dp(16), dp(8))
+            tag = preset.id
+            setOnClickListener { applyProviderPreset(preset) }
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { rightMargin = dp(8) }
+        }
+    }
+
+    /**
+     * Restyle every chip in [providerChipRow] to reflect [selectedProviderId].
+     * Called both at build time and after [applyProviderPreset] so the highlight
+     * actually follows the user's tap (the original bug: styles were baked in
+     * once and never updated).
+     */
+    private fun updateProviderChipStyles() {
+        val row = providerChipRow ?: return
+        val selectedId = selectedProviderId
+        for (i in 0 until row.childCount) {
+            val chip = row.getChildAt(i) as? TextView ?: continue
+            val selected = chip.tag == selectedId
             Md3.applyTextStyle(
-                this,
+                chip,
                 Md3TextStyle.LabelLarge,
                 if (selected) Md3.light.onSecondaryContainer else Md3.light.onSurfaceVariant
             )
-            setPadding(dp(16), 0, dp(16), 0)
-            background = Md3.ripple(
-                context = this@MainActivity,
+            chip.background = Md3.ripple(
+                context = this,
                 fillColor = if (selected) Md3.light.secondaryContainer else Color.TRANSPARENT,
                 radiusDp = 8f,
                 strokeColor = if (selected) null else Md3.light.outline
             )
-            setOnClickListener { applyProviderPreset(preset) }
-            Md3.bindStateLayer(this, pressedScale = 0.98f)
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                dp(36)
-            ).apply { rightMargin = dp(8) }
         }
+        currentServiceLine?.text = "当前服务：${ModelProviders.byId(selectedId).name}"
     }
 
     private fun applyProviderPreset(preset: ModelProviderPreset) {
@@ -342,6 +427,8 @@ class MainActivity : Activity() {
         modelInput.setText(savedModel)
         apiKeyInput.setText(savedKey)
         apiKeyInput.hint = if (preset.requiresApiKey) "${preset.name} API Key" else "本地服务通常可留空"
+        // Refresh chip highlights + the "当前服务" line so the tap is visible.
+        updateProviderChipStyles()
         Toast.makeText(this, "已切换到 ${preset.name}", Toast.LENGTH_SHORT).show()
         refreshStatus()
     }

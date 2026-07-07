@@ -141,6 +141,13 @@ class AppSettings(context: Context) {
         }
     }
 
+    /** Overlay window opacity (bubble + panel). 0.3..1.0, default 1.0. */
+    var overlayOpacity: Float
+        get() = prefs.getFloat(KEY_OVERLAY_OPACITY, 1.0f).coerceIn(MIN_OVERLAY_OPACITY, 1.0f)
+        set(value) = prefs.edit()
+            .putFloat(KEY_OVERLAY_OPACITY, value.coerceIn(MIN_OVERLAY_OPACITY, 1.0f))
+            .apply()
+
     fun loadBubblePosition(defaultX: Int, defaultY: Int): Pair<Int, Int> {
         return Pair(
             prefs.getInt(KEY_BUBBLE_X, defaultX),
@@ -232,6 +239,10 @@ class AppSettings(context: Context) {
         private const val KEY_API_KEY_LEGACY = "api_key"
         private const val KEY_INTERVAL_MS = "interval_ms"
         private const val KEY_WIFI_ONLY = "wifi_only"
+        private const val KEY_OVERLAY_OPACITY = "overlay_opacity"
+        /** Lowest allowed overlay opacity — below this the overlay becomes hard
+         *  to see/tap. */
+        private const val MIN_OVERLAY_OPACITY = 0.3f
         private const val KEY_BUBBLE_X = "bubble_x"
         private const val KEY_BUBBLE_Y = "bubble_y"
         private const val KEY_PANEL_X = "panel_x"

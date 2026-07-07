@@ -28,6 +28,7 @@ import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import com.poozh.translator.capture.ScreenCaptureController
@@ -198,6 +199,7 @@ class FloatingTranslatorService : Service() {
         windowManager.addView(bubble, params)
         bubbleView = bubble
         Md3Motion.enter(bubble, dp(8).toFloat())
+        applyOverlayOpacity()
     }
 
     private fun togglePanel() {
@@ -212,7 +214,10 @@ class FloatingTranslatorService : Service() {
         statusText = null
         titleText = null
         setBubbleDocked(false)
-        Md3Motion.exit(panel) { removeOverlay(panel) }
+        // Shrink the panel back into the bubble (non-linear), then remove it.
+        val params = panel.layoutParams as? WindowManager.LayoutParams
+        val (pivotX, pivotY) = if (params != null) bubblePivotRelativeToPanel(params) else 0f to 0f
+        Md3Motion.scaleOutTo(panel, pivotX, pivotY) { removeOverlay(panel) }
     }
 
     private fun showPanel() {
@@ -269,9 +274,30 @@ class FloatingTranslatorService : Service() {
         windowManager.addView(root, params)
         panelView = root
         setBubbleDocked(true)
-        Md3Motion.enter(root, dp(18).toFloat())
+        // Non-linear scale-in from the bubble's position — the panel grows out
+        // of the bubble instead of a plain fade. Apply opacity as the end alpha
+        // so it composes with the user's transparency setting.
+        val (pivotX, pivotY) = bubblePivotRelativeToPanel(params)
+        Md3Motion.scaleInFrom(root, pivotX, pivotY, endAlpha = settings.overlayOpacity)
         showReadingPage()
         showStatus(if (lastResult == null) "等待刷新" else "已加载上次结果")
+    }
+
+    /**
+     * Bubble center in panel-local coordinates (so it can be used as a scale
+     * pivot on the panel view). Falls back to the panel's top-start corner if
+     * the bubble isn't mounted.
+     */
+    private fun bubblePivotRelativeToPanel(panelParams: WindowManager.LayoutParams): Pair<Float, Float> {
+        val bubble = bubbleView ?: return 0f to 0f
+        val bubbleLoc = IntArray(2)
+        bubble.getLocationOnScreen(bubbleLoc)
+        val bubbleCenterX = bubbleLoc[0] + bubble.width / 2f
+        val bubbleCenterY = bubbleLoc[1] + bubble.height / 2f
+        // panel top-left in screen coords is (panelParams.x, panelParams.y).
+        val localX = bubbleCenterX - panelParams.x
+        val localY = bubbleCenterY - panelParams.y
+        return localX to localY
     }
 
     private fun buildPanelHeader(root: View, params: WindowManager.LayoutParams): LinearLayout {
@@ -360,6 +386,8 @@ class FloatingTranslatorService : Service() {
         menu.addView(statusLine("悬浮窗", if (Settings.canDrawOverlays(this)) "已授权" else "未授权"))
         menu.addView(statusLine("屏幕捕获", if (mediaProjection != null) "已授权" else "未授权"))
         menu.addView(statusLine("选区", selectionRect?.let { "${it.width()} × ${it.height()}" } ?: "未选择"))
+        menu.addView(sectionTitle("显示"))
+        menu.addView(opacityRow())
 
         menu.addView(sectionTitle("操作"))
         menu.addView(menuAction("返回阅读") { showReadingPage() })
@@ -913,6 +941,52 @@ class FloatingTranslatorService : Service() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply { bottomMargin = dp(8) }
+        }
+    }
+
+    /** "悬浮窗透明度" row with a SeekBar (30%–100%). Live-applies to bubble+panel. */
+    private fun opacityRow(): LinearLayout {
+        val opacity = settings.overlayOpacity
+        val label = TextView(this).apply {
+            text = "悬浮窗透明度 ${(opacity * 100).toInt()}%"
+            Md3.applyTextStyle(this, Md3TextStyle.BodyMedium, Md3.dark.onSurfaceVariant)
+        }
+        val seek = SeekBar(this).apply {
+            // Map 0.3..1.0 → 0..100 progress.
+            val pct = ((opacity - 0.3f) / 0.7f * 100f).toInt().coerceIn(0, 100)
+            progress = pct
+            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    val value = 0.3f + (progress / 100f) * 0.7f
+                    label.text = "悬浮窗透明度 ${(value * 100).toInt()}%"
+                    if (fromUser) {
+                        settings.overlayOpacity = value
+                        applyOverlayOpacity()
+                    }
+                }
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+            })
+        }
+        return LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(15), dp(10), dp(15), dp(10))
+            addView(label)
+            addView(seek)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { bottomMargin = dp(8) }
+        }
+    }
+
+    /** Apply the saved overlay opacity to the bubble and panel (rendering-layer
+     *  alpha; doesn't affect touch hit-testing). */
+    private fun applyOverlayOpacity() {
+        val alpha = settings.overlayOpacity
+        runOnMain {
+            bubbleView?.alpha = alpha
+            panelView?.alpha = alpha
         }
     }
 

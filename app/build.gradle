@@ -11,8 +11,8 @@ android {
         applicationId "com.poozh.translator"
         minSdk 26
         targetSdk 36
-        versionCode 5
-        versionName "0.2.3"
+        versionCode 6
+        versionName "0.3.0"
     }
 
     compileOptions {
@@ -33,6 +33,7 @@ dependencies {
     implementation "com.google.mlkit:text-recognition:16.0.0"
     implementation "com.google.mlkit:text-recognition-japanese:16.0.0"
     implementation "com.squareup.okhttp3:okhttp:4.12.0"
+    implementation "androidx.drawerlayout:drawerlayout:1.2.0"
 
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.json:json:20240303"
