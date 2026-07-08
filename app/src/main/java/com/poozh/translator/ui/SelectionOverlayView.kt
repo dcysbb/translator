@@ -95,7 +95,21 @@ class SelectionOverlayView(
                 if (abs(event.x - startX) < dp(10f) && abs(event.y - startY) < dp(10f)) {
                     onCanceled()
                 } else if (rect.width() >= dp(48f) && rect.height() >= dp(24f)) {
-                    onSelected(rect)
+                    // Convert view-local coordinates to absolute screen coordinates.
+                    // The overlay window does NOT start at the physical screen origin —
+                    // on most devices it is laid out below the status bar (e.g.
+                    // locOnScreen.y = 36). The captured bitmap covers the full physical
+                    // screen, so without this offset the crop slides up by the status
+                    // bar height vs. the box the user drew.
+                    val loc = IntArray(2)
+                    getLocationOnScreen(loc)
+                    val screenRect = Rect(
+                        rect.left + loc[0],
+                        rect.top + loc[1],
+                        rect.right + loc[0],
+                        rect.bottom + loc[1]
+                    )
+                    onSelected(screenRect)
                 } else {
                     onCanceled()
                 }
