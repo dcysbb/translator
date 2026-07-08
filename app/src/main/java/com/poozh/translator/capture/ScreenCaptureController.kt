@@ -9,6 +9,7 @@ import android.hardware.display.VirtualDisplay
 import android.media.Image
 import android.media.ImageReader
 import android.media.projection.MediaProjection
+import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
@@ -71,10 +72,16 @@ class ScreenCaptureController(
     private fun ensureDisplay() {
         if (virtualDisplay != null) return
 
-        val metrics = context.resources.displayMetrics
-        val width = max(metrics.widthPixels, 1)
-        val height = max(metrics.heightPixels, 1)
-        val density = metrics.densityDpi
+        // Use the REAL full-screen size (including system bars), not the
+        // app-window size from displayMetrics. The selection overlay is a
+        // MATCH_PARENT window covering the entire physical screen, so its
+        // view-local coordinates run from 0..realWidth/realHeight. If we size
+        // the ImageReader from displayMetrics.heightPixels (which excludes the
+        // status/navigation bars on most devices), the captured bitmap is
+        // shorter than the selection coordinate space, and the crop ends up
+        // misaligned (the recognised region slides up vs. the drawn box).
+        val (width, height) = realScreenSize()
+        val density = context.resources.displayMetrics.densityDpi
 
         val thread = HandlerThread("screen-translator-capture").also { it.start() }
         captureThread = thread
@@ -163,6 +170,27 @@ class ScreenCaptureController(
         val right = rect.right.coerceIn(left + 1, maxWidth)
         val bottom = rect.bottom.coerceIn(top + 1, maxHeight)
         return Rect(left, top, right, bottom)
+    }
+
+    /**
+     * The real, full physical screen size including system bars. Matches the
+     * coordinate space of a top-left-aligned MATCH_PARENT overlay window (which
+     * is what the selection view is), so selection coordinates map 1:1 onto the
+     * captured bitmap.
+     */
+    private fun realScreenSize(): Pair<Int, Int> {
+        val wm = context.getSystemService(Context.WINDOW_SERVICE) as? WindowManager
+        if (wm != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val bounds = wm.maximumWindowMetrics.bounds
+            val w = max(bounds.width(), 1)
+            val h = max(bounds.height(), 1)
+            if (w > 0 && h > 0) return w to h
+        }
+        // Fallback for older APIs: real metrics (includes system bars).
+        val metrics = android.util.DisplayMetrics()
+        @Suppress("DEPRECATION")
+        (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.getRealMetrics(metrics)
+        return max(metrics.widthPixels, 1) to max(metrics.heightPixels, 1)
     }
 
     private fun releaseDisplay() {
