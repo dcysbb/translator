@@ -11,8 +11,31 @@ android {
         applicationId "com.poozh.translator"
         minSdk 26
         targetSdk 36
-        versionCode 7
-        versionName "0.3.1"
+        versionCode 8
+        versionName "0.3.2"
+    }
+
+    signingConfigs {
+        release {
+            // A self-signed release keystore (NOT the debug one). The debug
+            // keystore is rejected by some OEM ROMs and by devices that already
+            // hold a differently-signed build of the same package, producing
+            // "未签名/无法安装". This keystore is gitignored (see .gitignore).
+            // Credentials are baked in for now; rotate to env vars before any
+            // public distribution.
+            storeFile rootProject.file("release.keystore")
+            storePassword "translator2026"
+            keyAlias "translator-release"
+            keyPassword "translator2026"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig = signingConfigs.release
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
     }
 
     compileOptions {
