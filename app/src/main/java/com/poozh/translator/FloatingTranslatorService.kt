@@ -229,11 +229,19 @@ class FloatingTranslatorService : Service() {
         readingText = null
         statusText = null
         titleText = null
-        setBubbleDocked(false)
         // Shrink the panel back into the bubble (non-linear), then remove it.
         val params = panel.layoutParams as? WindowManager.LayoutParams
         val (pivotX, pivotY) = if (params != null) bubblePivotRelativeToPanel(params) else 0f to 0f
-        Md3Motion.scaleOutTo(panel, pivotX, pivotY) { removeOverlay(panel) }
+        Md3Motion.scaleOutTo(panel, pivotX, pivotY) {
+            // Hide before removal: removing a window can trigger one last
+            // full-size draw of the view (its scale/alpha reset), which shows
+            // up as a "flash" the size of the expanded panel. INVISIBLE first
+            // guarantees nothing is drawn on top while the window tears down.
+            panel.visibility = View.INVISIBLE
+            panel.alpha = 0f
+            removeOverlay(panel)
+        }
+        setBubbleDocked(false)
     }
 
     private fun showPanel() {
@@ -744,20 +752,26 @@ class FloatingTranslatorService : Service() {
 
     private fun hideOwnWindowsForCapture() {
         if (hiddenOverlayState != null) return
+        // Remember the target alpha to restore to (respects overlay opacity).
+        val targetAlpha = settings.overlayOpacity
         hiddenOverlayState = HiddenOverlayState(
             bubbleVisibility = bubbleView?.visibility,
             panelVisibility = panelView?.visibility,
             selectionVisibility = selectionOverlay?.visibility
         )
-        bubbleView?.visibility = View.INVISIBLE
-        panelView?.visibility = View.INVISIBLE
+        // Fade out (not instant hide) so the refresh reads as a smooth pulse.
+        bubbleView?.animate()?.alpha(0f)?.setDuration(140L)?.start()
+        panelView?.animate()?.alpha(0f)?.setDuration(140L)?.start()
+        // The selection overlay is fullscreen and not opacity-controlled; hide
+        // it instantly so it never appears in the captured frame.
         selectionOverlay?.visibility = View.INVISIBLE
     }
 
     private fun restoreOwnWindowsAfterCapture() {
         val state = hiddenOverlayState ?: return
-        state.bubbleVisibility?.let { bubbleView?.visibility = it }
-        state.panelVisibility?.let { panelView?.visibility = it }
+        val targetAlpha = settings.overlayOpacity
+        bubbleView?.animate()?.alpha(targetAlpha)?.setDuration(180L)?.start()
+        panelView?.animate()?.alpha(targetAlpha)?.setDuration(180L)?.start()
         state.selectionVisibility?.let { selectionOverlay?.visibility = it }
         hiddenOverlayState = null
     }
@@ -781,7 +795,9 @@ class FloatingTranslatorService : Service() {
                     downRawY = event.rawY
                     startX = params.x
                     startY = params.y
-                    Md3Motion.press(dragTarget)
+                    // No press scale on the drag target — scaling the bubble
+                    // mid-drag makes it visibly change size and shifts the touch
+                    // anchor, which feels broken.
                     true
                 }
 
@@ -794,7 +810,6 @@ class FloatingTranslatorService : Service() {
 
                 MotionEvent.ACTION_UP -> {
                     val moved = kotlin.math.abs(event.rawX - downRawX) + kotlin.math.abs(event.rawY - downRawY)
-                    Md3Motion.release(dragTarget)
                     if (moved < dp(8)) {
                         view.performClick()
                         onClick?.invoke()

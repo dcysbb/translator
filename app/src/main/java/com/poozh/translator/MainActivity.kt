@@ -90,6 +90,12 @@ class MainActivity : Activity() {
         super.onResume()
         if (currentTab == AppTab.Console) {
             refreshStatus()
+            // Returning from the screen-capture permission dialog, the service
+            // receives ACTION_CAPTURE_RESULT and assigns mediaProjection
+            // asynchronously — refresh again after it has had time to process,
+            // so the "屏幕捕获就绪" indicator matches reality instead of
+            // lagging one cycle behind.
+            window.decorView.postDelayed({ if (currentTab == AppTab.Console) refreshStatus() }, 700)
         } else if (currentTab == AppTab.History) {
             switchTab(AppTab.History)
         }
@@ -472,6 +478,11 @@ class MainActivity : Activity() {
                     }
                 }
                 controlButton.postDelayed({ refreshStatus() }, 180)
+                    // Service start/stop is asynchronous — isRunning flips in
+                    // onCreate/onDestroy, which may not have run yet at 180ms.
+                    // Re-check after the service has had time to fully start or
+                    // tear down so the indicator matches reality.
+                    controlButton.postDelayed({ refreshStatus() }, 600)
             }
             addView(controlButton)
         }
