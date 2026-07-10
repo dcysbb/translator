@@ -22,7 +22,12 @@ class ScreenCaptureController(
     private val mediaProjection: MediaProjection,
     private val selectionProvider: () -> Rect?,
     private val frameCallback: (Bitmap) -> Unit,
-    private val errorCallback: (String) -> Unit
+    private val errorCallback: (String) -> Unit,
+    /** Fired on the main thread when the system revokes the MediaProjection
+     *  (token expired, user revoked, single-use on Android 14+). The service
+     *  uses this to null out its [mediaProjection] reference so the next refresh
+     *  re-requests permission instead of looping on a dead projection. */
+    private val onProjectionStopped: () -> Unit = {}
 ) {
     private val mainHandler = Handler(Looper.getMainLooper())
     private var captureThread: HandlerThread? = null
@@ -36,7 +41,10 @@ class ScreenCaptureController(
             mainHandler.post {
                 pendingCapture = false
                 releaseDisplay()
-                errorCallback("屏幕捕获已停止")
+                // Tell the service the projection is dead so it clears its
+                // mediaProjection field and re-requests permission on next use.
+                onProjectionStopped()
+                errorCallback("屏幕捕获授权已失效，正在重新请求…")
             }
         }
     }
@@ -108,7 +116,13 @@ class ScreenCaptureController(
         } catch (e: Throwable) {
             runCatching { mediaProjection.unregisterCallback(projectionCallback) }
             releaseDisplay()
-            mainHandler.post { errorCallback("屏幕捕获启动失败，请重新授权：${e.localizedMessage ?: e::class.simpleName}") }
+            // A SecurityException here almost always means the projection token
+            // is dead — fire onProjectionStopped so the service clears its
+            // reference and re-requests permission instead of looping.
+            mainHandler.post {
+                onProjectionStopped()
+                errorCallback("屏幕捕获授权已失效，正在重新请求…")
+            }
             null
         }
     }

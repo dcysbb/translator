@@ -362,6 +362,10 @@ class FloatingTranslatorService : Service() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
             addView(toolbarButton("刷新", primary = true) { refreshOnce() })
+            // Re-translate the last OCR text — handy when a translation fails
+            // (timeout/server error) so the user can retry in one tap without
+            // re-capturing the screen.
+            addView(toolbarButton("重译") { retranslateLastText() })
             addView(toolbarButton("选区") { showSelectionOverlay() })
             addView(toolbarButton("更多") { showMorePage() })
             addView(toolbarButton("收起") { collapsePanel() })
@@ -478,7 +482,8 @@ class FloatingTranslatorService : Service() {
             mediaProjection = projection,
             selectionProvider = { selectionRect },
             frameCallback = ::handleCapturedFrame,
-            errorCallback = ::handleCaptureError
+            errorCallback = ::handleCaptureError,
+            onProjectionStopped = ::handleProjectionStopped
         ).also { captureController = it }
         showStatus("正在截取屏幕")
         hideOwnWindowsForCapture()
@@ -493,6 +498,24 @@ class FloatingTranslatorService : Service() {
     private fun handleCaptureError(message: String) {
         restoreOwnWindowsAfterCapture()
         showStatus(message)
+    }
+
+    /**
+     * The MediaProjection token died (revoked by the user, expired, or rejected
+     * by Android 14+ single-use rules). Clear our references so the next refresh
+     * re-requests permission instead of looping on a dead projection. Then
+     * automatically re-request so the user doesn't have to tap anything.
+     */
+    private fun handleProjectionStopped() {
+        runCatching { mediaProjection?.stop() }
+        mediaProjection = null
+        captureController?.release()
+        captureController = null
+        ocrBusy = false
+        restoreOwnWindowsAfterCapture()
+        // Auto re-request permission so the overlay keeps working after a token
+        // expiry without the user having to dig into the main UI.
+        requestCapturePermission()
     }
 
     private fun handleFrame(bitmap: android.graphics.Bitmap) {
@@ -569,6 +592,17 @@ class FloatingTranslatorService : Service() {
         translating = true
         showStatus("正在翻译")
         currentCall?.cancel()
+        // Surface automatic-retry progress (e.g. "HTTP 503，正在重试…") in the
+        // reading area so the user knows the slowness is a transient retry,
+        // not a hang.
+        deepSeekClient.retryProgress = { msg ->
+            runOnMain {
+                if (translating) {
+                    readingText?.text = "原文\n$text\n\n$msg"
+                    showStatus("正在重试")
+                }
+            }
+        }
         currentCall = deepSeekClient.analyze(
             text = text,
             language = LanguageDetector.detect(text),
@@ -577,6 +611,7 @@ class FloatingTranslatorService : Service() {
                 override fun onSuccess(result: AnalysisResult) {
                     runOnMain {
                         translating = false
+                        deepSeekClient.retryProgress = null
                         lastResult = result
                         HistoryManager.addHistory(
                             context = this@FloatingTranslatorService,
@@ -592,8 +627,9 @@ class FloatingTranslatorService : Service() {
                 override fun onFailure(message: String) {
                     runOnMain {
                         translating = false
+                        deepSeekClient.retryProgress = null
                         lastResult = null
-                        readingText?.text = "原文\n$text\n\n$message"
+                        readingText?.text = "原文\n$text\n\n❌ $message\n\n点底部「重译」可重试"
                         showStatus("翻译失败")
                     }
                 }

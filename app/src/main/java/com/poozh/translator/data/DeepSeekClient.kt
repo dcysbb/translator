@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit
 class DeepSeekClient(
     private val httpClient: OkHttpClient = OkHttpClient.Builder()
         .connectTimeout(20, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(40, TimeUnit.SECONDS)
         .writeTimeout(20, TimeUnit.SECONDS)
         .build()
 ) {
@@ -25,6 +25,10 @@ class DeepSeekClient(
         fun onSuccess(result: AnalysisResult)
         fun onFailure(message: String)
     }
+
+    /** Optional: surfaced when a transient failure triggers an automatic retry,
+     *  so the UI can show "正在重试…" instead of silently re-sending. */
+    var retryProgress: ((String) -> Unit)? = null
 
     fun analyze(
         text: String,
@@ -55,17 +59,43 @@ class DeepSeekClient(
             }
             .build()
 
+        // Execute with up to MAX_RETRIES retries for transient failures
+        // (timeouts, 429, 5xx, network IO). Auth errors (401/403) and bad
+        // requests (400/404) are not retried — they won't fix themselves.
+        return executeWithRetry(request, provider, text, callback, attempt = 0)
+    }
+
+    private fun executeWithRetry(
+        request: Request,
+        provider: ModelProviderPreset,
+        text: String,
+        callback: ResultCallback,
+        attempt: Int
+    ): Call {
         val call = httpClient.newCall(request)
         call.enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                callback.onFailure(e.message ?: "模型服务请求失败")
+                // Network/timeout errors are transient — retry.
+                if (attempt < MAX_RETRIES && !call.isCanceled()) {
+                    scheduleRetry(request, provider, text, callback, attempt,
+                        "${provider.name} 请求失败（第 ${attempt + 1} 次），正在重试…")
+                } else {
+                    callback.onFailure(friendlyNetworkMessage(e))
+                }
             }
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
                     val responseBody = it.body?.string().orEmpty()
+                    val code = it.code
+                    // Retry transient server errors and rate limiting.
+                    if (shouldRetryStatus(code) && attempt < MAX_RETRIES && !call.isCanceled()) {
+                        scheduleRetry(request, provider, text, callback, attempt,
+                            "${provider.name} HTTP $code，正在重试…")
+                        return
+                    }
                     if (!it.isSuccessful) {
-                        callback.onFailure("${provider.name} HTTP ${it.code}: ${responseBody.take(240)}")
+                        callback.onFailure("${provider.name} HTTP $code: ${responseBody.take(240)}")
                         return
                     }
                     runCatching {
@@ -83,6 +113,47 @@ class DeepSeekClient(
             }
         })
         return call
+    }
+
+    private fun scheduleRetry(
+        request: Request,
+        provider: ModelProviderPreset,
+        text: String,
+        callback: ResultCallback,
+        attempt: Int,
+        statusMessage: String
+    ) {
+        // Backoff: 1s, then 2s. The statusMessage is surfaced via a dedicated
+        // progress callback if the caller supplied one (see [ProgressCallback]).
+        retryProgress?.invoke(statusMessage)
+        val delayMs = RETRY_BASE_DELAY_MS * (1L shl attempt)
+        Thread {
+            try {
+                Thread.sleep(delayMs)
+            } catch (_: InterruptedException) {
+                return@Thread
+            }
+            executeWithRetry(request, provider, text, callback, attempt + 1)
+        }.apply { isDaemon = true; name = "translate-retry-${attempt}" }.start()
+    }
+
+    /** Map raw OkHttp exceptions to user-readable Chinese hints. */
+    private fun friendlyNetworkMessage(e: IOException): String {
+        val msg = e.message.orEmpty()
+        return when {
+            "timeout" in msg.lowercase() -> "请求超时，请检查网络或稍后重试"
+            "failed to connect" in msg.lowercase() || "unable" in msg.lowercase() ->
+                "无法连接模型服务，请检查网络或 Base URL"
+            else -> msg.ifBlank { "模型服务请求失败" }
+        }
+    }
+
+    private fun shouldRetryStatus(code: Int): Boolean = code == 429 || code in 500..599
+
+    companion object {
+        private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
+        private const val MAX_RETRIES = 2
+        private const val RETRY_BASE_DELAY_MS = 1000L
     }
 
     private fun buildRequestJson(
@@ -107,9 +178,5 @@ class DeepSeekClient(
             json.put("response_format", JSONObject().put("type", "json_object"))
         }
         return json
-    }
-
-    companion object {
-        private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
     }
 }
