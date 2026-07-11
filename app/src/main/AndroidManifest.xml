@@ -21,6 +21,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".CapturePermissionActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:excludeFromRecents="true"
+            android:exported="false" />
+
         <service
             android:name=".FloatingTranslatorService"
             android:exported="false"
