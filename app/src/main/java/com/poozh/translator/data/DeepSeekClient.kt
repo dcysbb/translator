@@ -9,48 +9,259 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import org.json.JSONArray
 import org.json.JSONObject
+import java.io.BufferedReader
 import java.io.IOException
+import java.io.InputStreamReader
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 class DeepSeekClient(
     private val httpClient: OkHttpClient = OkHttpClient.Builder()
         .connectTimeout(20, TimeUnit.SECONDS)
-        .readTimeout(40, TimeUnit.SECONDS)
+        .readTimeout(45, TimeUnit.SECONDS)
         .writeTimeout(20, TimeUnit.SECONDS)
         .build()
 ) {
+    /**
+     * Streaming translation callback. All methods are invoked from a background
+     * OkHttp thread; callers must marshal onto the UI thread themselves.
+     */
     interface ResultCallback {
+        /** A partial translation has been extracted from the stream so far. */
+        fun onTranslationProgress(partialTranslation: String) {}
+        /** The full analysis (translation + grammar notes) is ready. */
         fun onSuccess(result: AnalysisResult)
+        /** The request failed terminally. Retry is left to the user ("重译"). */
         fun onFailure(message: String)
     }
 
-    /** Optional: surfaced when a transient failure triggers an automatic retry,
-     *  so the UI can show "正在重试…" instead of silently re-sending. */
-    var retryProgress: ((String) -> Unit)? = null
+    /** A cancellable handle for a translation request (stream + fallback). */
+    interface TranslationHandle {
+        fun cancel()
+    }
 
     fun analyze(
         text: String,
         language: TextLanguage,
         settings: SettingsSnapshot,
         callback: ResultCallback
-    ): Call? {
+    ): TranslationHandle {
         val provider = ModelProviders.byId(settings.providerId)
         if (settings.apiKey.isBlank() && provider.requiresApiKey) {
             callback.onFailure("请先在主界面填写 ${provider.name} API Key")
-            return null
+            return NoopHandle
         }
         if (text.isBlank()) {
             callback.onFailure("没有可翻译的文本")
-            return null
+            return NoopHandle
         }
 
-        val body = buildRequestJson(text, language, settings.model, provider.supportsJsonMode).toString()
+        val cancelled = AtomicBoolean(false)
+        return startStreaming(text, language, settings, provider, callback, cancelled, allowFallback = true)
+    }
+
+    /**
+     * Fire the streaming request. [allowFallback] gates whether a clearly-
+     * unsupported-stream error triggers a single non-streaming retry.
+     */
+    private fun startStreaming(
+        text: String,
+        language: TextLanguage,
+        settings: SettingsSnapshot,
+        provider: ModelProviderPreset,
+        callback: ResultCallback,
+        cancelled: AtomicBoolean,
+        allowFallback: Boolean
+    ): TranslationHandle {
+        val request = buildRequest(text, language, settings, provider, stream = true)
+        var currentCall: Call? = null
+        val handle = object : TranslationHandle {
+            override fun cancel() {
+                cancelled.set(true)
+                currentCall?.cancel()
+            }
+        }
+
+        currentCall = httpClient.newCall(request)
+        currentCall.enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                if (cancelled.get()) return
+                callback.onFailure(friendlyNetworkMessage(e))
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                response.use {
+                    val code = it.code
+                    // 400/415/422 with a "stream"/"response_format" complaint →
+                    // the server can't stream; fall back once to non-streaming.
+                    if (allowFallback && isStreamUnsupported(code, it)) {
+                        if (cancelled.get()) return
+                        val fbCall = startNonStreaming(text, language, settings, provider, callback, cancelled)
+                        // Wire cancellation of the outer handle to the fallback call.
+                        // (currentCall already completed; the new call owns the socket.)
+                        currentCall = null
+                        return
+                    }
+                    if (!it.isSuccessful) {
+                        if (cancelled.get()) return
+                        val body = runCatching { it.body?.string().orEmpty() }.getOrDefault("")
+                        callback.onFailure("${provider.name} HTTP $code: ${body.take(240)}")
+                        return
+                    }
+                    // 200 OK. Detect whether the server actually streamed (SSE)
+                    // or ignored stream=true and returned a plain JSON body.
+                    val contentType = it.header("Content-Type").orEmpty().lowercase()
+                    val isSse = contentType.contains("text/event-stream") || contentType.contains("stream")
+                    if (isSse) {
+                        consumeSseStream(it, text, callback, cancelled)
+                    } else {
+                        consumePlainBody(it, text, callback, cancelled)
+                    }
+                }
+            }
+        })
+        return handle
+    }
+
+    /** One-shot non-streaming fallback for servers that reject stream=true. */
+    private fun startNonStreaming(
+        text: String,
+        language: TextLanguage,
+        settings: SettingsSnapshot,
+        provider: ModelProviderPreset,
+        callback: ResultCallback,
+        cancelled: AtomicBoolean
+    ): TranslationHandle {
+        val request = buildRequest(text, language, settings, provider, stream = false)
+        val call = httpClient.newCall(request)
+        call.enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                if (cancelled.get()) return
+                callback.onFailure(friendlyNetworkMessage(e))
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                response.use {
+                    if (cancelled.get()) return
+                    if (!it.isSuccessful) {
+                        val body = runCatching { it.body?.string().orEmpty() }.getOrDefault("")
+                        callback.onFailure("${provider.name} HTTP ${it.code}: ${body.take(240)}")
+                        return
+                    }
+                    consumePlainBody(it, text, callback, cancelled)
+                }
+            }
+        })
+        return object : TranslationHandle { override fun cancel() { cancelled.set(true); call.cancel() } }
+    }
+
+    /** Read an SSE event stream, accumulating delta.content and emitting progress. */
+    private fun consumeSseStream(
+        response: Response,
+        text: String,
+        callback: ResultCallback,
+        cancelled: AtomicBoolean
+    ) {
+        val extractor = StreamingTranslationExtractor()
+        val full = StringBuilder()
+        try {
+            BufferedReader(InputStreamReader(response.body?.byteStream() ?: return)).use { reader ->
+                while (!cancelled.get()) {
+                    val line = reader.readLine() ?: break
+                    if (line.isEmpty() || line.startsWith(":")) continue  // keep-alive / comment
+                    if (!line.startsWith("data:")) continue
+                    val data = line.removePrefix("data:").trim()
+                    if (data == "[DONE]") break
+                    val delta = runCatching {
+                        val obj = JSONObject(data)
+                            .optJSONArray("choices")?.optJSONObject(0)
+                            ?.optJSONObject("delta")
+                        obj?.optString("content").orEmpty()
+                    }.getOrDefault("")
+                    if (delta.isNotEmpty()) {
+                        full.append(delta)
+                        extractor.append(delta)
+                        val partial = extractor.currentTranslation
+                        if (partial.isNotEmpty()) callback.onTranslationProgress(partial)
+                    }
+                }
+            }
+        } catch (e: IOException) {
+            if (!cancelled.get()) { callback.onFailure(friendlyNetworkMessage(e)); return }
+        }
+        if (cancelled.get()) return
+        finishWithContent(full.toString(), text, extractor, callback)
+    }
+
+    /** Server ignored stream=true and returned a normal JSON body in one shot. */
+    private fun consumePlainBody(
+        response: Response,
+        text: String,
+        callback: ResultCallback,
+        cancelled: AtomicBoolean
+    ) {
+        val body = runCatching { response.body?.string().orEmpty() }.getOrDefault("")
+        if (cancelled.get()) return
+        val content = runCatching {
+            JSONObject(body)
+                .getJSONArray("choices")
+                .getJSONObject(0)
+                .getJSONObject("message")
+                .getString("content")
+        }.getOrDefault(body) // if not chat-completions shape, treat body as raw content
+        finishWithContent(content, text, StreamingTranslationExtractor().apply { append(content) }, callback)
+    }
+
+    /** Parse the full accumulated model content into an AnalysisResult. */
+    private fun finishWithContent(
+        content: String,
+        text: String,
+        extractor: StreamingTranslationExtractor,
+        callback: ResultCallback
+    ) {
+        val parsed = runCatching { AnalysisJsonParser.parse(content, text) }
+        parsed.onSuccess(callback::onSuccess)
+            .onFailure {
+                // The full JSON didn't parse, but we may have already streamed a
+                // usable translation. Keep it so the user isn't left empty.
+                val quick = extractor.currentTranslation
+                if (quick.isNotBlank()) {
+                    callback.onSuccess(
+                        AnalysisResult(
+                            sourceText = text,
+                            translation = quick,
+                            language = com.poozh.translator.model.LanguageDetector.detect(text),
+                            summary = "（详细解析不可用）"
+                        )
+                    )
+                } else {
+                    callback.onFailure(it.message ?: "模型服务返回解析失败")
+                }
+            }
+    }
+
+    /** True when the error response indicates the server can't handle streaming. */
+    private fun isStreamUnsupported(code: Int, response: Response): Boolean {
+        if (code !in setOf(400, 415, 422)) return false
+        val body = runCatching { response.peekBody(2048L).string().lowercase() }.getOrDefault("")
+        return body.contains("stream") || body.contains("response_format")
+    }
+
+    private fun buildRequest(
+        text: String,
+        language: TextLanguage,
+        settings: SettingsSnapshot,
+        provider: ModelProviderPreset,
+        stream: Boolean
+    ): Request {
+        val body = buildRequestJson(text, language, settings.model, provider.supportsJsonMode, stream)
+            .toString()
             .toRequestBody(JSON_MEDIA_TYPE)
-        val request = Request.Builder()
+        return Request.Builder()
             .url(settings.baseUrl)
             .header("Content-Type", "application/json")
+            .header("Accept", if (stream) "text/event-stream" else "application/json")
             .post(body)
             .apply {
                 if (settings.apiKey.isNotBlank()) {
@@ -58,83 +269,30 @@ class DeepSeekClient(
                 }
             }
             .build()
-
-        // Execute with up to MAX_RETRIES retries for transient failures
-        // (timeouts, 429, 5xx, network IO). Auth errors (401/403) and bad
-        // requests (400/404) are not retried — they won't fix themselves.
-        return executeWithRetry(request, provider, text, callback, attempt = 0)
     }
 
-    private fun executeWithRetry(
-        request: Request,
-        provider: ModelProviderPreset,
+    private fun buildRequestJson(
         text: String,
-        callback: ResultCallback,
-        attempt: Int
-    ): Call {
-        val call = httpClient.newCall(request)
-        call.enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                // Network/timeout errors are transient — retry.
-                if (attempt < MAX_RETRIES && !call.isCanceled()) {
-                    scheduleRetry(request, provider, text, callback, attempt,
-                        "${provider.name} 请求失败（第 ${attempt + 1} 次），正在重试…")
-                } else {
-                    callback.onFailure(friendlyNetworkMessage(e))
-                }
-            }
+        language: TextLanguage,
+        model: String,
+        supportsJsonMode: Boolean,
+        stream: Boolean
+    ): JSONObject {
+        val messages = org.json.JSONArray()
+            .put(JSONObject().put("role", "system").put("content", DeepSeekPrompt.systemPrompt(language)))
+            .put(JSONObject().put("role", "user").put("content", DeepSeekPrompt.userPrompt(text, language)))
 
-            override fun onResponse(call: Call, response: Response) {
-                response.use {
-                    val responseBody = it.body?.string().orEmpty()
-                    val code = it.code
-                    // Retry transient server errors and rate limiting.
-                    if (shouldRetryStatus(code) && attempt < MAX_RETRIES && !call.isCanceled()) {
-                        scheduleRetry(request, provider, text, callback, attempt,
-                            "${provider.name} HTTP $code，正在重试…")
-                        return
-                    }
-                    if (!it.isSuccessful) {
-                        callback.onFailure("${provider.name} HTTP $code: ${responseBody.take(240)}")
-                        return
-                    }
-                    runCatching {
-                        val content = JSONObject(responseBody)
-                            .getJSONArray("choices")
-                            .getJSONObject(0)
-                            .getJSONObject("message")
-                            .getString("content")
-                        AnalysisJsonParser.parse(content, text)
-                    }.onSuccess(callback::onSuccess)
-                        .onFailure { error ->
-                            callback.onFailure(error.message ?: "模型服务返回解析失败")
-                        }
-                }
-            }
-        })
-        return call
-    }
-
-    private fun scheduleRetry(
-        request: Request,
-        provider: ModelProviderPreset,
-        text: String,
-        callback: ResultCallback,
-        attempt: Int,
-        statusMessage: String
-    ) {
-        // Backoff: 1s, then 2s. The statusMessage is surfaced via a dedicated
-        // progress callback if the caller supplied one (see [ProgressCallback]).
-        retryProgress?.invoke(statusMessage)
-        val delayMs = RETRY_BASE_DELAY_MS * (1L shl attempt)
-        Thread {
-            try {
-                Thread.sleep(delayMs)
-            } catch (_: InterruptedException) {
-                return@Thread
-            }
-            executeWithRetry(request, provider, text, callback, attempt + 1)
-        }.apply { isDaemon = true; name = "translate-retry-${attempt}" }.start()
+        val json = JSONObject()
+            .put("model", model)
+            .put("messages", messages)
+            .put("temperature", 0.2)
+            .put("stream", stream)
+        if (supportsJsonMode && !stream) {
+            // response_format is meaningless under streaming and some servers
+            // reject it; only send it for the non-streaming fallback.
+            json.put("response_format", JSONObject().put("type", "json_object"))
+        }
+        return json
     }
 
     /** Map raw OkHttp exceptions to user-readable Chinese hints. */
@@ -148,35 +306,9 @@ class DeepSeekClient(
         }
     }
 
-    private fun shouldRetryStatus(code: Int): Boolean = code == 429 || code in 500..599
+    private object NoopHandle : TranslationHandle { override fun cancel() {} }
 
     companion object {
         private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
-        private const val MAX_RETRIES = 2
-        private const val RETRY_BASE_DELAY_MS = 1000L
-    }
-
-    private fun buildRequestJson(
-        text: String,
-        language: TextLanguage,
-        model: String,
-        supportsJsonMode: Boolean
-    ): JSONObject {
-        val messages = JSONArray()
-            .put(JSONObject().put("role", "system").put("content", DeepSeekPrompt.systemPrompt(language)))
-            .put(JSONObject().put("role", "user").put("content", DeepSeekPrompt.userPrompt(text, language)))
-
-        val json = JSONObject()
-            .put("model", model)
-            .put("messages", messages)
-            .put("temperature", 0.2)
-            .put("stream", false)
-        // Only enforce JSON mode when the provider supports it; otherwise rely
-        // on the prompt + tolerant parsing (some endpoints, e.g. local Ollama,
-        // reject response_format with a 400).
-        if (supportsJsonMode) {
-            json.put("response_format", JSONObject().put("type", "json_object"))
-        }
-        return json
     }
 }
