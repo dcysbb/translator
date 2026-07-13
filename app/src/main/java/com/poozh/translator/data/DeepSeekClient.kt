@@ -165,6 +165,7 @@ class DeepSeekClient(
     ) {
         val extractor = StreamingTranslationExtractor()
         val full = StringBuilder()
+        var reasoningNotified = false
         try {
             BufferedReader(InputStreamReader(response.body?.byteStream() ?: return)).use { reader ->
                 while (!cancelled.get()) {
@@ -173,15 +174,25 @@ class DeepSeekClient(
                     if (!line.startsWith("data:")) continue
                     val data = line.removePrefix("data:").trim()
                     if (data == "[DONE]") break
-                    val delta = runCatching {
-                        val obj = JSONObject(data)
+                    val (content, reasoning) = runCatching {
+                        val delta = JSONObject(data)
                             .optJSONArray("choices")?.optJSONObject(0)
                             ?.optJSONObject("delta")
-                        obj?.optString("content").orEmpty()
-                    }.getOrDefault("")
-                    if (delta.isNotEmpty()) {
-                        full.append(delta)
-                        extractor.append(delta)
+                        (delta?.optString("content") ?: "") to (delta?.optString("reasoning_content") ?: "")
+                    }.getOrDefault("" to "")
+                    // Reasoning models (DeepSeek-R1, V4-Flash) emit reasoning_content
+                    // first — potentially for many seconds — before any content. Give
+                    // the user a visible "thinking" indicator during that phase so the
+                    // stream doesn't look dead.
+                    if (reasoning.isNotEmpty() && content.isEmpty()) {
+                        if (!reasoningNotified) {
+                            reasoningNotified = true
+                            callback.onTranslationProgress("")
+                        }
+                    }
+                    if (content.isNotEmpty()) {
+                        full.append(content)
+                        extractor.append(content)
                         val partial = extractor.currentTranslation
                         if (partial.isNotEmpty()) callback.onTranslationProgress(partial)
                     }

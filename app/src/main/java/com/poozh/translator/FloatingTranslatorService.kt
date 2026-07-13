@@ -603,16 +603,25 @@ class FloatingTranslatorService : Service() {
             callback = object : DeepSeekClient.ResultCallback {
                 override fun onTranslationProgress(partial: String) {
                     runOnMain {
-                        if (!translating || partial == lastPartialShown) return@runOnMain
+                        if (!translating) return@runOnMain
                         // Throttle live updates to ~every 80ms so we don't flood
                         // the UI thread / WindowManager on every token.
                         val now = System.currentTimeMillis()
                         if (now - lastPartialShownAt < 80L) return@runOnMain
-                        lastPartialShown = partial
                         lastPartialShownAt = now
                         showReadingPage() // keep the panel open on the reading page
-                        readingText?.text = "原文\n$text\n\n中文\n$partial\n\n正在生成详细解析…"
-                        showStatus("正在翻译")
+                        if (partial.isEmpty()) {
+                            // Reasoning-model "thinking" phase (reasoning_content
+                            // streaming, no translation yet). Show a clear indicator
+                            // so the stream doesn't look dead during the long wait.
+                            readingText?.text = "原文\n$text\n\n🤔 模型正在思考…"
+                            showStatus("模型思考中")
+                        } else {
+                            if (partial == lastPartialShown) return@runOnMain
+                            lastPartialShown = partial
+                            readingText?.text = "原文\n$text\n\n中文\n$partial\n\n正在生成详细解析…"
+                            showStatus("正在翻译")
+                        }
                     }
                 }
 
