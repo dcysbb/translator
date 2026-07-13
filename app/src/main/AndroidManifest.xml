@@ -23,8 +23,9 @@
 
         <activity
             android:name=".CapturePermissionActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:theme="@style/InvisiblePermissionTheme"
             android:excludeFromRecents="true"
+            android:noHistory="true"
             android:exported="false" />
 
         <service

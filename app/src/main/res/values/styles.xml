@@ -7,4 +7,17 @@
         <item name="android:navigationBarColor">#EEF2F1</item>
         <item name="android:colorAccent">@color/translator_primary</item>
     </style>
+
+    <!-- Fully invisible, no-animation theme for the permission-request
+         activity. Disabling window animations prevents the brief background
+         flash of the previous activity (main UI / launcher) that users see
+         when the transparent activity is launched before the system dialog. -->
+    <style name="InvisiblePermissionTheme" parent="@android:style/Theme.Translucent.NoTitleBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
 </resources>
