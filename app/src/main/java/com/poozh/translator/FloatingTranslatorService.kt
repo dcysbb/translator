@@ -46,7 +46,6 @@ import com.poozh.translator.ui.Md3
 import com.poozh.translator.ui.Md3Motion
 import com.poozh.translator.ui.Md3TextStyle
 import com.poozh.translator.ui.SelectionOverlayView
-import okhttp3.Call
 import kotlin.math.max
 import kotlin.math.min
 
@@ -74,7 +73,10 @@ class FloatingTranslatorService : Service() {
     private var blankFrameRetries = 0
     private var lastStableText = ""
     private var lastResult: AnalysisResult? = null
-    private var currentCall: Call? = null
+    private var currentTranslation: DeepSeekClient.TranslationHandle? = null
+    /** Last partial translation shown, used to throttle UI updates (~80ms). */
+    private var lastPartialShown = ""
+    private var lastPartialShownAt = 0L
     private var hiddenOverlayState: HiddenOverlayState? = null
 
     private data class HiddenOverlayState(
@@ -113,7 +115,7 @@ class FloatingTranslatorService : Service() {
     override fun onDestroy() {
         instance = null
         isRunning = false
-        currentCall?.cancel()
+        currentTranslation?.cancel()
         captureController?.release()
         captureController = null
         recognizer.close()
@@ -590,28 +592,33 @@ class FloatingTranslatorService : Service() {
         }
 
         translating = true
+        lastPartialShown = ""
+        lastPartialShownAt = 0L
         showStatus("正在翻译")
-        currentCall?.cancel()
-        // Surface automatic-retry progress (e.g. "HTTP 503，正在重试…") in the
-        // reading area so the user knows the slowness is a transient retry,
-        // not a hang.
-        deepSeekClient.retryProgress = { msg ->
-            runOnMain {
-                if (translating) {
-                    readingText?.text = "原文\n$text\n\n$msg"
-                    showStatus("正在重试")
-                }
-            }
-        }
-        currentCall = deepSeekClient.analyze(
+        currentTranslation?.cancel()
+        currentTranslation = deepSeekClient.analyze(
             text = text,
             language = LanguageDetector.detect(text),
             settings = snapshot,
             callback = object : DeepSeekClient.ResultCallback {
+                override fun onTranslationProgress(partial: String) {
+                    runOnMain {
+                        if (!translating || partial == lastPartialShown) return@runOnMain
+                        // Throttle live updates to ~every 80ms so we don't flood
+                        // the UI thread / WindowManager on every token.
+                        val now = System.currentTimeMillis()
+                        if (now - lastPartialShownAt < 80L) return@runOnMain
+                        lastPartialShown = partial
+                        lastPartialShownAt = now
+                        showReadingPage() // keep the panel open on the reading page
+                        readingText?.text = "原文\n$text\n\n中文\n$partial\n\n正在生成详细解析…"
+                        showStatus("正在翻译")
+                    }
+                }
+
                 override fun onSuccess(result: AnalysisResult) {
                     runOnMain {
                         translating = false
-                        deepSeekClient.retryProgress = null
                         lastResult = result
                         HistoryManager.addHistory(
                             context = this@FloatingTranslatorService,
@@ -627,7 +634,6 @@ class FloatingTranslatorService : Service() {
                 override fun onFailure(message: String) {
                     runOnMain {
                         translating = false
-                        deepSeekClient.retryProgress = null
                         lastResult = null
                         readingText?.text = "原文\n$text\n\n❌ $message\n\n点底部「重译」可重试"
                         showStatus("翻译失败")
