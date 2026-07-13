@@ -266,7 +266,7 @@ class DeepSeekClient(
         provider: ModelProviderPreset,
         stream: Boolean
     ): Request {
-        val body = buildRequestJson(text, language, settings.model, provider.supportsJsonMode, stream)
+        val body = buildRequestJson(text, language, settings.model, provider.supportsJsonMode, stream, settings.thinkingEnabled)
             .toString()
             .toRequestBody(JSON_MEDIA_TYPE)
         return Request.Builder()
@@ -287,7 +287,8 @@ class DeepSeekClient(
         language: TextLanguage,
         model: String,
         supportsJsonMode: Boolean,
-        stream: Boolean
+        stream: Boolean,
+        thinkingEnabled: Boolean
     ): JSONObject {
         val messages = org.json.JSONArray()
             .put(JSONObject().put("role", "system").put("content", DeepSeekPrompt.systemPrompt(language)))
@@ -298,6 +299,12 @@ class DeepSeekClient(
             .put("messages", messages)
             .put("temperature", 0.2)
             .put("stream", stream)
+        // Reasoning models (DeepSeek-R1, V4-Flash) accept a `thinking` object to
+        // control the chain-of-thought phase. When disabled the model answers
+        // directly — much faster, at a small quality cost on complex grammar.
+        if (!thinkingEnabled) {
+            json.put("thinking", JSONObject().put("type", "disabled"))
+        }
         if (supportsJsonMode && !stream) {
             // response_format is meaningless under streaming and some servers
             // reject it; only send it for the non-streaming fallback.

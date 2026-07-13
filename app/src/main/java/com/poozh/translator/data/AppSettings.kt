@@ -71,7 +71,8 @@ class AppSettings(context: Context) {
             baseUrl = baseUrl,
             model = model,
             intervalMs = prefs.getLong(KEY_INTERVAL_MS, DEFAULT_INTERVAL_MS).coerceIn(500L, 5000L),
-            wifiOnly = prefs.getBoolean(KEY_WIFI_ONLY, false)
+            wifiOnly = prefs.getBoolean(KEY_WIFI_ONLY, false),
+            thinkingEnabled = prefs.getBoolean(KEY_THINKING_ENABLED, true)
         )
     }
 
@@ -80,7 +81,8 @@ class AppSettings(context: Context) {
         baseUrl: String,
         model: String,
         intervalMs: Long,
-        wifiOnly: Boolean
+        wifiOnly: Boolean,
+        thinkingEnabled: Boolean = true
     ) {
         selectProvider(providerId)
         prefs.edit()
@@ -88,6 +90,7 @@ class AppSettings(context: Context) {
             .putString(modelKeyFor(providerId), model.ifBlank { ModelProviders.byId(providerId).defaultModel })
             .putLong(KEY_INTERVAL_MS, intervalMs.coerceIn(500L, 5000L))
             .putBoolean(KEY_WIFI_ONLY, wifiOnly)
+            .putBoolean(KEY_THINKING_ENABLED, thinkingEnabled)
             .apply()
     }
 
@@ -239,6 +242,7 @@ class AppSettings(context: Context) {
         private const val KEY_API_KEY_LEGACY = "api_key"
         private const val KEY_INTERVAL_MS = "interval_ms"
         private const val KEY_WIFI_ONLY = "wifi_only"
+        private const val KEY_THINKING_ENABLED = "thinking_enabled"
         private const val KEY_OVERLAY_OPACITY = "overlay_opacity"
         /** Lowest allowed overlay opacity — below this the overlay becomes hard
          *  to see/tap. */

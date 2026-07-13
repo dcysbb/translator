@@ -50,6 +50,7 @@ class MainActivity : Activity() {
     private lateinit var baseUrlInput: EditText
     private lateinit var modelInput: EditText
     private lateinit var wifiOnlyInput: Switch
+    private lateinit var thinkingInput: Switch
     private lateinit var opacitySeekBar: SeekBar
 
     private lateinit var controlButton: TextView
@@ -503,6 +504,7 @@ class MainActivity : Activity() {
             modelInput = inputRow(this, "模型名称", snapshot.model, password = false)
 
             addView(switchRow(snapshot))
+            addView(thinkingSwitchRow(snapshot))
             opacitySeekBar = opacityRow(this, snapshot)
 
             val buttonsRow = LinearLayout(this@MainActivity).apply {
@@ -686,7 +688,8 @@ class MainActivity : Activity() {
             baseUrl = baseUrlInput.text.toString().trim(),
             model = modelInput.text.toString().trim(),
             intervalMs = current.intervalMs,
-            wifiOnly = wifiOnlyInput.isChecked
+            wifiOnly = wifiOnlyInput.isChecked,
+            thinkingEnabled = thinkingInput.isChecked
         )
         settings.saveApiKey(providerId, apiKeyInput.text.toString().trim())
         settings.overlayOpacity = opacityValue
@@ -994,6 +997,29 @@ class MainActivity : Activity() {
                 }
             }
             addView(wifiOnlyInput)
+        }
+    }
+
+    /** Toggle for the reasoning model's thinking phase. Off = faster, no
+     *  chain-of-thought; On = better grammar analysis but slower. */
+    private fun thinkingSwitchRow(snapshot: SettingsSnapshot): LinearLayout {
+        return LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, dp(4), 0, dp(8))
+            addView(TextView(this@MainActivity).apply {
+                text = "深度思考"
+                Md3.applyTextStyle(this, Md3TextStyle.BodyLarge, Md3.light.onSurface)
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            })
+            thinkingInput = Switch(this@MainActivity).apply {
+                isChecked = snapshot.thinkingEnabled
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    thumbTintList = ColorStateList.valueOf(Md3.light.primary)
+                    trackTintList = ColorStateList.valueOf(Md3.withAlpha(Md3.light.primary, 0.32f))
+                }
+            }
+            addView(thinkingInput)
         }
     }
 

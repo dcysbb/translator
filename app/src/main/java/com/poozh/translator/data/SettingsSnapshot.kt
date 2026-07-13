@@ -6,6 +6,10 @@ data class SettingsSnapshot(
     val baseUrl: String,
     val model: String,
     val intervalMs: Long,
-    val wifiOnly: Boolean
+    val wifiOnly: Boolean,
+    /** Whether to enable the reasoning model's thinking phase. When false,
+     *  `thinking:{type:"disabled"}` is sent so the model answers directly
+     *  without a chain-of-thought (much faster). */
+    val thinkingEnabled: Boolean = true
 )
 
