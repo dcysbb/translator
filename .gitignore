@@ -10,3 +10,4 @@ externalNativeBuild/
 *.apk
 *.aab
 *.keystore
+wb.txt
