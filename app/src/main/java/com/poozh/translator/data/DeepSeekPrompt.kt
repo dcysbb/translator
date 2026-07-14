@@ -4,12 +4,24 @@ import com.poozh.translator.model.TextLanguage
 
 object DeepSeekPrompt {
     /**
+     * Returns the system prompt for the given language, or the user's custom
+     * prompt if one is set. When [customPrompt] is non-blank it fully replaces
+     * the built-in template — the caller is responsible for instructing the
+     * model to output the expected JSON shape (especially that `translation`
+     * is the first field, which the streaming extractor relies on).
+     */
+    fun systemPrompt(language: TextLanguage, customPrompt: String = ""): String {
+        if (customPrompt.isNotBlank()) return customPrompt.trim()
+        return builtInSystemPrompt(language)
+    }
+
+    /**
      * Field order matters for streaming: the client incrementally extracts the
      * `"translation"` value as it arrives, so `translation` MUST be the first
      * field in the JSON object so users see a translation ASAP. The remaining
      * fields (language, summary, vocabulary, ...) follow.
      */
-    fun systemPrompt(language: TextLanguage): String {
+    fun builtInSystemPrompt(language: TextLanguage): String {
         // The ordered field list is shared; only the lead-in differs per language.
         val fields = "translation, sourceText, language, summary, vocabulary, particles, conjugations, fixedExpressions, tone, grammar"
         val arrayNote = "vocabulary/particles/conjugations/fixedExpressions 是数组（每项含 surface, reading, meaning, note），grammar 是字符串数组；无内容用空字符串或空数组。"

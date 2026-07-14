@@ -72,7 +72,8 @@ class AppSettings(context: Context) {
             model = model,
             intervalMs = prefs.getLong(KEY_INTERVAL_MS, DEFAULT_INTERVAL_MS).coerceIn(500L, 5000L),
             wifiOnly = prefs.getBoolean(KEY_WIFI_ONLY, false),
-            thinkingEnabled = prefs.getBoolean(KEY_THINKING_ENABLED, false)
+            thinkingEnabled = prefs.getBoolean(KEY_THINKING_ENABLED, false),
+            customSystemPrompt = prefs.getString(KEY_CUSTOM_PROMPT, "").orEmpty()
         )
     }
 
@@ -82,7 +83,8 @@ class AppSettings(context: Context) {
         model: String,
         intervalMs: Long,
         wifiOnly: Boolean,
-        thinkingEnabled: Boolean = false
+        thinkingEnabled: Boolean = false,
+        customSystemPrompt: String = ""
     ) {
         selectProvider(providerId)
         prefs.edit()
@@ -91,6 +93,7 @@ class AppSettings(context: Context) {
             .putLong(KEY_INTERVAL_MS, intervalMs.coerceIn(500L, 5000L))
             .putBoolean(KEY_WIFI_ONLY, wifiOnly)
             .putBoolean(KEY_THINKING_ENABLED, thinkingEnabled)
+            .putString(KEY_CUSTOM_PROMPT, customSystemPrompt)
             .apply()
     }
 
@@ -243,6 +246,7 @@ class AppSettings(context: Context) {
         private const val KEY_INTERVAL_MS = "interval_ms"
         private const val KEY_WIFI_ONLY = "wifi_only"
         private const val KEY_THINKING_ENABLED = "thinking_enabled"
+        private const val KEY_CUSTOM_PROMPT = "custom_system_prompt"
         private const val KEY_OVERLAY_OPACITY = "overlay_opacity"
         /** Lowest allowed overlay opacity — below this the overlay becomes hard
          *  to see/tap. */

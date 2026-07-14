@@ -53,6 +53,7 @@ class MainActivity : Activity() {
     private lateinit var modelInput: EditText
     private lateinit var wifiOnlyInput: Switch
     private lateinit var thinkingInput: Switch
+    private lateinit var customPromptInput: EditText
     private lateinit var opacitySeekBar: SeekBar
 
     private lateinit var controlButton: TextView
@@ -518,6 +519,35 @@ class MainActivity : Activity() {
             addView(thinkingSwitchRow(snapshot))
             opacitySeekBar = opacityRow(this, snapshot)
 
+            // Custom system prompt — when non-blank, fully replaces the built-in
+            // per-language prompt. Leave empty to use the default.
+            addView(TextView(this@MainActivity).apply {
+                text = "自定义提示词（留空用默认）"
+                Md3.applyTextStyle(this, Md3TextStyle.BodyLarge, Md3.light.onSurface)
+                setPadding(0, dp(8), 0, dp(4))
+            })
+            customPromptInput = EditText(this@MainActivity).apply {
+                hint = "例如：你是翻译助手，把文本翻译成中文，只输出 JSON…"
+                setText(snapshot.customSystemPrompt)
+                Md3.applyTextStyle(this, Md3TextStyle.BodyMedium, Md3.light.onSurface)
+                setHintTextColor(Md3.light.onSurfaceVariant)
+                setSingleLine(false)
+                minLines = 2
+                maxLines = 5
+                setPadding(dp(16), dp(10), dp(16), dp(10))
+                background = Md3.ripple(
+                    context = this@MainActivity,
+                    fillColor = Md3.light.surfaceContainerHighest,
+                    radiusDp = 8f,
+                    strokeColor = Md3.light.outline
+                )
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { bottomMargin = dp(8) }
+            }
+            addView(customPromptInput)
+
             val buttonsRow = LinearLayout(this@MainActivity).apply {
                 orientation = LinearLayout.HORIZONTAL
                 setPadding(0, dp(12), 0, 0)
@@ -700,7 +730,8 @@ class MainActivity : Activity() {
             model = modelInput.text.toString().trim(),
             intervalMs = current.intervalMs,
             wifiOnly = wifiOnlyInput.isChecked,
-            thinkingEnabled = thinkingInput.isChecked
+            thinkingEnabled = thinkingInput.isChecked,
+            customSystemPrompt = customPromptInput.text.toString().trim()
         )
         settings.saveApiKey(providerId, apiKeyInput.text.toString().trim())
         settings.overlayOpacity = opacityValue

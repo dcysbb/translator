@@ -307,8 +307,8 @@ class DeepSeekClient(
         provider: ModelProviderPreset,
         stream: Boolean
     ): Request {
-        android.util.Log.d("DeepSeekClient", "buildRequest: thinkingEnabled=${settings.thinkingEnabled} stream=$stream model=${settings.model}")
-        val body = buildRequestJson(text, language, settings.model, provider.supportsJsonMode, stream, settings.thinkingEnabled)
+        android.util.Log.d("DeepSeekClient", "buildRequest: thinkingEnabled=${settings.thinkingEnabled} stream=$stream model=${settings.model} customPrompt=${settings.customSystemPrompt.isNotBlank()}")
+        val body = buildRequestJson(text, language, settings.model, provider.supportsJsonMode, stream, settings.thinkingEnabled, settings.customSystemPrompt)
             .toString()
             .toRequestBody(JSON_MEDIA_TYPE)
         return Request.Builder()
@@ -330,10 +330,11 @@ class DeepSeekClient(
         model: String,
         supportsJsonMode: Boolean,
         stream: Boolean,
-        thinkingEnabled: Boolean
+        thinkingEnabled: Boolean,
+        customPrompt: String = ""
     ): JSONObject {
         val messages = org.json.JSONArray()
-            .put(JSONObject().put("role", "system").put("content", DeepSeekPrompt.systemPrompt(language)))
+            .put(JSONObject().put("role", "system").put("content", DeepSeekPrompt.systemPrompt(language, customPrompt)))
             .put(JSONObject().put("role", "user").put("content", DeepSeekPrompt.userPrompt(text, language)))
 
         val json = JSONObject()
