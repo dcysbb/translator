@@ -39,11 +39,11 @@ object Md3Motion {
             .start()
     }
 
-    fun enter(view: View, fromY: Float = 24f) {
+    fun enter(view: View, fromY: Float = 24f, endAlpha: Float = 1f) {
         view.alpha = 0f
         view.translationY = fromY
         view.animate()
-            .alpha(1f)
+            .alpha(endAlpha)
             .translationY(0f)
             .setDuration(400L)
             .setInterpolator(emphasizedDecelerate)

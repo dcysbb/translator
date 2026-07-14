@@ -8,6 +8,7 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -116,6 +117,45 @@ class DeepSeekStreamingTest {
     }
 
     @Test
+    fun mislabeledSseBodyStillStreamsInOneRequest() {
+        fun delta(content: String): String {
+            val choice = org.json.JSONObject().put(
+                "delta",
+                org.json.JSONObject().put("content", content)
+            )
+            return org.json.JSONObject()
+                .put("choices", org.json.JSONArray().put(choice))
+                .toString()
+        }
+        val sse = buildString {
+            append("data: ").append(delta("""{"translation":"流""")).append("\n\n")
+            append("data: ").append(delta("""式","language":"zh"}""")).append("\n\n")
+            append("data: [DONE]\n\n")
+        }
+        // Some compatible gateways stream SSE while incorrectly declaring JSON.
+        server.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(sse)
+        )
+
+        val partial = AtomicReference("")
+        val result = AtomicReference<AnalysisResult?>(null)
+        val latch = CountDownLatch(1)
+        client.analyze("stream", TextLanguage.ENGLISH, snapshot(), object : DeepSeekClient.ResultCallback {
+            override fun onTranslationProgress(partialTranslation: String) { partial.set(partialTranslation) }
+            override fun onSuccess(value: AnalysisResult) { result.set(value); latch.countDown() }
+            override fun onFailure(message: String) { latch.countDown() }
+        })
+
+        assertTrue(latch.await(5, TimeUnit.SECONDS))
+        assertEquals("流式", partial.get())
+        assertEquals("流式", result.get()?.translation)
+        assertEquals(1, server.requestCount)
+    }
+
+    @Test
     fun streamUnsupportedFallsBackToSingleNonStreamingRequest() {
         // First: 400 with a stream-related error body.
         server.enqueue(
@@ -179,5 +219,50 @@ class DeepSeekStreamingTest {
         assertTrue(latch.await(5, TimeUnit.SECONDS))
         assertTrue(failRef.get()?.contains("503") == true)
         assertEquals(1, server.requestCount)
+    }
+
+    @Test
+    fun cancellingOuterHandleAlsoCancelsFallbackCall() {
+        server.enqueue(
+            MockResponse()
+                .setResponseCode(400)
+                .setBody("""{"error":{"message":"stream not supported"}}""")
+        )
+        server.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody("""{"choices":[{"message":{"content":"{\"translation\":\"late\"}"}}]}""")
+                .setBodyDelay(2, TimeUnit.SECONDS)
+        )
+
+        val terminal = CountDownLatch(1)
+        val handle = client.analyze("cancel", TextLanguage.ENGLISH, snapshot(), object : DeepSeekClient.ResultCallback {
+            override fun onSuccess(result: AnalysisResult) { terminal.countDown() }
+            override fun onFailure(message: String) { terminal.countDown() }
+        })
+        assertTrue(server.takeRequest(2, TimeUnit.SECONDS) != null)
+        assertTrue(server.takeRequest(2, TimeUnit.SECONDS) != null)
+        handle.cancel()
+
+        assertFalse("cancelled fallback must not call a terminal callback", terminal.await(500, TimeUnit.MILLISECONDS))
+        assertEquals(2, server.requestCount)
+    }
+
+    @Test
+    fun thinkingIsDisabledByDefault() {
+        val body = """{"choices":[{"message":{"content":"{\"translation\":\"ok\"}"}}]}"""
+        server.enqueue(MockResponse().setResponseCode(200).setBody(body))
+        val latch = CountDownLatch(1)
+        client.analyze("fast", TextLanguage.ENGLISH, snapshot(), object : DeepSeekClient.ResultCallback {
+            override fun onSuccess(result: AnalysisResult) { latch.countDown() }
+            override fun onFailure(message: String) { latch.countDown() }
+        })
+
+        val request = server.takeRequest(2, TimeUnit.SECONDS)
+        assertTrue(request != null)
+        val requestJson = org.json.JSONObject(request!!.body.readUtf8())
+        assertEquals("disabled", requestJson.getJSONObject("thinking").getString("type"))
+        assertTrue(latch.await(5, TimeUnit.SECONDS))
     }
 }

@@ -10,6 +10,6 @@ data class SettingsSnapshot(
     /** Whether to enable the reasoning model's thinking phase. When false,
      *  `thinking:{type:"disabled"}` is sent so the model answers directly
      *  without a chain-of-thought (much faster). */
-    val thinkingEnabled: Boolean = true
+    val thinkingEnabled: Boolean = false
 )
 

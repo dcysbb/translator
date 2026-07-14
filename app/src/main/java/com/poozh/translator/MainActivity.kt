@@ -1,6 +1,7 @@
 package com.poozh.translator
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.res.ColorStateList
@@ -15,6 +16,7 @@ import android.text.InputType
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.window.OnBackInvokedDispatcher
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
@@ -81,6 +83,11 @@ class MainActivity : Activity() {
         settings = AppSettings(this)
         buildContentView()
         requestNotificationPermissionIfNeeded()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT
+            ) { handleBackNavigation() }
+        }
 
         if (intent?.action == FloatingTranslatorService.ACTION_REQUEST_CAPTURE) {
             requestScreenCapture()
@@ -120,14 +127,18 @@ class MainActivity : Activity() {
         }
     }
 
-    @Deprecated("Deprecated by Android framework")
+    @SuppressLint("GestureBackNavigation")
+    @Deprecated("Used only below Android 13; newer versions use OnBackInvokedDispatcher")
     override fun onBackPressed() {
+        handleBackNavigation()
+    }
+
+    private fun handleBackNavigation() {
         val drawer = drawerRef
         if (drawer != null && drawer.isDrawerOpen(Gravity.LEFT)) {
             drawer.closeDrawer(Gravity.LEFT)
         } else {
-            @Suppress("DEPRECATION")
-            super.onBackPressed()
+            finishAfterTransition()
         }
     }
 

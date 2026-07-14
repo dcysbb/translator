@@ -1,5 +1,8 @@
 package com.poozh.translator
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -41,11 +44,13 @@ import com.poozh.translator.model.AnalysisResult
 import com.poozh.translator.model.LanguageDetector
 import com.poozh.translator.model.RefreshAction
 import com.poozh.translator.model.TranslationRefreshPolicy
+import com.poozh.translator.model.TranslationUiState
 import com.poozh.translator.ocr.ScreenTextRecognizer
 import com.poozh.translator.ui.Md3
 import com.poozh.translator.ui.Md3Motion
 import com.poozh.translator.ui.Md3TextStyle
 import com.poozh.translator.ui.SelectionOverlayView
+import java.lang.ref.WeakReference
 import kotlin.math.max
 import kotlin.math.min
 
@@ -74,6 +79,10 @@ class FloatingTranslatorService : Service() {
     private var lastStableText = ""
     private var lastResult: AnalysisResult? = null
     private var currentTranslation: DeepSeekClient.TranslationHandle? = null
+    private var translationUiState: TranslationUiState = TranslationUiState.Idle
+    private var activeTranslationRequestId = 0L
+    private var bubbleStateAnimator: AnimatorSet? = null
+    private var bubbleFeedbackState: BubbleFeedbackState? = null
     /** Last partial translation shown, used to throttle UI updates (~80ms). */
     private var lastPartialShown = ""
     private var lastPartialShownAt = 0L
@@ -85,9 +94,11 @@ class FloatingTranslatorService : Service() {
         val selectionVisibility: Int?
     )
 
+    private enum class BubbleFeedbackState { IDLE, IN_PROGRESS, COMPLETE, FAILED }
+
     override fun onCreate() {
         super.onCreate()
-        instance = this
+        instanceRef = WeakReference(this)
         isRunning = true
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         settings = AppSettings(this)
@@ -113,9 +124,12 @@ class FloatingTranslatorService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
-        instance = null
+        instanceRef.clear()
         isRunning = false
+        activeTranslationRequestId++
+        bubbleStateAnimator?.cancel()
         currentTranslation?.cancel()
+        currentTranslation = null
         captureController?.release()
         captureController = null
         recognizer.close()
@@ -216,8 +230,9 @@ class FloatingTranslatorService : Service() {
         )
         windowManager.addView(bubble, params)
         bubbleView = bubble
-        Md3Motion.enter(bubble, dp(8).toFloat())
+        Md3Motion.enter(bubble, dp(8).toFloat(), endAlpha = settings.overlayOpacity)
         applyOverlayOpacity()
+        updateBubbleFeedback()
     }
 
     private fun togglePanel() {
@@ -244,6 +259,7 @@ class FloatingTranslatorService : Service() {
             removeOverlay(panel)
         }
         setBubbleDocked(false)
+        updateBubbleFeedback()
     }
 
     private fun showPanel() {
@@ -306,7 +322,7 @@ class FloatingTranslatorService : Service() {
         val (pivotX, pivotY) = bubblePivotRelativeToPanel(params)
         Md3Motion.scaleInFrom(root, pivotX, pivotY, endAlpha = settings.overlayOpacity)
         showReadingPage()
-        showStatus(if (lastResult == null) "等待刷新" else "已加载上次结果")
+        showStatus(translationUiState.statusText())
     }
 
     /**
@@ -393,11 +409,7 @@ class FloatingTranslatorService : Service() {
     }
 
     private fun currentReadingText(): String {
-        lastResult?.let { return it.toDisplayText() }
-        if (lastStableText.isNotBlank()) {
-            return "原文\n$lastStableText\n\n暂无译文。点“更多 > 重新翻译”再次请求。"
-        }
-        return "选择屏幕区域后，点“刷新”识别当前画面。\n\n这里会只显示原文、中文翻译和日语解析，不混入设置项。"
+        return translationUiState.displayText()
     }
 
     private fun showMorePage() {
@@ -567,6 +579,7 @@ class FloatingTranslatorService : Service() {
         ) {
             RefreshAction.IGNORE_EMPTY -> showStatus("选区内未识别到文本")
             RefreshAction.REUSE_CACHED_RESULT -> {
+                lastResult?.let { translationUiState = TranslationUiState.Complete(normalized, it) }
                 showReadingPage()
                 showStatus("内容未变化，已复用")
             }
@@ -582,16 +595,24 @@ class FloatingTranslatorService : Service() {
         val snapshot = settings.load()
         lastStableText = text
         lastResult = null
+        translationUiState = TranslationUiState.InProgress(sourceText = text)
         showReadingPage()
-        readingText?.text = "原文\n$text\n\n正在翻译..."
+        showStatus(translationUiState.statusText())
+        updateBubbleFeedback()
 
         if (!canUseNetwork(snapshot)) {
-            readingText?.text = "原文\n$text\n\n当前设置为仅 Wi-Fi 请求，网络不满足条件。"
+            translationUiState = TranslationUiState.Failed(
+                sourceText = text,
+                message = "当前设置为仅 Wi-Fi 请求，网络不满足条件。"
+            )
+            readingText?.text = translationUiState.displayText()
             showStatus("等待 Wi-Fi")
+            updateBubbleFeedback()
             return
         }
 
         translating = true
+        val requestId = ++activeTranslationRequestId
         lastPartialShown = ""
         lastPartialShownAt = 0L
         showStatus("正在翻译")
@@ -603,7 +624,16 @@ class FloatingTranslatorService : Service() {
             callback = object : DeepSeekClient.ResultCallback {
                 override fun onTranslationProgress(partial: String) {
                     runOnMain {
-                        if (!translating) return@runOnMain
+                        if (!translating || requestId != activeTranslationRequestId) return@runOnMain
+                        translationUiState = TranslationUiState.InProgress(
+                            sourceText = text,
+                            partialTranslation = partial,
+                            isThinking = partial.isEmpty()
+                        )
+                        updateBubbleFeedback()
+                        // The panel may be collapsed. State is still retained so
+                        // reopening it immediately renders the latest partial.
+                        if (panelView == null) return@runOnMain
                         // Throttle live updates to ~every 80ms so we don't flood
                         // the UI thread / WindowManager on every token.
                         val now = System.currentTimeMillis()
@@ -615,12 +645,12 @@ class FloatingTranslatorService : Service() {
                         // the panel flicker on every streaming token. Instead,
                         // just update the existing readingText in place.
                         if (partial.isEmpty()) {
-                            readingText?.text = "原文\n$text\n\n🤔 模型正在思考…"
+                            readingText?.text = translationUiState.displayText()
                             showStatus("模型思考中")
                         } else {
                             if (partial == lastPartialShown) return@runOnMain
                             lastPartialShown = partial
-                            readingText?.text = "原文\n$text\n\n中文\n$partial\n\n正在生成详细解析…"
+                            readingText?.text = translationUiState.displayText()
                             showStatus("正在翻译")
                         }
                     }
@@ -628,25 +658,41 @@ class FloatingTranslatorService : Service() {
 
                 override fun onSuccess(result: AnalysisResult) {
                     runOnMain {
+                        if (requestId != activeTranslationRequestId) return@runOnMain
                         translating = false
+                        currentTranslation = null
                         lastResult = result
+                        translationUiState = TranslationUiState.Complete(text, result)
                         HistoryManager.addHistory(
                             context = this@FloatingTranslatorService,
                             original = text,
                             translated = result.toDisplayText(),
                             providerId = snapshot.providerId
                         )
-                        showReadingPage()
-                        showStatus("翻译完成")
+                        if (panelView != null) {
+                            showReadingPage()
+                            showStatus("翻译完成")
+                        } else {
+                            updateBubbleFeedback()
+                            Toast.makeText(this@FloatingTranslatorService, "翻译完成，点悬浮球查看", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
 
                 override fun onFailure(message: String) {
                     runOnMain {
+                        if (requestId != activeTranslationRequestId) return@runOnMain
                         translating = false
+                        currentTranslation = null
                         lastResult = null
-                        readingText?.text = "原文\n$text\n\n❌ $message\n\n点底部「重译」可重试"
-                        showStatus("翻译失败")
+                        translationUiState = TranslationUiState.Failed(text, message)
+                        if (panelView != null) {
+                            readingText?.text = translationUiState.displayText()
+                            showStatus("翻译失败")
+                        } else {
+                            updateBubbleFeedback()
+                            Toast.makeText(this@FloatingTranslatorService, "翻译失败，点悬浮球查看", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             }
@@ -683,7 +729,12 @@ class FloatingTranslatorService : Service() {
 
     private fun requestCapturePermission() {
         val intent = Intent(this, CapturePermissionActivity::class.java)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_USER_ACTION)
+            .addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_NO_USER_ACTION or
+                    Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS or
+                    Intent.FLAG_ACTIVITY_NO_ANIMATION
+            )
         startActivity(intent)
         showStatus("请授权屏幕捕获")
     }
@@ -710,6 +761,10 @@ class FloatingTranslatorService : Service() {
 
     private fun setBubbleDocked(docked: Boolean) {
         val bubble = bubbleView ?: return
+        bubbleStateAnimator?.cancel()
+        bubbleStateAnimator = null
+        bubble.scaleX = 1f
+        bubble.scaleY = 1f
         bubble.animate().cancel()
         if (docked) {
             bubble.isEnabled = false
@@ -725,7 +780,81 @@ class FloatingTranslatorService : Service() {
         } else {
             bubble.visibility = View.VISIBLE
             bubble.isEnabled = true
-            Md3Motion.enter(bubble, dp(8).toFloat())
+            Md3Motion.enter(bubble, dp(8).toFloat(), endAlpha = settings.overlayOpacity)
+            updateBubbleFeedback()
+        }
+    }
+
+    /** Apply token-backed feedback without forcing the collapsed panel open. */
+    private fun updateBubbleFeedback() {
+        val bubble = bubbleView ?: return
+        val nextFeedbackState = when (translationUiState) {
+            TranslationUiState.Idle -> BubbleFeedbackState.IDLE
+            is TranslationUiState.InProgress -> BubbleFeedbackState.IN_PROGRESS
+            is TranslationUiState.Complete -> BubbleFeedbackState.COMPLETE
+            is TranslationUiState.Failed -> BubbleFeedbackState.FAILED
+        }
+        // Partial text can arrive many times per second. Once the correct
+        // collapsed-state animation is running, do not restart it per token.
+        if (bubbleFeedbackState == nextFeedbackState) {
+            if (panelView != null || bubbleStateAnimator?.isRunning == true) return
+        }
+        bubbleFeedbackState = nextFeedbackState
+        bubbleStateAnimator?.cancel()
+        bubbleStateAnimator = null
+        bubble.scaleX = 1f
+        bubble.scaleY = 1f
+
+        val (fill, stroke, description) = when (translationUiState) {
+            TranslationUiState.Idle -> Triple(
+                Md3.light.surfaceContainerLowest,
+                Md3.light.outlineVariant,
+                "屏幕翻译"
+            )
+            is TranslationUiState.InProgress -> Triple(
+                Md3.light.primaryContainer,
+                Md3.light.primary,
+                "屏幕翻译，正在翻译"
+            )
+            is TranslationUiState.Complete -> Triple(
+                Md3.light.secondaryContainer,
+                Md3.light.secondary,
+                "屏幕翻译，翻译完成"
+            )
+            is TranslationUiState.Failed -> Triple(
+                Md3.light.errorContainer,
+                Md3.light.error,
+                "屏幕翻译，翻译失败"
+            )
+        }
+        bubble.background = Md3.ripple(
+            context = this,
+            fillColor = fill,
+            radiusDp = 999f,
+            strokeColor = stroke,
+            rippleColor = Md3.withAlpha(stroke, 0.16f)
+        )
+        bubble.contentDescription = description
+
+        // The panel owns the visible status while expanded. Animate only the
+        // collapsed bubble so background work remains apparent but unobtrusive.
+        if (panelView != null || bubble.visibility != View.VISIBLE) return
+        val values = when (translationUiState) {
+            is TranslationUiState.InProgress -> floatArrayOf(1f, 0.90f, 1f)
+            is TranslationUiState.Complete -> floatArrayOf(1f, 1.12f, 1f)
+            is TranslationUiState.Failed -> floatArrayOf(1f, 0.88f, 1f)
+            TranslationUiState.Idle -> return
+        }
+        val scaleX = ObjectAnimator.ofFloat(bubble, View.SCALE_X, *values)
+        val scaleY = ObjectAnimator.ofFloat(bubble, View.SCALE_Y, *values)
+        if (translationUiState is TranslationUiState.InProgress) {
+            scaleX.repeatCount = ValueAnimator.INFINITE
+            scaleY.repeatCount = ValueAnimator.INFINITE
+        }
+        bubbleStateAnimator = AnimatorSet().apply {
+            playTogether(scaleX, scaleY)
+            duration = if (translationUiState is TranslationUiState.InProgress) 1100L else 420L
+            start()
         }
     }
 
@@ -1150,9 +1279,9 @@ class FloatingTranslatorService : Service() {
     companion object {
         var isRunning = false
         val isCaptureActive: Boolean
-            get() = instance?.mediaProjection != null
+            get() = instanceRef.get()?.mediaProjection != null
 
-        private var instance: FloatingTranslatorService? = null
+        private var instanceRef = WeakReference<FloatingTranslatorService>(null)
 
         const val ACTION_SHOW = "com.poozh.translator.action.SHOW"
         const val ACTION_STOP = "com.poozh.translator.action.STOP"

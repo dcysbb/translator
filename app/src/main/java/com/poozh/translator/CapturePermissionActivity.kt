@@ -12,14 +12,17 @@ import android.widget.Toast
  * MediaProjection permission dialog. It has no UI and finishes itself the
  * moment the dialog is dismissed.
  *
- * Key behaviour: after delivering the result to the service, it calls
- * [moveTaskToBack] instead of [finish] so the user is returned to whatever app
- * they were in before the re-auth was triggered — NOT the translator's main UI.
+ * The manifest gives this activity a dedicated task affinity. Removing that
+ * isolated task after the permission result reveals the app the user was
+ * actually using, instead of briefly resuming the translator's MainActivity.
  */
 class CapturePermissionActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestScreenCapture()
+        overridePendingTransition(0, 0)
+        // Android restores the pending activity result after a configuration
+        // change. Starting another permission intent would show two dialogs.
+        if (savedInstanceState == null) requestScreenCapture()
     }
 
     private fun requestScreenCapture() {
@@ -51,11 +54,8 @@ class CapturePermissionActivity : Activity() {
             } else {
                 Toast.makeText(this, "未获得屏幕捕获权限", Toast.LENGTH_SHORT).show()
             }
-            // Send the whole task to the background so the user lands back in
-            // the app they were using (e.g. the browser/book they're reading),
-            // not in our main UI. The floating overlay stays on top regardless.
-            moveTaskToBack(true)
-            finish()
+            finishAndRemoveTask()
+            overridePendingTransition(0, 0)
         }
     }
 

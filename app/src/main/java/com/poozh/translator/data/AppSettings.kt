@@ -72,7 +72,7 @@ class AppSettings(context: Context) {
             model = model,
             intervalMs = prefs.getLong(KEY_INTERVAL_MS, DEFAULT_INTERVAL_MS).coerceIn(500L, 5000L),
             wifiOnly = prefs.getBoolean(KEY_WIFI_ONLY, false),
-            thinkingEnabled = prefs.getBoolean(KEY_THINKING_ENABLED, true)
+            thinkingEnabled = prefs.getBoolean(KEY_THINKING_ENABLED, false)
         )
     }
 
@@ -82,7 +82,7 @@ class AppSettings(context: Context) {
         model: String,
         intervalMs: Long,
         wifiOnly: Boolean,
-        thinkingEnabled: Boolean = true
+        thinkingEnabled: Boolean = false
     ) {
         selectProvider(providerId)
         prefs.edit()

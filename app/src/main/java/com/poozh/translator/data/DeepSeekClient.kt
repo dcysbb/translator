@@ -15,6 +15,7 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 
 class DeepSeekClient(
     private val httpClient: OkHttpClient = OkHttpClient.Builder()
@@ -57,8 +58,10 @@ class DeepSeekClient(
             return NoopHandle
         }
 
-        val cancelled = AtomicBoolean(false)
-        return startStreaming(text, language, settings, provider, callback, cancelled, allowFallback = true)
+        val session = RequestSession(callback)
+        android.util.Log.d(TAG, "translation request started provider=${provider.id} model=${settings.model}")
+        startStreaming(text, language, settings, provider, session, allowFallback = true)
+        return session
     }
 
     /**
@@ -70,24 +73,16 @@ class DeepSeekClient(
         language: TextLanguage,
         settings: SettingsSnapshot,
         provider: ModelProviderPreset,
-        callback: ResultCallback,
-        cancelled: AtomicBoolean,
+        session: RequestSession,
         allowFallback: Boolean
-    ): TranslationHandle {
+    ) {
         val request = buildRequest(text, language, settings, provider, stream = true)
-        var currentCall: Call? = null
-        val handle = object : TranslationHandle {
-            override fun cancel() {
-                cancelled.set(true)
-                currentCall?.cancel()
-            }
-        }
-
-        currentCall = httpClient.newCall(request)
-        currentCall.enqueue(object : Callback {
+        val call = httpClient.newCall(request)
+        if (!session.activate(call)) return
+        call.enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                if (cancelled.get()) return
-                callback.onFailure(friendlyNetworkMessage(e))
+                if (!session.isRunning) return
+                session.fail(friendlyNetworkMessage(e))
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -96,32 +91,21 @@ class DeepSeekClient(
                     // 400/415/422 with a "stream"/"response_format" complaint →
                     // the server can't stream; fall back once to non-streaming.
                     if (allowFallback && isStreamUnsupported(code, it)) {
-                        if (cancelled.get()) return
-                        val fbCall = startNonStreaming(text, language, settings, provider, callback, cancelled)
-                        // Wire cancellation of the outer handle to the fallback call.
-                        // (currentCall already completed; the new call owns the socket.)
-                        currentCall = null
+                        if (!session.isRunning) return
+                        android.util.Log.d(TAG, "stream unsupported; using one non-streaming fallback")
+                        startNonStreaming(text, language, settings, provider, session)
                         return
                     }
                     if (!it.isSuccessful) {
-                        if (cancelled.get()) return
+                        if (!session.isRunning) return
                         val body = runCatching { it.body?.string().orEmpty() }.getOrDefault("")
-                        callback.onFailure("${provider.name} HTTP $code: ${body.take(240)}")
+                        session.fail("${provider.name} HTTP $code: ${body.take(240)}")
                         return
                     }
-                    // 200 OK. Detect whether the server actually streamed (SSE)
-                    // or ignored stream=true and returned a plain JSON body.
-                    val contentType = it.header("Content-Type").orEmpty().lowercase()
-                    val isSse = contentType.contains("text/event-stream") || contentType.contains("stream")
-                    if (isSse) {
-                        consumeSseStream(it, text, callback, cancelled)
-                    } else {
-                        consumePlainBody(it, text, callback, cancelled)
-                    }
+                    consumeResponseBody(it, text, session)
                 }
             }
         })
-        return handle
     }
 
     /** One-shot non-streaming fallback for servers that reject stream=true. */
@@ -130,50 +114,106 @@ class DeepSeekClient(
         language: TextLanguage,
         settings: SettingsSnapshot,
         provider: ModelProviderPreset,
-        callback: ResultCallback,
-        cancelled: AtomicBoolean
-    ): TranslationHandle {
+        session: RequestSession
+    ) {
         val request = buildRequest(text, language, settings, provider, stream = false)
         val call = httpClient.newCall(request)
+        if (!session.activate(call)) return
         call.enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                if (cancelled.get()) return
-                callback.onFailure(friendlyNetworkMessage(e))
+                if (!session.isRunning) return
+                session.fail(friendlyNetworkMessage(e))
             }
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (cancelled.get()) return
+                    if (!session.isRunning) return
                     if (!it.isSuccessful) {
                         val body = runCatching { it.body?.string().orEmpty() }.getOrDefault("")
-                        callback.onFailure("${provider.name} HTTP ${it.code}: ${body.take(240)}")
+                        session.fail("${provider.name} HTTP ${it.code}: ${body.take(240)}")
                         return
                     }
-                    consumePlainBody(it, text, callback, cancelled)
+                    consumeResponseBody(it, text, session)
                 }
             }
         })
-        return object : TranslationHandle { override fun cancel() { cancelled.set(true); call.cancel() } }
+    }
+
+    /**
+     * Decide from the first meaningful response line instead of trusting the
+     * Content-Type header. Several OpenAI-compatible gateways send real SSE
+     * using application/json, which otherwise turns streaming into a blocking
+     * body.string() call.
+     */
+    private fun consumeResponseBody(
+        response: Response,
+        text: String,
+        session: RequestSession
+    ) {
+        val body = response.body ?: run {
+            session.fail("模型服务返回为空")
+            return
+        }
+        try {
+            BufferedReader(InputStreamReader(body.byteStream())).use { reader ->
+                var firstLine: String? = null
+                while (session.isRunning && firstLine == null) {
+                    val line = reader.readLine() ?: break
+                    if (line.isNotBlank()) firstLine = line.trimStart('\uFEFF')
+                }
+                if (!session.isRunning) return
+                val first = firstLine ?: run {
+                    session.fail("模型服务返回为空")
+                    return
+                }
+                session.markFirstData()
+                if (looksLikeSse(first)) {
+                    consumeSseStream(reader, first, text, session)
+                } else {
+                    val plain = buildString {
+                        append(first)
+                        var line = reader.readLine()
+                        while (line != null) {
+                            append('\n').append(line)
+                            line = reader.readLine()
+                        }
+                    }
+                    consumePlainText(plain, text, session)
+                }
+            }
+        } catch (e: IOException) {
+            if (session.isRunning) session.fail(friendlyNetworkMessage(e))
+        }
+    }
+
+    private fun looksLikeSse(line: String): Boolean {
+        val trimmed = line.trimStart()
+        return trimmed.startsWith("data:") || trimmed.startsWith("event:") || trimmed.startsWith(":")
     }
 
     /** Read an SSE event stream, accumulating delta.content and emitting progress. */
     private fun consumeSseStream(
-        response: Response,
+        reader: BufferedReader,
+        firstLine: String,
         text: String,
-        callback: ResultCallback,
-        cancelled: AtomicBoolean
+        session: RequestSession
     ) {
         val extractor = StreamingTranslationExtractor()
         val full = StringBuilder()
         var reasoningNotified = false
         try {
-            BufferedReader(InputStreamReader(response.body?.byteStream() ?: return)).use { reader ->
-                while (!cancelled.get()) {
-                    val line = reader.readLine() ?: break
-                    if (line.isEmpty() || line.startsWith(":")) continue  // keep-alive / comment
-                    if (!line.startsWith("data:")) continue
-                    val data = line.removePrefix("data:").trim()
-                    if (data == "[DONE]") break
+            var line: String? = firstLine
+            while (session.isRunning && line != null) {
+                val currentLine = line ?: break
+                line = reader.readLine()
+                run {
+                    if (currentLine.isEmpty() || currentLine.startsWith(":")) return@run
+                    if (!currentLine.startsWith("data:")) return@run
+                    val data = currentLine.removePrefix("data:").trim()
+                    if (data == "[DONE]") {
+                        line = null
+                        return@run
+                    }
                     val (content, reasoning) = runCatching {
                         val delta = JSONObject(data)
                             .optJSONArray("choices")?.optJSONObject(0)
@@ -187,33 +227,34 @@ class DeepSeekClient(
                     if (reasoning.isNotEmpty() && content.isEmpty()) {
                         if (!reasoningNotified) {
                             reasoningNotified = true
-                            callback.onTranslationProgress("")
+                            session.progress("")
                         }
                     }
                     if (content.isNotEmpty()) {
                         full.append(content)
                         extractor.append(content)
                         val partial = extractor.currentTranslation
-                        if (partial.isNotEmpty()) callback.onTranslationProgress(partial)
+                        if (partial.isNotEmpty()) session.progress(partial)
                     }
                 }
             }
         } catch (e: IOException) {
-            if (!cancelled.get()) { callback.onFailure(friendlyNetworkMessage(e)); return }
+            if (session.isRunning) {
+                session.fail(friendlyNetworkMessage(e))
+                return
+            }
         }
-        if (cancelled.get()) return
-        finishWithContent(full.toString(), text, extractor, callback)
+        if (!session.isRunning) return
+        finishWithContent(full.toString(), text, extractor, session)
     }
 
     /** Server ignored stream=true and returned a normal JSON body in one shot. */
-    private fun consumePlainBody(
-        response: Response,
+    private fun consumePlainText(
+        body: String,
         text: String,
-        callback: ResultCallback,
-        cancelled: AtomicBoolean
+        session: RequestSession
     ) {
-        val body = runCatching { response.body?.string().orEmpty() }.getOrDefault("")
-        if (cancelled.get()) return
+        if (!session.isRunning) return
         val content = runCatching {
             JSONObject(body)
                 .getJSONArray("choices")
@@ -221,7 +262,7 @@ class DeepSeekClient(
                 .getJSONObject("message")
                 .getString("content")
         }.getOrDefault(body) // if not chat-completions shape, treat body as raw content
-        finishWithContent(content, text, StreamingTranslationExtractor().apply { append(content) }, callback)
+        finishWithContent(content, text, StreamingTranslationExtractor().apply { append(content) }, session)
     }
 
     /** Parse the full accumulated model content into an AnalysisResult. */
@@ -229,16 +270,16 @@ class DeepSeekClient(
         content: String,
         text: String,
         extractor: StreamingTranslationExtractor,
-        callback: ResultCallback
+        session: RequestSession
     ) {
         val parsed = runCatching { AnalysisJsonParser.parse(content, text) }
-        parsed.onSuccess(callback::onSuccess)
+        parsed.onSuccess(session::succeed)
             .onFailure {
                 // The full JSON didn't parse, but we may have already streamed a
                 // usable translation. Keep it so the user isn't left empty.
                 val quick = extractor.currentTranslation
                 if (quick.isNotBlank()) {
-                    callback.onSuccess(
+                    session.succeed(
                         AnalysisResult(
                             sourceText = text,
                             translation = quick,
@@ -247,7 +288,7 @@ class DeepSeekClient(
                         )
                     )
                 } else {
-                    callback.onFailure(it.message ?: "模型服务返回解析失败")
+                    session.fail(it.message ?: "模型服务返回解析失败")
                 }
             }
     }
@@ -325,9 +366,74 @@ class DeepSeekClient(
         }
     }
 
+    /** Owns whichever Call is active, including the compatibility fallback. */
+    private class RequestSession(
+        private val callback: ResultCallback
+    ) : TranslationHandle {
+        private val cancelled = AtomicBoolean(false)
+        private val terminal = AtomicBoolean(false)
+        private val activeCall = AtomicReference<Call?>(null)
+        private val startedAtNanos = System.nanoTime()
+        private val firstDataLogged = AtomicBoolean(false)
+        private val firstTranslationLogged = AtomicBoolean(false)
+
+        val isRunning: Boolean
+            get() = !cancelled.get() && !terminal.get()
+
+        fun activate(call: Call): Boolean {
+            if (!isRunning) {
+                call.cancel()
+                return false
+            }
+            activeCall.set(call)
+            if (!isRunning && activeCall.compareAndSet(call, null)) {
+                call.cancel()
+                return false
+            }
+            return true
+        }
+
+        fun markFirstData() {
+            if (firstDataLogged.compareAndSet(false, true)) {
+                android.util.Log.d(TAG, "first response data after ${elapsedMs()}ms")
+            }
+        }
+
+        fun progress(partial: String) {
+            if (!isRunning) return
+            if (partial.isNotBlank() && firstTranslationLogged.compareAndSet(false, true)) {
+                android.util.Log.d(TAG, "first translation text after ${elapsedMs()}ms")
+            }
+            callback.onTranslationProgress(partial)
+        }
+
+        fun succeed(result: AnalysisResult) {
+            if (!terminal.compareAndSet(false, true) || cancelled.get()) return
+            activeCall.set(null)
+            android.util.Log.d(TAG, "translation completed after ${elapsedMs()}ms")
+            callback.onSuccess(result)
+        }
+
+        fun fail(message: String) {
+            if (!terminal.compareAndSet(false, true) || cancelled.get()) return
+            activeCall.set(null)
+            android.util.Log.w(TAG, "translation failed after ${elapsedMs()}ms")
+            callback.onFailure(message)
+        }
+
+        override fun cancel() {
+            cancelled.set(true)
+            terminal.set(true)
+            activeCall.getAndSet(null)?.cancel()
+        }
+
+        private fun elapsedMs(): Long = (System.nanoTime() - startedAtNanos) / 1_000_000L
+    }
+
     private object NoopHandle : TranslationHandle { override fun cancel() {} }
 
     companion object {
+        private const val TAG = "TranslationTrace"
         private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
     }
 }
