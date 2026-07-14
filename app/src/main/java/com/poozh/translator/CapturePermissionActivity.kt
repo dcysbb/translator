@@ -7,6 +7,15 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 
+/**
+ * Invisible activity whose sole purpose is to host the system's
+ * MediaProjection permission dialog. It has no UI and finishes itself the
+ * moment the dialog is dismissed.
+ *
+ * Key behaviour: after delivering the result to the service, it calls
+ * [moveTaskToBack] instead of [finish] so the user is returned to whatever app
+ * they were in before the re-auth was triggered — NOT the translator's main UI.
+ */
 class CapturePermissionActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +51,10 @@ class CapturePermissionActivity : Activity() {
             } else {
                 Toast.makeText(this, "未获得屏幕捕获权限", Toast.LENGTH_SHORT).show()
             }
+            // Send the whole task to the background so the user lands back in
+            // the app they were using (e.g. the browser/book they're reading),
+            // not in our main UI. The floating overlay stays on top regardless.
+            moveTaskToBack(true)
             finish()
         }
     }

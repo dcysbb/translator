@@ -682,7 +682,7 @@ class FloatingTranslatorService : Service() {
 
     private fun requestCapturePermission() {
         val intent = Intent(this, CapturePermissionActivity::class.java)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_USER_ACTION)
         startActivity(intent)
         showStatus("请授权屏幕捕获")
     }
