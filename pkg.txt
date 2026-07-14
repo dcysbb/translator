@@ -1,0 +1,146 @@
+Activity Resolver Table:
+  Non-Data Actions:
+      android.intent.action.MAIN:
+        b9d91e5 com.poozh.translator/.MainActivity filter a914ba
+          Action: "android.intent.action.MAIN"
+          Category: "android.intent.category.LAUNCHER"
+
+Domain verification status:
+
+Registered ContentProviders:
+  com.poozh.translator/com.google.mlkit.common.internal.MlKitInitProvider:
+    Provider{1bac768 com.poozh.translator/com.google.mlkit.common.internal.MlKitInitProvider}
+
+ContentProvider Authorities:
+  [com.poozh.translator.mlkitinitprovider]:
+    Provider{1bac768 com.poozh.translator/com.google.mlkit.common.internal.MlKitInitProvider}
+      applicationInfo=ApplicationInfo{aba6a6b com.poozh.translator}
+
+Key Set Manager:
+  [com.poozh.translator]
+      Signing KeySets: 18
+
+Packages:
+  Package [com.poozh.translator] (53c7026):
+    userId=10058
+    pkg=Package{84b8467 com.poozh.translator}
+    codePath=/data/app/~~BNorBaIi8joVs5F2Rn6P6g==/com.poozh.translator-FTlrqv1FbA4g8sDDwEsFVA==
+    resourcePath=/data/app/~~BNorBaIi8joVs5F2Rn6P6g==/com.poozh.translator-FTlrqv1FbA4g8sDDwEsFVA==
+    legacyNativeLibraryDir=/data/app/~~BNorBaIi8joVs5F2Rn6P6g==/com.poozh.translator-FTlrqv1FbA4g8sDDwEsFVA==/lib
+    extractNativeLibs=false
+    primaryCpuAbi=x86_64
+    secondaryCpuAbi=null
+    cpuAbiOverride=null
+    versionCode=18 minSdk=26 targetSdk=36
+    minExtensionVersions=[]
+    versionName=0.5.4
+    usesNonSdkApi=false
+    splits=[base]
+    apkSigningVersion=2
+    applicationInfo=PackageImpl{84b8467 com.poozh.translator}
+    flags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE PARTIALLY_DIRECT_BOOT_AWARE PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    forceQueryable=false
+    queriesPackages=[]
+    dataDir=/data/user/0/com.poozh.translator
+    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]
+    timeStamp=2026-07-14 04:08:25
+    firstInstallTime=2026-07-12 23:58:13
+    lastUpdateTime=2026-07-14 04:08:25
+    signatures=PackageSignatures{928f214 version:2, signatures:[8946ba51], past signatures:[]}
+    installPermissionsFixed=true
+    pkgFlags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    requested permissions:
+      android.permission.QUERY_ALL_PACKAGES
+      android.permission.ACCESS_NETWORK_STATE
+      android.permission.FOREGROUND_SERVICE
+      android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION
+      android.permission.INTERNET
+      android.permission.POST_NOTIFICATIONS
+      android.permission.SYSTEM_ALERT_WINDOW
+    install permissions:
+      android.permission.FOREGROUND_SERVICE: granted=true
+      android.permission.INTERNET: granted=true
+      android.permission.ACCESS_NETWORK_STATE: granted=true
+      android.permission.QUERY_ALL_PACKAGES: granted=true
+    User 0: ceDataInode=4980808 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      overlay paths:
+        /data/resource-cache/com.android.systemui-neutral-1LTA.frro
+        /data/resource-cache/com.android.systemui-accent-gSyu.frro
+      gids=[3003]
+      runtime permissions:
+
+Queries:
+  system apps queryable: false
+  queries via package name:
+  queries via intent:
+  queryable via interaction:
+    User 0:
+      [com.android.settings,android,com.android.keychain,com.mumu.store,com.sohu.inputmethod.sogou.chuizi,com.android.providers.settings,com.android.location.fused,com.mumu.shared.sdk,com.netease.mumu.cloner,com.netease.nemu_vapi_android.nemu]:
+        com.poozh.translator
+      com.android.systemui:
+        com.poozh.translator
+      com.poozh.translator:
+        [com.android.settings,android,com.android.keychain,com.mumu.store,com.sohu.inputmethod.sogou.chuizi,com.android.providers.settings,com.android.location.fused,com.mumu.shared.sdk,com.netease.mumu.cloner,com.netease.nemu_vapi_android.nemu]
+  queryable via uses-library:
+
+Package Changes:
+  Sequence number=70
+  User 0:
+    seq=9, package=com.android.settings
+    seq=36, package=com.example.translator
+    seq=69, package=com.poozh.translator
+
+
+Dexopt state:
+  [com.poozh.translator]
+    path: /data/app/~~BNorBaIi8joVs5F2Rn6P6g==/com.poozh.translator-FTlrqv1FbA4g8sDDwEsFVA==/base.apk
+      x86_64: [status=verify] [reason=install]
+
+
+Compiler stats:
+  [com.poozh.translator]
+     base.apk - 1174
+Snapshot statistics
+   Unrecorded-hits: 3169  Cork-level: 0
+   Summary stats               TotBlds     TotUsed     TotCork     BigBlds    ShortLvd     TotTime     MaxTime
+          0:17         now           0           0           0           0           0           0           0
+          1:17        0:17           0           0           0           0           0           0           0
+          2:17        1:17           0           0           0           0           0           0           0
+          3:17        2:17           0           0           0           0           0           0           0
+          4:17        3:17           0           0           0           0           0           0           0
+          5:17        4:17           0           0           0           0           0           0           0
+          6:17        5:17           0           0           0           0           0           0           0
+          7:17        6:17           0           0           0           0           0           0           0
+          8:17        7:17           0           0           0           0           0           0           0
+          9:17        8:17           0           0           0           0           0           0           0
+    6:15:41:18         now         339      215368           0           0          22         138           7
+   13:15:41:18  6:15:41:18         406      260489           0           0          49         137           7
+
+   Build times                  <= 1ms      <= 2ms      <= 5ms     <= 10ms     <= 20ms     <= 50ms    <= 100ms     > 100ms
+          0:17         now           0           0           0           0           0           0           0           0
+          1:17        0:17           0           0           0           0           0           0           0           0
+          2:17        1:17           0           0           0           0           0           0           0           0
+          3:17        2:17           0           0           0           0           0           0           0           0
+          4:17        3:17           0           0           0           0           0           0           0           0
+          5:17        4:17           0           0           0           0           0           0           0           0
+          6:17        5:17           0           0           0           0           0           0           0           0
+          7:17        6:17           0           0           0           0           0           0           0           0
+          8:17        7:17           0           0           0           0           0           0           0           0
+          9:17        8:17           0           0           0           0           0           0           0           0
+    6:15:41:18         now         327           8           2           2           0           0           0           0
+   13:15:41:18  6:15:41:18         403           0           1           2           0           0           0           0
+
+   Use counters                   <= 1        <= 2        <= 5       <= 10       <= 20       <= 50      <= 100       > 100
+          0:17         now           0           0           0           0           0           0           0           0
+          1:17        0:17           0           0           0           0           0           0           0           0
+          2:17        1:17           0           0           0           0           0           0           0           0
+          3:17        2:17           0           0           0           0           0           0           0           0
+          4:17        3:17           0           0           0           0           0           0           0           0
+          5:17        4:17           0           0           0           0           0           0           0           0
+          6:17        5:17           0           0           0           0           0           0           0           0
+          7:17        6:17           0           0           0           0           0           0           0           0
+          8:17        7:17           0           0           0           0           0           0           0           0
+          9:17        8:17           0           0           0           0           0           0           0           0
+    6:15:41:18         now          20           2           0           3           5          28          63         218
+   13:15:41:18  6:15:41:18          37           4           8           6           8          38          86         219

@@ -1,0 +1,1388 @@
+--------- beginning of main
+07-14 04:08:27.618  1567  1689 D BaseIconFactory: icon scale is 1.4512156
+07-14 04:08:27.640  1427  2065 D Watchdog: upload event: {"architecture":"x86_64","channel":"gw-win","country":"zh-CN","engine":"NEMUX","fchannel":"gw-win","language":"zh-Hans","mpid":"0","package":"mumu","product":"MuMu5.0","product_version":"5.22.3.3171","usage":"0","uuid":"ce158732-4752-4d28-9885-ead31b9cff1d","version":"5.22.3.3171","x":{"apk_path":"socket:[4223359]","app_name":"屏幕翻译","app_package":"com.poozh.translator","app_version_code":18,"app_version_name":"0.5.4","error":{"code":0,"msg":"ok"},"extra":{"SupportArchitecture":"x86_64,x86,armeabi-v7a,arm64-v8a","amp_name":"屏幕翻译","ampid":0,"is_remote_control":0},"has_installed":1,"token":"bb41e5c9-7b01-41cd-a185-3adb45c54b85"}}	type: InstallAPP	sign: WXsXBWr6oejNj4pn23sI+W/8p5Y=	uid: 1000	json:{"apk_path":"socket:[4223359]","app_name":"屏幕翻译","app_package":"com.poozh.translator","app_version_code":18,"app_version_name":"0.5.4","error":{"code":0,"msg":"ok"},"extra":{"SupportArchitecture":"x86_64,x86,armeabi-v7a,arm64-v8a","amp_name":"屏幕翻译","ampid":0,"is_remote_control":0},"has_installed":1,"token":"bb41e5c9-7b01-41cd-a185-3adb45c54b85"}
+07-14 04:08:27.734 26968 27017 W System.err: com.mumu.store.data.remote.ApiError: 请校准本地系统时间
+07-14 04:08:27.734 26968 27017 W System.err: 	at com.mumu.store.data.remote.d.c(Proguard:50)
+07-14 04:08:27.735 26968 27017 W System.err: 	at com.mumu.store.data.remote.d.a(Proguard:3)
+07-14 04:08:27.735 26968 27017 W System.err: 	at retrofit2.x.f(Proguard:59)
+07-14 04:08:27.735 26968 27017 W System.err: 	at retrofit2.x.execute(Proguard:25)
+07-14 04:08:27.735 26968 27017 W System.err: 	at d3.c.E(Proguard:24)
+07-14 04:08:27.735 26968 27017 W System.err: 	at C1.h.c(Proguard:15)
+07-14 04:08:27.735 26968 27017 W System.err: 	at d3.a.E(Proguard:8)
+07-14 04:08:27.735 26968 27017 W System.err: 	at C1.h.c(Proguard:15)
+07-14 04:08:27.735 26968 27017 W System.err: 	at io.reactivex.internal.operators.observable.x$b.run(Proguard:7)
+07-14 04:08:27.735 26968 27017 W System.err: 	at C1.n$a.run(Proguard:10)
+07-14 04:08:27.735 26968 27017 W System.err: 	at io.reactivex.internal.schedulers.h.run(Proguard:14)
+07-14 04:08:27.735 26968 27017 W System.err: 	at io.reactivex.internal.schedulers.h.call(Proguard:1)
+07-14 04:08:27.735 26968 27017 W System.err: 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+07-14 04:08:27.735 26968 27017 W System.err: 	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:301)
+07-14 04:08:27.735 26968 27017 W System.err: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+07-14 04:08:27.735 26968 27017 W System.err: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+07-14 04:08:27.735 26968 27017 W System.err: 	at java.lang.Thread.run(Thread.java:920)
+07-14 04:08:27.756  2018  2028 I com.mumu.acc: Background concurrent copying GC freed 67110(3389KB) AllocSpace objects, 49(980KB) LOS objects, 49% free, 3577KB/7154KB, paused 397us,71us total 948.702ms
+07-14 04:08:27.756  2018  2028 W com.mumu.acc: Reducing the number of considered missed Gc histogram windows from 6663 to 100
+07-14 04:08:27.774  2018 21474 W AccRequestManager: getValidAccPkgDatasAfterRequests: hasMuMuRequestFinished = true, hasUuRequestFinished = false
+07-14 04:08:27.777 26968 26968 W System.err: com.mumu.store.data.remote.ApiError: 请校准本地系统时间
+07-14 04:08:27.777 26968 26968 W System.err: 	at com.mumu.store.data.remote.d.c(Proguard:50)
+07-14 04:08:27.777 26968 26968 W System.err: 	at com.mumu.store.data.remote.d.a(Proguard:3)
+07-14 04:08:27.777 26968 26968 W System.err: 	at retrofit2.x.f(Proguard:59)
+07-14 04:08:27.777 26968 26968 W System.err: 	at retrofit2.x.execute(Proguard:25)
+07-14 04:08:27.777 26968 26968 W System.err: 	at d3.c.E(Proguard:24)
+07-14 04:08:27.777 26968 26968 W System.err: 	at C1.h.c(Proguard:15)
+07-14 04:08:27.777 26968 26968 W System.err: 	at d3.a.E(Proguard:8)
+07-14 04:08:27.777 26968 26968 W System.err: 	at C1.h.c(Proguard:15)
+07-14 04:08:27.777 26968 26968 W System.err: 	at io.reactivex.internal.operators.observable.x$b.run(Proguard:7)
+07-14 04:08:27.777 26968 26968 W System.err: 	at C1.n$a.run(Proguard:10)
+07-14 04:08:27.777 26968 26968 W System.err: 	at io.reactivex.internal.schedulers.h.run(Proguard:14)
+07-14 04:08:27.777 26968 26968 W System.err: 	at io.reactivex.internal.schedulers.h.call(Proguard:1)
+07-14 04:08:27.777 26968 26968 W System.err: 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+07-14 04:08:27.777 26968 26968 W System.err: 	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:301)
+07-14 04:08:27.777 26968 26968 W System.err: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+07-14 04:08:27.777 26968 26968 W System.err: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+07-14 04:08:27.777 26968 26968 W System.err: 	at java.lang.Thread.run(Thread.java:920)
+07-14 04:08:27.826  1567  1588 I app.lawnchair: Background concurrent copying GC freed 322475(13MB) AllocSpace objects, 130(2600KB) LOS objects, 49% free, 21MB/42MB, paused 4.452ms,261us total 1.084s
+07-14 04:08:27.826  1567  1588 W app.lawnchair: Reducing the number of considered missed Gc histogram windows from 1491 to 100
+07-14 04:08:27.864  1427  1441 I pi_android.nem: Background concurrent copying GC freed 37480(1718KB) AllocSpace objects, 20(400KB) LOS objects, 49% free, 2482KB/4965KB, paused 186us,77us total 1.041s
+07-14 04:08:27.864  1427  1441 W pi_android.nem: Reducing the number of considered missed Gc histogram windows from 4699 to 100
+07-14 04:08:27.921  2018  2018 W AccRequestManager: getValidAccPkgDatasAfterRequests: hasMuMuRequestFinished = true, hasUuRequestFinished = true
+07-14 04:08:27.926  1427  2065 D Watchdog: upload server response: {"errcode": 100, "errmsg": "ok"}
+07-14 04:08:27.926  1427  2065 D Watchdog: upload result: true
+07-14 04:08:27.946 26968 26974 W com.mumu.store: Reducing the number of considered missed Gc histogram windows from 343 to 100
+07-14 04:08:27.947 21510 21510 D ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+--------- beginning of system
+07-14 04:08:27.950  1275  1451 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.poozh.translator/.MainActivity} from uid 2000, pid 21510
+07-14 04:08:27.961  1275  1451 I ActivityTaskManager: [KeepAlive] disabled for com.poozh.translator
+07-14 04:08:27.962  1275  1451 W ActivityTaskManager: Can't find TaskDisplayArea to determine support for multi window. Task id=1032 attached=false
+07-14 04:08:27.964  1275  1451 D CompatibilityChangeReporter: Compat change id reported: 174042980; UID 10058; state: DISABLED
+07-14 04:08:27.964  1275  1451 D CompatibilityChangeReporter: Compat change id reported: 184838306; UID 10058; state: DISABLED
+07-14 04:08:27.965  1275  1451 D CompatibilityChangeReporter: Compat change id reported: 185004937; UID 10058; state: DISABLED
+07-14 04:08:27.965  1275  1451 D CompatibilityChangeReporter: Compat change id reported: 181136395; UID 10058; state: DISABLED
+07-14 04:08:27.965  1275  1451 D CompatibilityChangeReporter: Compat change id reported: 174042936; UID 10058; state: DISABLED
+07-14 04:08:27.965  1275  1451 D CompatibilityChangeReporter: Compat change id reported: 197654537; UID 10058; state: ENABLED
+07-14 04:08:27.981  1275  1295 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10058; state: DISABLED
+07-14 04:08:27.990  1275  1305 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10058; state: ENABLED
+07-14 04:08:28.026  1457  1457 D StatusBar: Received new disable state. Old: enaihbcrso.qingr | New: enaihbcrso.qingr
+07-14 04:08:28.034  1457  1457 D StatusBar: Received new disable state. Old: enaihbcrso.qingr | New: enaihbcrso.qingr
+07-14 04:08:28.040  1457  1611 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 3690496
+07-14 04:08:28.076  1457 21514 D ndroid.systemu: Features: 0 0 0
+07-14 04:08:28.076  1457 21514 E ndroid.systemu: vulkan version is 4211017
+07-14 04:08:28.077  1457 21514 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 3690496
+07-14 04:08:28.079  1457 21514 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 3690496
+07-14 04:08:28.094  1124  2998 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 3690496
+07-14 04:08:28.126  1104  1104 D Zygote  : Forked child process 21515
+07-14 04:08:28.126  1275  1305 W ActivityManager: Slow operation: 152ms so far, now at startProcess: returned from zygote!
+07-14 04:08:28.127  1275  1305 W ActivityManager: Slow operation: 153ms so far, now at startProcess: done updating battery stats
+07-14 04:08:28.127  1275  1305 W ActivityManager: Slow operation: 153ms so far, now at startProcess: building log message
+07-14 04:08:28.127  1275  1305 I ActivityManager: Start proc 21515:com.poozh.translator/u0a58 for pre-top-activity {com.poozh.translator/com.poozh.translator.MainActivity}
+07-14 04:08:28.127  1275  1305 W ActivityManager: Slow operation: 153ms so far, now at startProcess: starting to update pids map
+07-14 04:08:28.127  1275  1305 W ActivityManager: Slow operation: 153ms so far, now at startProcess: done updating pids map
+07-14 04:08:28.131 21515 21515 I Zygote  : fakeProductInfoIfNeed callded! com.poozh.translator
+07-14 04:08:28.136 21515 21515 I Zygote  : fake Product info com.poozh.translator not matched any pattern
+07-14 04:08:28.136 21515 21515 I Zygote  : fakeProductInfoFromProperties callded! com.poozh.translator
+07-14 04:08:28.149 21515 21515 E NemuAppNameUtil: save data success
+07-14 04:08:28.154 15183 15218 I Unity   : 04:08:28.150-491: OnApplicationPause: true
+07-14 04:08:28.154 15183 15218 I Unity   : LuaInterface.Debugger:Log(String)
+07-14 04:08:28.154 15183 15218 I Unity   : LuaInterface.ToLua:Print(IntPtr)
+07-14 04:08:28.154 15183 15218 I Unity   : LuaInterface.LuaDLL:lua_pcall(IntPtr, Int32, Int32, Int32)
+07-14 04:08:28.154 15183 15218 I Unity   : LuaInterface.LuaState:PCall(Int32, Int32)
+07-14 04:08:28.154 15183 15218 I Unity   : LuaInterface.LuaFunction:PCall()
+07-14 04:08:28.154 15183 15218 I Unity   : LuaInterface.LuaFunction:Call(T1)
+07-14 04:08:28.154 15183 15218 I Unity   : LuaScriptMgr:CallFunction(String, Object[])
+07-14 04:08:28.154 15183 15218 I Unity   : GameMain:OnApplicationPause(Boolean)
+07-14 04:08:28.154 15183 15218 I Unity   : 
+07-14 04:08:28.155 15183 15218 I Unity   : 04:08:28.155-491: 取消通知
+07-14 04:08:28.155 15183 15218 I Unity   : LuaInterface.Debugger:Log(String)
+07-14 04:08:28.155 15183 15218 I Unity   : LuaInterface.ToLua:Print(IntPtr)
+07-14 04:08:28.155 15183 15218 I Unity   : LuaInterface.LuaDLL:lua_pcall(IntPtr, Int32, Int32, Int32)
+07-14 04:08:28.155 15183 15218 I Unity   : LuaInterface.LuaState:PCall(Int32, Int32)
+07-14 04:08:28.155 15183 15218 I Unity   : LuaInterface.LuaFunction:PCall()
+07-14 04:08:28.155 15183 15218 I Unity   : LuaInterface.LuaFunction:Call(T1)
+07-14 04:08:28.155 15183 15218 I Unity   : LuaScriptMgr:CallFunction(String, Object[])
+07-14 04:08:28.155 15183 15218 I Unity   : GameMain:OnApplicationPause(Boolean)
+07-14 04:08:28.155 15183 15218 I Unity   : 
+07-14 04:08:28.157 15183 15218 D UtilApi : cancelAllNotification
+07-14 04:08:28.170 15183 15218 I Unity   : 04:08:28.169-491: 20260714133506 - 回收石油喵  -  海军食堂的石油已经满了喵，再不回来我就拿走了喵！  -  33998.5 s后推送
+07-14 04:08:28.170 15183 15218 I Unity   : LuaInterface.Debugger:Log(String)
+07-14 04:08:28.170 15183 15218 I Unity   : LuaInterface.ToLua:Print(IntPtr)
+07-14 04:08:28.170 15183 15218 I Unity   : LuaInterface.LuaDLL:lua_pcall(IntPtr, Int32, Int32, Int32)
+07-14 04:08:28.170 15183 15218 I Unity   : LuaInterface.LuaState:PCall(Int32, Int32)
+07-14 04:08:28.170 15183 15218 I Unity   : LuaInterface.LuaFunction:PCall()
+07-14 04:08:28.170 15183 15218 I Unity   : LuaInterface.LuaFunction:Call(T1)
+07-14 04:08:28.170 15183 15218 I Unity   : LuaScriptMgr:CallFunction(String, Object[])
+07-14 04:08:28.170 15183 15218 I Unity   : GameMain:OnApplicationPause(Boolean)
+07-14 04:08:28.170 15183 15218 I Unity   : 
+07-14 04:08:28.170 15183 15218 I Unity   : 04:08:28.170-491: 20260714042835 - 弹尽粮绝喵  -  指挥官～家里已经没东西吃了喵～大家都饿趴下了喵…  -  1207 s后推送
+07-14 04:08:28.170 15183 15218 I Unity   : LuaInterface.Debugger:Log(String)
+07-14 04:08:28.170 15183 15218 I Unity   : LuaInterface.ToLua:Print(IntPtr)
+07-14 04:08:28.170 15183 15218 I Unity   : LuaInterface.LuaDLL:lua_pcall(IntPtr, Int32, Int32, Int32)
+07-14 04:08:28.170 15183 15218 I Unity   : LuaInterface.LuaState:PCall(Int32, Int32)
+07-14 04:08:28.170 15183 15218 I Unity   : LuaInterface.LuaFunction:PCall()
+07-14 04:08:28.170 15183 15218 I Unity   : LuaInterface.LuaFunction:Call(T1)
+07-14 04:08:28.170 15183 15218 I Unity   : LuaScriptMgr:CallFunction(String, Object[])
+07-14 04:08:28.170 15183 15218 I Unity   : GameMain:OnApplicationPause(Boolean)
+07-14 04:08:28.170 15183 15218 I Unity   : 
+07-14 04:08:28.189 15183 15218 I Unity   : 04:08:28.188-491: 20260714065839 - 新进展喵  -  研究中的瓦尔帕莱索有新的进展了喵！快来开发船坞中确认一下喵！  -  10211 s后推送
+07-14 04:08:28.189 15183 15218 I Unity   : LuaInterface.Debugger:Log(String)
+07-14 04:08:28.189 15183 15218 I Unity   : LuaInterface.ToLua:Print(IntPtr)
+07-14 04:08:28.189 15183 15218 I Unity   : LuaInterface.LuaDLL:lua_pcall(IntPtr, Int32, Int32, Int32)
+07-14 04:08:28.189 15183 15218 I Unity   : LuaInterface.LuaState:PCall(Int32, Int32)
+07-14 04:08:28.189 15183 15218 I Unity   : LuaInterface.LuaFunction:PCall()
+07-14 04:08:28.189 15183 15218 I Unity   : LuaInterface.LuaFunction:Call(T1)
+07-14 04:08:28.189 15183 15218 I Unity   : LuaScriptMgr:CallFunction(String, Object[])
+07-14 04:08:28.189 15183 15218 I Unity   : GameMain:OnApplicationPause(Boolean)
+07-14 04:08:28.189 15183 15218 I Unity   : 
+07-14 04:08:28.189 15183 15218 I Unity   : 04:08:28.189-491: 20260715065839 - 新进展喵  -  研究中的瓦尔帕莱索有新的进展了喵！快来开发船坞中确认一下喵！  -  96611 s后推送
+07-14 04:08:28.189 15183 15218 I Unity   : LuaInterface.Debugger:Log(String)
+07-14 04:08:28.189 15183 15218 I Unity   : LuaInterface.ToLua:Print(IntPtr)
+07-14 04:08:28.189 15183 15218 I Unity   : LuaInterface.LuaDLL:lua_pcall(IntPtr, Int32, Int32, Int32)
+07-14 04:08:28.189 15183 15218 I Unity   : LuaInterface.LuaState:PCall(Int32, Int32)
+07-14 04:08:28.189 15183 15218 I Unity   : LuaInterface.LuaFunction:PCall()
+07-14 04:08:28.189 15183 15218 I Unity   : LuaInterface.LuaFunction:Call(T1)
+07-14 04:08:28.189 15183 15218 I Unity   : LuaScriptMgr:CallFunction(String, Object[])
+07-14 04:08:28.189 15183 15218 I Unity   : GameMain:OnApplicationPause(Boolean)
+07-14 04:08:28.189 15183 15218 I Unity   : 
+07-14 04:08:28.189 15183 15218 I Unity   : 04:08:28.189-491: 20260715065839 - 新进展喵  -  研究中的瓦尔帕莱索有新的进展了喵！快来开发船坞中确认一下喵！  -  96611 s后推送
+07-14 04:08:28.189 15183 15218 I Unity   : LuaInterface.Debugger:Log(String)
+07-14 04:08:28.189 15183 15218 I Unity   : LuaInterface.ToLua:Print(IntPtr)
+07-14 04:08:28.189 15183 15218 I Unity   : LuaInterface.LuaDLL:lua_pcall(IntPtr, Int32, Int32, Int32)
+07-14 04:08:28.189 15183 15218 I Unity   : LuaInterface.LuaState:PCall(Int32, Int32)
+07-14 04:08:28.189 15183 15218 I Unity   : LuaInterface.LuaFunction:PCall()
+07-14 04:08:28.189 15183 15218 I Unity   : LuaInterface.LuaFunction:Call(T1)
+07-14 04:08:28.189 15183 15218 I Unity   : LuaScriptMgr:CallFunction(String, Object[])
+07-14 04:08:28.189 15183 15218 I Unity   : GameMain:OnApplicationPause(Boolean)
+07-14 04:08:28.189 15183 15218 I Unity   : 
+07-14 04:08:28.193 15183 15218 D UtilApi : scheduleNotification: 1   海军食堂的石油已经满了喵，再不回来我就拿走了喵！    33998500
+07-14 04:08:28.198 21515 21515 E linker  : do_dlopen failed
+07-14 04:08:28.198 21515 21515 E linker  : load selected hp /system/etc/mumu-configs/shared_libs/libhp12_x86_64.so failed
+07-14 04:08:28.198 21515 21515 E linker  : library "/system/etc/mumu-configs/shared_libs/libhp12_x86_64.so" ("/system/etc/mumu-configs/shared_libs/libhp12_x86_64.so") needed or dlopened by "/apex/com.android.art/lib64/libnativebridge.so" is not accessible for the namespace: [name="com_android_art", ld_library_paths="", default_library_paths="/apex/com.android.art/lib64", permitted_paths="/apex/com.android.art/lib64:/system/lib64:/data:/apex/com.android.art/javalib"]
+07-14 04:08:28.198 21515 21515 E linker  : do_dlopen failed
+07-14 04:08:28.198 21515 21515 E linker  : load origin hp /system/etc/mumu-configs/shared_libs/libhp12_x86_64.so failed
+07-14 04:08:28.211 15183 15218 D UtilApi : scheduleNotification: 2   指挥官～家里已经没东西吃了喵～大家都饿趴下了喵…    1207000
+07-14 04:08:28.213 15183 15218 D UtilApi : scheduleNotification: 3   研究中的瓦尔帕莱索有新的进展了喵！快来开发船坞中确认一下喵！    10211000
+07-14 04:08:28.214 15183 15218 D UtilApi : scheduleNotification: 4   研究中的瓦尔帕莱索有新的进展了喵！快来开发船坞中确认一下喵！    96611000
+07-14 04:08:28.214 15183 15218 D UtilApi : scheduleNotification: 5   研究中的瓦尔帕莱索有新的进展了喵！快来开发船坞中确认一下喵！    96611000
+07-14 04:08:28.215 15183 15218 E Main    : onPause onPause onPause
+07-14 04:08:28.230 21515 21515 E linker  : hp entrace has not been loaded, ignored
+07-14 04:08:28.240 21515 21515 W nativebridge: LLLog DoRedirectTranslator not is_gte
+07-14 04:08:28.243 21515 21515 W nativebridge: Failed to bind-mount /system/etc/cpuinfo.x86_64.txt as /proc/cpuinfo: No such file or directory
+07-14 04:08:28.244 21515 21515 W nativebridge: Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: No such file or directory
+07-14 04:08:28.244 21515 21515 I Zygote  : seccomp disabled by setenforce 0
+07-14 04:08:28.259 15183 15507 D libili.azurlan: PlayerBase::stop() from IPlayer
+07-14 04:08:28.259 15183 15507 D AudioTrack: stop(359): called with 1787773440 frames delivered
+07-14 04:08:28.270 21515 21515 W oozh.translato: Unexpected CPU variant for X86 using defaults: x86_64
+07-14 04:08:28.271 21515 21515 V libnb   : enter native_bridge2_initialize /data/user/0/com.poozh.translator/code_cache arm64
+07-14 04:08:28.271 21515 21515 E libnb   : The translator implementation library has not been set.
+07-14 04:08:28.297 21515 21515 E libnb   : get_callbacks native_handle 0xa0bafc784f408101: 1 libnb:/system/lib64/libhoudini.so
+07-14 04:08:28.297 21515 21515 I libnb   : Found /system/lib64/libhoudini.so version 6
+07-14 04:08:28.298 21515 21515 D HP      : no libmumuhooker.so
+07-14 04:08:28.307 21515 21515 D houdini : [21515] Intel Bridge Technology for Netease internal evaluation only, Copyright(C) Intel Corp. 2012-2025.
+07-14 04:08:28.307 21515 21515 D houdini : [21515] Use permitted only under a valid evaluation software license agreement - all other rights reserved.
+07-14 04:08:28.308 21515 21515 D houdini : [21515] Initialize library(version: 12.0.1_z.Netease_ev4 RELEASE)... successfully.
+07-14 04:08:28.308 21515 21515 W HP      : x_initialize private_dir:/data/user/0/com.poozh.translator/code_cache instruction_set:arm64 getMethodShorty:0x7ab96ab3c340 ret:1
+07-14 04:08:28.319 21515 21515 E oozh.translato: Not starting debugger since process cannot load the jdwp agent.
+07-14 04:08:28.336 21515 21515 D ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+07-14 04:08:28.363 15183 15183 E Surface : freeAllBuffers: 1 buffers were freed while being dequeued!
+07-14 04:08:28.372 15183 15183 E BLASTBufferQueue: [ViewRootImpl[MainActivity]#0](f:0,a:1) Applying pending transactions on dtor 4
+07-14 04:08:28.381 15183 15183 I GSCPubCommon: aOfl
+07-14 04:08:28.406  1275  1451 W OomAdjuster: Fallback pre-set sched group to default: not expected top priority
+07-14 04:08:28.422  1275  1451 D RecentTaskMonitor: onTaskFocusChanged [FALSE] 1031
+07-14 04:08:28.425  1275  1451 D RecentTaskMonitor: onTaskFocusChanged [TRUE] 1032 ignoreTFC false
+07-14 04:08:28.428 21515 21525 E ashmem  : memfd: ro.vndk.version not defined or invalid (), this is mandated since P.
+07-14 04:08:28.446 21515 21515 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10058; state: ENABLED
+07-14 04:08:28.520 21515 21515 D NemuJavaHotPatchHelper: onHandleBindApplication reportedPackageName:com.poozh.translator isMatchJavaPatch:false
+07-14 04:08:28.518  1427  1427 I pool-3-thread-1: type=1400 audit(0.0:144982): avc: denied { search } for name="/" dev="mumuvmmsf" ino=1 scontext=u:r:system_app:s0 tcontext=u:object_r:unlabeled:s0 tclass=dir permissive=1
+07-14 04:08:28.531  1427  1427 I pool-3-thread-1: type=1400 audit(0.0:144983): avc: denied { write } for name="com.poozh.translator.png" dev="mumuvmmsf" ino=238 scontext=u:r:system_app:s0 tcontext=u:object_r:unlabeled:s0 tclass=file permissive=1
+07-14 04:08:28.531  1427  1427 I pool-3-thread-1: type=1400 audit(0.0:144984): avc: denied { open } for path="/mnt/shared/keymap_config/AppIcon/com.poozh.translator.png" dev="mumuvmmsf" ino=238 scontext=u:r:system_app:s0 tcontext=u:object_r:unlabeled:s0 tclass=file permissive=1
+07-14 04:08:28.541  1427  1427 I pool-3-thread-1: type=1400 audit(0.0:144985): avc: denied { getattr } for path="/mnt/shared/keymap_config/AppIcon/com.poozh.translator.png" dev="mumuvmmsf" ino=238 scontext=u:r:system_app:s0 tcontext=u:object_r:unlabeled:s0 tclass=file permissive=1
+07-14 04:08:28.656  1275  1295 D RecentTaskMonitor: task null or not sub display in notifyDisplayOpened
+07-14 04:08:28.657  1275  1295 D RecentTaskMonitor: VAddressShellNotifier#notifyOpenTab :{"uri":"player\/tab","need_response":false,"params":{"id":"task:1032","displayId":0,"userId":0,"name":"屏幕翻译","originName":"屏幕翻译","packageName":"com.poozh.translator","launcher":false,"newTask":true,"icon":"iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARzQklUCAgICHwIZIgAAAOjSURBVEiJtZVbaFxVFIa\/teeSzmSSSZrU3ExtLq0VQ6ooEQpFfEgRifStUhRfFBQUfVERL6AvolAQnwSlDyJSaUGIFXxpQVApJd6SapOxiZmkE9KJMUnnkjlnZs5ePkwbc5mjjegPB85Za6\/1n\/XvvdYWVb3PWnsK2M1\/CBG5JtY+aqy1w37Jfy87xMdOk3Lz2yZQ1bgVOWmAFr9FI7lF8qqMFBa3TQAgEAsCfLB4mQk3WzEBiADCtJMDMXy0PMfX+cyaHRFQGIg28Ei8DRGpXoUI4pXL2nvpc6bLhQ3BFTIDYq6\/C0gAofKtwIO1zZzpuhfjQyAiKp7naclaFj3Xv9DreGF+gk9X0nzTM8CecJT6QIBaE\/SXSESDACFjaDMRANIlh+8KGR6qv4X1\/6WqjLsO7cEI\/ZF6ak3AN\/G6IMxm2xOpixxJ\/sCp5fkN9gurGcacAvfHmonKljC\/ErYSvN\/RR9QEefnqJHnrATDlFhicHqVWQrzT2rO2qZecVY7NjnMut+zLsYWgMxzhzZZerpRc+ibOkyo6PDs3yaoV3m3rpSNcU6keeC2d5HRmiaGZBFZ1a3ZVxPO8Kh54anacEytpVAyoYZcJc7VvYM2\/WCrRmvieGyfsmZ27eK+9a5NCor5ivtHaTVRCCCGCJsTZ3r4N\/tcXUkCATzp6iJoQ3xZcXGv\/WSKA5XKZl+aT5FXYG4pgEe6a\/IW3FuZJuA6qynAmS3c4ysPxnRyubeCiUyThbj3qVSW6M\/ETE0WX3cEaErf3cyGfZTA5RalSNrcGQ6Q8y+MNjZzo6OSrXJbBmVm6a2r4tbfXX6IfCzn2J0aZKJYYijWS2N9P2BgO1cVZ7bubk51dHInFSZUVwfBKc6VXHojV0REM85vrMVpw\/kqoylobfpldYSiZQDC82NTK2+2dG7UU4WhDI02BEF\/kZgkbw4fLN+YTHIjEmMvlOZNd5UBkRyX\/eokCF0cIE+Rc114OxmLVtgaAozNzfJbNgQiqgoigYhCtzLEAgnPHbYism0UAw5kVOoIh7olEfafjTLHEvsszlBWS+\/YQ2LTs1fQ1Ps64HG+J83xTLUZE8TxPb\/Z5+sqCMjqlx9NLVf1LxZJGfp7Xg5N\/qFMuq7XW3uRQqWDc9WgMhHmysa6qPx4wHIru4PyqJW8rh9O3k6vhbM6hrHA4VuN7B4w5ZUYdj2PxMCFjdFsE24WIqBGRlf+LQFWLxlr7mIj8u1v9byDgAM\/9CRk8wk0mjd3+AAAAAElFTkSuQmCC","canChangeAppOrientation":false,"canReceiveFile":false,"pid":21515,"uid":10058,"action":"open"}}
+07-14 04:08:28.661  1038  1050 D nemuinit: start name: vapi, operation: {"uri":"/tools/cmd","method":"POST","params":{"action":"switch_fps_mode","packageName":""}}, id: 4936
+07-14 04:08:28.665  1038 21535 D nemuinit: Proxy: use callback: 1427, handleNemuInitMessage, name: vapi, params: {"uri":"/tools/cmd","method":"POST","params":{"action":"switch_fps_mode","packageName":""}}, res: {"errcode":0,"message":"OK"}
+07-14 04:08:28.665  1038 21535 D nemuinit: Proxy: finish handleNemuInitMessage
+07-14 04:08:28.661  1038  1038 I nemuinit: type=1400 audit(0.0:144986): avc: denied { call } for scontext=u:r:init:s0 tcontext=u:r:system_app:s0 tclass=binder permissive=1
+07-14 04:08:28.806  1038  1050 D nemuinit: start name: vapi, operation: {"uri":"/tools/inputdevice","method":"POST","params":{"action":"set_input_device_list","device":12,"packageName":"com.poozh.translator","pid":21515,"uid":10058}}, id: 4937
+07-14 04:08:28.807  1038  1050 D nemuinit: start name: vapi, operation: {"uri":"/tools/cmd","method":"POST","params":{"action":"switch_fps_mode","packageName":""}}, id: 4938
+07-14 04:08:28.808  1038 21536 D nemuinit: Proxy: use callback: 1427, handleNemuInitMessage, name: vapi, params: {"uri":"/tools/inputdevice","method":"POST","params":{"action":"set_input_device_list","device":12,"packageName":"com.poozh.translator","pid":21515,"uid":10058}}, res: {"errcode":0,"message":"OK"}
+07-14 04:08:28.808  1038 21536 D nemuinit: Proxy: finish handleNemuInitMessage
+07-14 04:08:28.808  1038 21537 D nemuinit: Proxy: use callback: 1427, handleNemuInitMessage, name: vapi, params: {"uri":"/tools/cmd","method":"POST","params":{"action":"switch_fps_mode","packageName":""}}, res: {"errcode":0,"message":"OK"}
+07-14 04:08:28.808  1038 21537 D nemuinit: Proxy: finish handleNemuInitMessage
+07-14 04:08:28.809  1038  1050 D nemuinit: start name: vapi, operation: {"uri":"/tools/inputdevice","method":"POST","params":{"action":"set_input_device_list","device":12,"packageName":"com.poozh.translator","pid":21515,"uid":10058}}, id: 4939
+07-14 04:08:28.809  1038 21538 D nemuinit: Proxy: use callback: 1427, handleNemuInitMessage, name: vapi, params: {"uri":"/tools/inputdevice","method":"POST","params":{"action":"set_input_device_list","device":12,"packageName":"com.poozh.translator","pid":21515,"uid":10058}}, res: {"errcode":0,"message":"OK"}
+07-14 04:08:28.809  1038 21538 D nemuinit: Proxy: finish handleNemuInitMessage
+07-14 04:08:28.810  1038  1050 D nemuinit: start name: vapi, operation: {"uri":"/tools/inputdevice","method":"POST","params":{"action":"set_input_device_list","device":12,"packageName":"com.poozh.translator","pid":21515,"uid":10058}}, id: 4940
+07-14 04:08:28.810  1038  1050 D nemuinit: start name: vapi, operation: {"uri":"/tools/cmd","method":"POST","params":{"action":"switch_fps_mode","packageName":""}}, id: 4941
+07-14 04:08:28.810  1038 21539 D nemuinit: Proxy: use callback: 1427, handleNemuInitMessage, name: vapi, params: {"uri":"/tools/inputdevice","method":"POST","params":{"action":"set_input_device_list","device":12,"packageName":"com.poozh.translator","pid":21515,"uid":10058}}, res: {"errcode":0,"message":"OK"}
+07-14 04:08:28.810  1038 21539 D nemuinit: Proxy: finish handleNemuInitMessage
+07-14 04:08:28.811  1038 21540 D nemuinit: Proxy: use callback: 1427, handleNemuInitMessage, name: vapi, params: {"uri":"/tools/cmd","method":"POST","params":{"action":"switch_fps_mode","packageName":""}}, res: {"errcode":0,"message":"OK"}
+07-14 04:08:28.811  1038 21540 D nemuinit: Proxy: finish handleNemuInitMessage
+07-14 04:08:28.813  1038  1050 D nemuinit: start name: vapi, operation: {"uri":"/tools/inputdevice","method":"POST","params":{"action":"set_input_device_list","device":12,"packageName":"com.poozh.translator","pid":21515,"uid":10058}}, id: 4942
+07-14 04:08:28.813  1038 21541 D nemuinit: Proxy: use callback: 1427, handleNemuInitMessage, name: vapi, params: {"uri":"/tools/inputdevice","method":"POST","params":{"action":"set_input_device_list","device":12,"packageName":"com.poozh.translator","pid":21515,"uid":10058}}, res: {"errcode":0,"message":"OK"}
+07-14 04:08:28.813  1038 21541 D nemuinit: Proxy: finish handleNemuInitMessage
+07-14 04:08:28.820  1038  1050 D nemuinit: start name: vapi, operation: {"uri":"/tools/inputdevice","method":"POST","params":{"action":"set_gamepad_guid","guid":"2d3607d1000000000000504944564944","name":"Wireless Link-KM","type":"Dinput"}}, id: 4943
+07-14 04:08:28.820  1038  1050 D nemuinit: start name: vapi, operation: {"uri":"/tools/inputdevice","method":"POST","params":{"action":"set_input_device_list","device":12,"packageName":"com.poozh.translator","pid":21515,"uid":10058}}, id: 4944
+07-14 04:08:28.820  1038  1050 D nemuinit: start name: vapi, operation: {"uri":"/tools/inputdevice","method":"POST","params":{"action":"set_gamepad_guid","guid":"2d3607d1000000000000504944564944","name":"Wireless Link-KM","type":"Dinput"}}, id: 4945
+07-14 04:08:28.821  1038 21542 D nemuinit: Proxy: use callback: 1427, handleNemuInitMessage, name: vapi, params: {"uri":"/tools/inputdevice","method":"POST","params":{"action":"set_gamepad_guid","guid":"2d3607d1000000000000504944564944","name":"Wireless Link-KM","type":"Dinput"}}, res: {"errcode":0,"message":"OK"}
+07-14 04:08:28.821  1038 21542 D nemuinit: Proxy: finish handleNemuInitMessage
+07-14 04:08:28.821  1038  1050 D nemuinit: start name: vapi, operation: {"uri":"/tools/inputdevice","method":"POST","params":{"action":"set_input_device_list","device":12,"packageName":"com.poozh.translator","pid":21515,"uid":10058}}, id: 4946
+07-14 04:08:28.822  1038 21543 D nemuinit: Proxy: use callback: 1427, handleNemuInitMessage, name: vapi, params: {"uri":"/tools/inputdevice","method":"POST","params":{"action":"set_input_device_list","device":12,"packageName":"com.poozh.translator","pid":21515,"uid":10058}}, res: {"errcode":0,"message":"OK"}
+07-14 04:08:28.822  1038 21543 D nemuinit: Proxy: finish handleNemuInitMessage
+07-14 04:08:28.822  1038 21544 D nemuinit: Proxy: use callback: 1427, handleNemuInitMessage, name: vapi, params: {"uri":"/tools/inputdevice","method":"POST","params":{"action":"set_gamepad_guid","guid":"2d3607d1000000000000504944564944","name":"Wireless Link-KM","type":"Dinput"}}, res: {"errcode":0,"message":"OK"}
+07-14 04:08:28.822  1038 21544 D nemuinit: Proxy: finish handleNemuInitMessage
+07-14 04:08:28.822  1038 21545 D nemuinit: Proxy: use callback: 1427, handleNemuInitMessage, name: vapi, params: {"uri":"/tools/inputdevice","method":"POST","params":{"action":"set_input_device_list","device":12,"packageName":"com.poozh.translator","pid":21515,"uid":10058}}, res: {"errcode":0,"message":"OK"}
+07-14 04:08:28.822  1038 21545 D nemuinit: Proxy: finish handleNemuInitMessage
+07-14 04:08:28.897 21515 21515 I Typeface: Preloading /system/fonts/Roboto-Regular.ttf
+07-14 04:08:28.991 21515 21515 I oozh.translato: Waiting for a blocking GC ClassLinker
+07-14 04:08:29.236 21515 21515 I oozh.translato: WaitForGcToComplete blocked ClassLinker on Background for 245.698ms
+07-14 04:08:29.246 21515 21515 V GraphicsEnvironment: ANGLE Developer option for 'com.poozh.translator' set to: 'default'
+07-14 04:08:29.247 21515 21515 V GraphicsEnvironment: ANGLE GameManagerService for com.poozh.translator: false
+07-14 04:08:29.247 21515 21515 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+07-14 04:08:29.250 21515 21515 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+07-14 04:08:29.250 21515 21515 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+07-14 04:08:29.302 21515 21549 D libEGL  : loaded /system/lib64/egl/libEGL_emulation.so
+07-14 04:08:29.316 21515 21549 D oozh.translato: Features: 0 0 0
+07-14 04:08:29.316 21515 21549 E oozh.translato: vulkan version is 4211017
+07-14 04:08:29.319 21515 21549 D libEGL  : loaded /system/lib64/egl/libGLESv1_CM_emulation.so
+07-14 04:08:29.320 21515 21549 D libEGL  : loaded /system/lib64/egl/libGLESv2_emulation.so
+07-14 04:08:29.338 21515 21515 D CompatibilityChangeReporter: Compat change id reported: 171228096; UID 10058; state: ENABLED
+07-14 04:08:29.377 21515 21549 E GraphicsEnv: Failed to get gpu service
+07-14 04:08:29.559  1427  1427 D TabManager: setFocusTaskProp 1032
+07-14 04:08:29.562  1275  1451 I RecentTaskMonitor: broadcast tab opened in android as it's new task1 1032
+07-14 04:08:29.568  2018  2018 W AccMsgReceiver: AccMsgReceiver: onReceive action = nemu.intent.action.NEW_TASK
+07-14 04:08:29.571  1427  1833 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.sendBroadcast:1181 android.content.ContextWrapper.sendBroadcast:479 com.netease.nemu_vapi_android.thread.NewFileUpdater.notifyFocusedTabChanged:499 com.netease.nemu_vapi_android.thread.NewFileUpdater.onOpenNewTask:421 com.netease.nemu_vapi_android.worker.LocalAppManager.updateOnNewTask:259 
+07-14 04:08:29.572  1427  1833 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.sendBroadcast:1181 android.content.ContextWrapper.sendBroadcast:479 com.netease.nemu_vapi_android.thread.NewFileUpdater.notifyFocusedTabChanged:504 com.netease.nemu_vapi_android.thread.NewFileUpdater.onOpenNewTask:421 com.netease.nemu_vapi_android.worker.LocalAppManager.updateOnNewTask:259 
+07-14 04:08:29.554  1427  1427 I pi_android.nemu: type=1400 audit(0.0:144998): avc: denied { sendto } for path="/dev/socket/logdw" scontext=u:r:system_app:s0 tcontext=u:r:init:s0 tclass=unix_dgram_socket permissive=1
+07-14 04:08:29.572  1427  1833 D NewFileUpdater: onOpenNewTask focusPkgName set to com.poozh.translator
+07-14 04:08:29.573  1427  1833 D Watchdog: ignore events AppLaunch: {"app_name":"屏幕翻译","app_package":"com.poozh.translator","event_duration":0,"failure_reason":"","status_code":0}
+07-14 04:08:29.574  1427  2065 D Watchdog: upload event: {"architecture":"x86_64","channel":"gw-win","country":"zh-CN","engine":"NEMUX","fchannel":"gw-win","language":"zh-Hans","mpid":"0","package":"mumu","product":"MuMu5.0","product_version":"5.22.3.3171","usage":"0","uuid":"ce158732-4752-4d28-9885-ead31b9cff1d","version":"5.22.3.3171","x":{"app_name":"屏幕翻译","app_package":"com.poozh.translator","app_version_code":18,"app_version_name":"0.5.4","error":{"code":0,"msg":"ok"},"extra":{"NB":"{\"NB_MD5\":\"72CB84348C02A65BC980B18257B7699A\",\"NB_NAME\":\"libhoudini.so\",\"NB_64BIT\":\"true\",\"RunningArchitecture\":\"x86_64\"}","amp_name":"屏幕翻译","ampid":0,"is_remote_control":0},"token":"bb41e5c9-7b01-41cd-a185-3adb45c54b85"}}	type: LaunchAPP	sign: bTcdSdDwqHzSgmwKfAhkhBl7ghs=	uid: 1000	json:{"app_name":"屏幕翻译","app_package":"com.poozh.translator","app_version_code":18,"app_version_name":"0.5.4","error":{"code":0,"msg":"ok"},"extra":{"NB":"{\"NB_MD5\":\"72CB84348C02A65BC980B18257B7699A\",\"NB_NAME\":\"libhoudini.so\",\"NB_64BIT\":\"true\",\"RunningArchitecture\":\"x86_64\"}","amp_name":"屏幕翻译","ampid":0,"is_remote_control":0},"token":"bb41e5c9-7b01-41cd-a185-3adb45c54b85"}
+07-14 04:08:29.575  1275  1451 W ActivityManager: Foreground service started from background can not have location/camera/microphone access: service com.mumu.acc/.AccService
+07-14 04:08:29.576  1275  1304 V ActivityManager: Attempted to start a foreground service (com.mumu.acc/.AccService) with a broken notification (no icon: Notification(channel=acc-service shortcut=null contentView=null vibrate=null sound=null defaults=0x0 flags=0x40 color=0x00000000 vis=PRIVATE))
+07-14 04:08:29.577  2018  2964 W AccServiceManager: onAppLaunch: packageName = com.poozh.translator
+07-14 04:08:29.577  2018  2018 W AccMsgReceiver: AccMsgReceiver: onReceive action = com.mumu.launcher.ACTION_FOCUSED_TAB_CHANGED
+07-14 04:08:29.578  1103  1103 I Binder:1103_2: type=1400 audit(0.0:144999): avc: denied { use } for path="socket:[4223639]" dev="sockfs" ino=4223639 scontext=u:r:init:s0 tcontext=u:r:system_app:s0 tclass=fd permissive=1
+07-14 04:08:29.578  1103  1103 I Binder:1103_2: type=1400 audit(0.0:145000): avc: denied { read write } for path="socket:[4223639]" dev="sockfs" ino=4223639 scontext=u:r:init:s0 tcontext=u:r:system_app:s0 tclass=tcp_socket permissive=1
+07-14 04:08:29.578  1103  1103 I Binder:1103_2: type=1400 audit(0.0:145001): avc: denied { getopt } for scontext=u:r:init:s0 tcontext=u:r:system_app:s0 tclass=tcp_socket permissive=1
+07-14 04:08:29.617  1427  2065 D Watchdog: upload server response: {"errcode": 100, "errmsg": "ok"}
+07-14 04:08:29.617  1427  2065 D Watchdog: upload result: true
+07-14 04:08:29.578  1103  1103 I Binder:1103_2: type=1400 audit(0.0:145002): avc: denied { setopt } for scontext=u:r:init:s0 tcontext=u:r:system_app:s0 tclass=tcp_socket permissive=1
+07-14 04:08:29.658 21515 21547 D oozh.translato: Features: 0 0 0
+07-14 04:08:29.658 21515 21547 E oozh.translato: vulkan version is 4211017
+07-14 04:08:29.663 21515 21547 D hw-ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+07-14 04:08:29.666 21515 21547 E HidlServiceManagement: getService: Potential race detected, descriptor: android.hardware.configstore@1.0::ISurfaceFlingerConfigs instance: default
+07-14 04:08:29.671 21515 21547 W OpenGLRenderer: Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+07-14 04:08:29.697  1124  1182 E HWComposer: getSupportedContentTypes: getSupportedContentTypes failed for display 4619827820427265280: Unsupported (8)
+07-14 04:08:29.698  1024  1024 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device VINTF manifest.
+07-14 04:08:29.699 21515 21547 E HidlServiceManagement: getService: Potential race detected, descriptor: android.hardware.graphics.mapper@4.0::IMapper instance: default
+07-14 04:08:29.699  1024  1024 I hwservicemanager: Since android.hardware.graphics.mapper@4.0::IMapper/default is not registered, trying to start it as a lazy HAL.
+07-14 04:08:29.701 21515 21547 I Gralloc4: mapper 4.x is not supported
+07-14 04:08:29.710  1024  1024 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@3.0::IMapper/default in either framework or device VINTF manifest.
+07-14 04:08:29.710 21515 21547 E HidlServiceManagement: getService: Potential race detected, descriptor: android.hardware.graphics.mapper@3.0::IMapper instance: default
+07-14 04:08:29.711  1024  1024 I hwservicemanager: Since android.hardware.graphics.mapper@3.0::IMapper/default is not registered, trying to start it as a lazy HAL.
+07-14 04:08:29.711  1024 21558 W libc    : Unable to set property "ctl.interface_start" to "android.hardware.graphics.mapper@4.0::IMapper/default": error code: 0x20
+07-14 04:08:29.711  1024 21558 I hwservicemanager: Tried to start android.hardware.graphics.mapper@4.0::IMapper/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+07-14 04:08:29.711 21515 21547 W Gralloc3: mapper 3.x is not supported
+07-14 04:08:29.711 21515 21547 E HidlServiceManagement: getService: Potential race detected, descriptor: android.hardware.graphics.mapper@2.0::IMapper instance: default
+07-14 04:08:29.718  1024 21559 W libc    : Unable to set property "ctl.interface_start" to "android.hardware.graphics.mapper@3.0::IMapper/default": error code: 0x20
+07-14 04:08:29.718  1024 21559 I hwservicemanager: Tried to start android.hardware.graphics.mapper@3.0::IMapper/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+07-14 04:08:29.719  1024  1024 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.allocator@4.0::IAllocator/default in either framework or device VINTF manifest.
+07-14 04:08:29.720 21515 21547 E HidlServiceManagement: getService: Potential race detected, descriptor: android.hardware.graphics.allocator@4.0::IAllocator instance: default
+07-14 04:08:29.720  1024  1024 I hwservicemanager: Since android.hardware.graphics.allocator@4.0::IAllocator/default is not registered, trying to start it as a lazy HAL.
+07-14 04:08:29.720 21515 21547 W Gralloc4: allocator 4.x is not supported
+07-14 04:08:29.720  1024  1024 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.allocator@3.0::IAllocator/default in either framework or device VINTF manifest.
+07-14 04:08:29.720 21515 21547 E HidlServiceManagement: getService: Potential race detected, descriptor: android.hardware.graphics.allocator@3.0::IAllocator instance: default
+07-14 04:08:29.720  1024  1024 I hwservicemanager: Since android.hardware.graphics.allocator@3.0::IAllocator/default is not registered, trying to start it as a lazy HAL.
+07-14 04:08:29.720 21515 21547 W Gralloc3: allocator 3.x is not supported
+07-14 04:08:29.721 21515 21547 E HidlServiceManagement: getService: Potential race detected, descriptor: android.hardware.graphics.allocator@2.0::IAllocator instance: default
+07-14 04:08:29.722  1427  1787 W NewFileUpdater: MSG_GET_PACKAGE_TAG_INFO, no available new tag for: com.poozh.translator, workingTag: 12.2069
+07-14 04:08:29.730  1024 21560 W libc    : Unable to set property "ctl.interface_start" to "android.hardware.graphics.allocator@4.0::IAllocator/default": error code: 0x20
+07-14 04:08:29.730  1024 21560 I hwservicemanager: Tried to start android.hardware.graphics.allocator@4.0::IAllocator/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+07-14 04:08:29.737 21515 21547 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 3690496
+07-14 04:08:29.737  1024 21561 W libc    : Unable to set property "ctl.interface_start" to "android.hardware.graphics.allocator@3.0::IAllocator/default": error code: 0x20
+07-14 04:08:29.737  1024 21561 I hwservicemanager: Tried to start android.hardware.graphics.allocator@3.0::IAllocator/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+07-14 04:08:29.746 21515 21562 D oozh.translato: Features: 0 0 0
+07-14 04:08:29.746 21515 21562 E oozh.translato: vulkan version is 4211017
+07-14 04:08:29.747 21515 21562 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 3690496
+07-14 04:08:29.750 21515 21562 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 3690496
+07-14 04:08:29.799  1275  1292 I ActivityTaskManager: Displayed com.poozh.translator/.MainActivity: +1s837ms
+07-14 04:08:29.952  1275  1737 W InputManager-JNI: Input channel object '6b0af78 Splash Screen com.poozh.translator (client)' was disposed without first being removed with the input manager!
+07-14 04:08:30.814  1275  1275 I WifiHandlerThre: type=1400 audit(0.0:145015): avc: denied { map_read } for scontext=u:r:system_server:s0 tcontext=u:r:init:s0 tclass=bpf permissive=1
+07-14 04:08:33.141 21569 21569 I adbd    : type=1400 audit(0.0:145016): avc: denied { search } for name="/" dev="sda6" ino=2 scontext=u:r:adbd:s0 tcontext=u:object_r:unlabeled:s0 tclass=dir permissive=1
+07-14 04:08:33.141 21569 21569 I adbd    : type=1400 audit(0.0:145017): avc: denied { read } for name="linker64" dev="sda6" ino=733 scontext=u:r:adbd:s0 tcontext=u:object_r:unlabeled:s0 tclass=lnk_file permissive=1
+07-14 04:08:33.144 21569 21569 I sh      : type=1400 audit(0.0:145018): avc: denied { read } for name="/" dev="sda6" ino=2 scontext=u:r:adbd:s0 tcontext=u:object_r:unlabeled:s0 tclass=dir permissive=1
+07-14 04:08:33.144 21569 21569 I sh      : type=1400 audit(0.0:145019): avc: denied { getattr } for path="/system" dev="sda6" ino=2 scontext=u:r:adbd:s0 tcontext=u:object_r:unlabeled:s0 tclass=dir permissive=1
+07-14 04:08:33.161 21569 21569 I pidof   : type=1400 audit(0.0:145020): avc: denied { search } for name="1" dev="proc" ino=9202 scontext=u:r:adbd:s0 tcontext=u:r:kernel:s0 tclass=dir permissive=1
+07-14 04:08:33.161 21569 21569 I pidof   : type=1400 audit(0.0:145021): avc: denied { read } for name="cmdline" dev="proc" ino=4222824 scontext=u:r:adbd:s0 tcontext=u:r:kernel:s0 tclass=file permissive=1
+07-14 04:08:33.161 21569 21569 I pidof   : type=1400 audit(0.0:145022): avc: denied { open } for path="/proc/1/cmdline" dev="proc" ino=4222824 scontext=u:r:adbd:s0 tcontext=u:r:kernel:s0 tclass=file permissive=1
+07-14 04:08:33.164 21569 21569 I pidof   : type=1400 audit(0.0:145023): avc: denied { search } for name="1010" dev="proc" ino=4171183 scontext=u:r:adbd:s0 tcontext=u:r:vendor_init:s0 tclass=dir permissive=1
+07-14 04:08:33.164 21569 21569 I pidof   : type=1400 audit(0.0:145024): avc: denied { read } for name="cmdline" dev="proc" ino=4222869 scontext=u:r:adbd:s0 tcontext=u:r:vendor_init:s0 tclass=file permissive=1
+07-14 04:08:33.337 15253 15265 W ocessService0:: Reducing the number of considered missed Gc histogram windows from 3726 to 100
+07-14 04:08:34.939  1152  1152 D opengl-gc: Check pid 11313: running 0
+07-14 04:08:37.334  1021  1021 I lmkd    : type=1400 audit(0.0:145076): avc: denied { write } for name="oom_score_adj" dev="proc" ino=4181165 scontext=u:r:init:s0 tcontext=u:r:permissioncontroller_app:s0:c36,c256,c512,c768 tclass=file permissive=1
+07-14 04:08:39.585  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.mumu.store|1|null|1000
+07-14 04:08:39.585  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.mumu.store|-1679252459|null|1000
+07-14 04:08:39.585  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.android.permissioncontroller|1|HibernationJobService|10036
+07-14 04:08:39.586  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.mumu.store|1|null|1000
+07-14 04:08:39.586  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.mumu.store|-1679252459|null|1000
+07-14 04:08:39.586  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.android.permissioncontroller|1|HibernationJobService|10036
+07-14 04:08:40.276  1042 21551 I keystore2: keystore2::watchdog: Watchdog thread idle -> terminating. Have a great day.
+07-14 04:08:47.698 28202 28208 W ssioncontrolle: Reducing the number of considered missed Gc histogram windows from 6991 to 100
+07-14 04:08:47.694 28202 28202 I HeapTaskDaemon: type=1400 audit(0.0:145077): avc: denied { sendto } for path="/dev/socket/logdw" scontext=u:r:permissioncontroller_app:s0:c36,c256,c512,c768 tcontext=u:r:init:s0 tclass=unix_dgram_socket permissive=1
+07-14 04:08:47.951  1103  1103 I Binder:1103_2: type=1400 audit(0.0:145078): avc: denied { read write } for path="socket:[4223718]" dev="sockfs" ino=4223718 scontext=u:r:init:s0 tcontext=u:r:platform_app:s0:c512,c768 tclass=tcp_socket permissive=1
+07-14 04:08:47.951  1103  1103 I Binder:1103_2: type=1400 audit(0.0:145079): avc: denied { getopt } for scontext=u:r:init:s0 tcontext=u:r:platform_app:s0:c512,c768 tclass=tcp_socket permissive=1
+07-14 04:08:47.951  1103  1103 I Binder:1103_2: type=1400 audit(0.0:145080): avc: denied { setopt } for scontext=u:r:init:s0 tcontext=u:r:platform_app:s0:c512,c768 tclass=tcp_socket permissive=1
+07-14 04:08:48.011  2018  2018 I pool-3-thread-1: type=1400 audit(0.0:145081): avc: denied { search } for name="/" dev="sda6" ino=2 scontext=u:r:platform_app:s0:c512,c768 tcontext=u:object_r:unlabeled:s0 tclass=dir permissive=1 app=com.mumu.acc
+07-14 04:08:52.938  1040  1040 I compat_ram_d: type=1400 audit(0.0:145082): avc: denied { read } for name="cpu" dev="proc" ino=4026532064 scontext=u:r:init:s0 tcontext=u:object_r:proc_pressure_cpu:s0 tclass=file permissive=1
+07-14 04:08:52.938  1040  1040 I compat_ram_d: type=1400 audit(0.0:145083): avc: denied { open } for path="/proc/pressure/cpu" dev="proc" ino=4026532064 scontext=u:r:init:s0 tcontext=u:object_r:proc_pressure_cpu:s0 tclass=file permissive=1
+07-14 04:08:52.938  1040  1040 I compat_ram_d: type=1400 audit(0.0:145084): avc: denied { getattr } for path="/proc/pressure/cpu" dev="proc" ino=4026532064 scontext=u:r:init:s0 tcontext=u:object_r:proc_pressure_cpu:s0 tclass=file permissive=1
+07-14 04:08:52.938  1040  1040 I compat_ram_d: type=1400 audit(0.0:145085): avc: denied { read } for name="io" dev="proc" ino=4026532062 scontext=u:r:init:s0 tcontext=u:object_r:proc_pressure_io:s0 tclass=file permissive=1
+07-14 04:08:52.938  1040  1040 I compat_ram_d: type=1400 audit(0.0:145086): avc: denied { open } for path="/proc/pressure/io" dev="proc" ino=4026532062 scontext=u:r:init:s0 tcontext=u:object_r:proc_pressure_io:s0 tclass=file permissive=1
+07-14 04:08:52.938  1040  1040 I compat_ram_d: type=1400 audit(0.0:145087): avc: denied { getattr } for path="/proc/pressure/io" dev="proc" ino=4026532062 scontext=u:r:init:s0 tcontext=u:object_r:proc_pressure_io:s0 tclass=file permissive=1
+07-14 04:08:55.381  1103  1103 I netd    : type=1400 audit(0.0:145088): avc: denied { create } for scontext=u:r:init:s0 tcontext=u:r:init:s0 tclass=netlink_tcpdiag_socket permissive=1
+07-14 04:08:55.381  1103  1103 I netd    : type=1400 audit(0.0:145089): avc: denied { connect } for scontext=u:r:init:s0 tcontext=u:r:init:s0 tclass=netlink_tcpdiag_socket permissive=1
+07-14 04:08:55.381  1103  1103 I netd    : type=1400 audit(0.0:145090): avc: denied { write } for path="socket:[4223720]" dev="sockfs" ino=4223720 scontext=u:r:init:s0 tcontext=u:r:init:s0 tclass=netlink_tcpdiag_socket permissive=1
+07-14 04:08:55.381  1103  1103 I netd    : type=1400 audit(0.0:145091): avc: denied { nlmsg_read } for scontext=u:r:init:s0 tcontext=u:r:init:s0 tclass=netlink_tcpdiag_socket permissive=1
+07-14 04:08:57.034  1021  1021 I lmkd    : type=1400 audit(0.0:145092): avc: denied { write } for name="oom_score_adj" dev="proc" ino=4181195 scontext=u:r:init:s0 tcontext=u:r:system_app:s0 tclass=file permissive=1
+07-14 04:08:57.034  1021  1021 I lmkd    : type=1400 audit(0.0:145093): avc: denied { write } for name="oom_score_adj" dev="proc" ino=4174332 scontext=u:r:init:s0 tcontext=u:r:priv_app:s0:c512,c768 tclass=file permissive=1
+07-14 04:08:57.034  1021  1021 I lmkd    : type=1400 audit(0.0:145094): avc: denied { write } for name="oom_score_adj" dev="proc" ino=4167655 scontext=u:r:init:s0 tcontext=u:r:platform_app:s0:c512,c768 tclass=file permissive=1
+07-14 04:09:04.104  1103  1103 I netd    : type=1400 audit(0.0:145095): avc: denied { read } for scontext=u:r:init:s0 tcontext=u:r:init:s0 tclass=netlink_kobject_uevent_socket permissive=1
+07-14 04:09:04.104  1103  1103 I netd    : type=1400 audit(0.0:145096): avc: denied { call } for scontext=u:r:init:s0 tcontext=u:r:network_stack:s0 tclass=binder permissive=1
+07-14 04:09:06.195 21585 21585 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+07-14 04:09:06.205 21585 21585 I AndroidRuntime: Using default boot image
+07-14 04:09:06.205 21585 21585 I AndroidRuntime: Leaving lock profiling enabled
+07-14 04:09:06.201 21585 21585 I app_process: type=1400 audit(0.0:145097): avc: denied { read } for name="u:object_r:device_config_runtime_native_boot_prop:s0" dev="tmpfs" ino=10351 scontext=u:r:adbd:s0 tcontext=u:object_r:device_config_runtime_native_boot_prop:s0 tclass=file permissive=1
+07-14 04:09:06.201 21585 21585 I app_process: type=1400 audit(0.0:145098): avc: denied { open } for path="/dev/__properties__/u:object_r:device_config_runtime_native_boot_prop:s0" dev="tmpfs" ino=10351 scontext=u:r:adbd:s0 tcontext=u:object_r:device_config_runtime_native_boot_prop:s0 tclass=file permissive=1
+07-14 04:09:06.201 21585 21585 I app_process: type=1400 audit(0.0:145099): avc: denied { getattr } for path="/dev/__properties__/u:object_r:device_config_runtime_native_boot_prop:s0" dev="tmpfs" ino=10351 scontext=u:r:adbd:s0 tcontext=u:object_r:device_config_runtime_native_boot_prop:s0 tclass=file permissive=1
+07-14 04:09:06.201 21585 21585 I app_process: type=1400 audit(0.0:145100): avc: denied { map } for path="/dev/__properties__/u:object_r:device_config_runtime_native_boot_prop:s0" dev="tmpfs" ino=10351 scontext=u:r:adbd:s0 tcontext=u:object_r:device_config_runtime_native_boot_prop:s0 tclass=file permissive=1
+07-14 04:09:06.201 21585 21585 I app_process: type=1400 audit(0.0:145101): avc: denied { read } for name="u:object_r:odsign_prop:s0" dev="tmpfs" ino=10424 scontext=u:r:adbd:s0 tcontext=u:object_r:odsign_prop:s0 tclass=file permissive=1
+07-14 04:09:06.201 21585 21585 I app_process: type=1400 audit(0.0:145102): avc: denied { open } for path="/dev/__properties__/u:object_r:odsign_prop:s0" dev="tmpfs" ino=10424 scontext=u:r:adbd:s0 tcontext=u:object_r:odsign_prop:s0 tclass=file permissive=1
+07-14 04:09:06.201 21585 21585 I app_process: type=1400 audit(0.0:145103): avc: denied { getattr } for path="/dev/__properties__/u:object_r:odsign_prop:s0" dev="tmpfs" ino=10424 scontext=u:r:adbd:s0 tcontext=u:object_r:odsign_prop:s0 tclass=file permissive=1
+07-14 04:09:06.201 21585 21585 I app_process: type=1400 audit(0.0:145104): avc: denied { map } for path="/dev/__properties__/u:object_r:odsign_prop:s0" dev="tmpfs" ino=10424 scontext=u:r:adbd:s0 tcontext=u:object_r:odsign_prop:s0 tclass=file permissive=1
+07-14 04:09:06.264 21585 21585 I app_process: type=1400 audit(0.0:145105): avc: denied { read } for name="u:object_r:device_config_runtime_native_prop:s0" dev="tmpfs" ino=10352 scontext=u:r:adbd:s0 tcontext=u:object_r:device_config_runtime_native_prop:s0 tclass=file permissive=1
+07-14 04:09:06.293 21585 21585 W app_process: ART APEX data files are untrusted.
+07-14 04:09:06.355 21585 21585 D app_process: Time zone APEX ICU file found: /apex/com.android.tzdata/etc/icu/icu_tzdata.dat
+07-14 04:09:06.355 21585 21585 D app_process: I18n APEX ICU file found: /apex/com.android.i18n/etc/icu/icudt68l.dat
+07-14 04:09:06.374 21585 21585 W app_process: Unexpected CPU variant for X86 using defaults: x86_64
+07-14 04:09:06.375 21585 21585 W System  : ClassLoader referenced unknown path: /system/framework/android.test.runner.jar
+07-14 04:09:06.423 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:09:06.424 21585 21585 E Zygote  : The " /system/etc/mumu-configs/device-prop-configs/arm.config" app property config file not exists!
+07-14 04:09:06.424 21585 21585 W Zygote  : In ".*shootgame.*" have not valid property config, ignore it
+07-14 04:09:06.424 21585 21585 E Zygote  : The " /system/etc/mumu-configs/device-prop-configs/arm.config" app property config file not exists!
+07-14 04:09:06.424 21585 21585 W Zygote  : In ".*hanju.*" have not valid property config, ignore it
+07-14 04:09:06.424 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:09:06.424 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/p50pro.config
+07-14 04:09:06.424 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/p50pro.config
+07-14 04:09:06.425 21585 21585 I Zygote  : getAppDeviceConfig find player priority
+07-14 04:09:06.425 21585 21585 I Zygote  : getAppDeviceConfig find player priority
+07-14 04:09:06.426 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/tzyxmznew.config
+07-14 04:09:06.426 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mate10pro.config
+07-14 04:09:06.426 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/gjqtmyr.config
+07-14 04:09:06.427 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mate10pro.config
+07-14 04:09:06.427 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:09:06.427 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi6.config
+07-14 04:09:06.427 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mate10pro.config
+07-14 04:09:06.427 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mate10pro.config
+07-14 04:09:06.427 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi11pro.config
+07-14 04:09:06.427 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:09:06.427 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:09:06.427 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:09:06.427 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:09:06.427 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:09:06.428 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:09:06.428 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:09:06.428 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:09:06.428 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:09:06.428 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi11pro.config
+07-14 04:09:06.428 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi11pro.config
+07-14 04:09:06.428 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi11pro.config
+07-14 04:09:06.428 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi11pro.config
+07-14 04:09:06.428 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi11pro.config
+07-14 04:09:06.428 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:09:06.428 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:09:06.428 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:09:06.429 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:09:06.430 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi14pro.config
+07-14 04:09:06.430 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi14pro.config
+07-14 04:09:06.430 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi14pro.config
+07-14 04:09:06.430 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/overseas_sim_info.config
+07-14 04:09:06.430 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/overseas_sim_info.config
+07-14 04:09:06.431 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:09:06.431 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/x86.config
+07-14 04:09:06.432 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/tzyxmznew.config
+07-14 04:09:06.432 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:09:06.432 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/pad.config
+07-14 04:09:06.434 21585 21585 I Zygote  : config file alreay parse:/system/etc/mumu-configs/device-prop-configs/yyb.config
+07-14 04:09:06.434 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsungsms9006.config
+07-14 04:09:06.435 21585 21585 I Zygote  : config file alreay parse:/system/etc/mumu-configs/device-prop-configs/yyb.config
+07-14 04:09:06.435 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:09:06.435 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/coc.config
+07-14 04:09:06.435 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/liapp.config
+07-14 04:09:06.435 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:09:06.435 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/overseas_sim_info.config
+07-14 04:09:06.435 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/liapp.config
+07-14 04:09:06.435 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/liapp.config
+07-14 04:09:06.435 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:09:06.435 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:09:06.436 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:09:06.436 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.436 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:09:06.436 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsungsms9080.config
+07-14 04:09:06.436 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi14pro.config
+07-14 04:09:06.436 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.436 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.436 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:09:06.437 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:09:06.437 21585 21585 I Zygote  : config file alreay parse:/system/etc/mumu-configs/device-prop-configs/yyb.config
+07-14 04:09:06.437 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_v2q.config
+07-14 04:09:06.437 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_v2q.config
+07-14 04:09:06.437 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_v2q.config
+07-14 04:09:06.437 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_v2q.config
+07-14 04:09:06.437 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.437 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.437 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsungsms9080.config
+07-14 04:09:06.437 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.437 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.438 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.438 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/liapp.config
+07-14 04:09:06.438 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.438 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.438 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.438 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.438 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.438 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.438 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsungsmg9910.config
+07-14 04:09:06.438 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.438 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/yunos.config
+07-14 04:09:06.438 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/yunos.config
+07-14 04:09:06.438 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/yunos.config
+07-14 04:09:06.438 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.438 21585 21585 I Zygote  : config file alreay parse:/system/etc/mumu-configs/device-prop-configs/yyb.config
+07-14 04:09:06.438 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/yunos.config
+07-14 04:09:06.439 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_s22_ultra.config
+07-14 04:09:06.439 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_s22_ultra.config
+07-14 04:09:06.439 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.439 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.439 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.439 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.439 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_s22_ultra.config
+07-14 04:09:06.439 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.439 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_s22_ultra.config
+07-14 04:09:06.439 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.439 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.439 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_s22_ultra.config
+07-14 04:09:06.439 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.440 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.440 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:09:06.440 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/liapp.config
+07-14 04:09:06.440 21585 21585 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_s22_ultra.config
+07-14 04:09:06.441 21585 21585 D Zygote  : Apps device config data:{com\.vng\.codmvn={ro.product.model=JAD-AL50, ro.product.manufacturer=HUAWEI, ro.product.name=JAD-AL50, ro.product.board=JAD-AL50, ro.product.brand=HUAWEI, ro.product.device=JAD-AL50}, com\.zhiliaoapp\.musically={gsm.operator.iso-country=us, gsm.sim.operator.iso-country=us, gsm.sim.operator.numeric=31001, gsm.version.baseband=2.5.1.c1, gsm.operator.numeric=31001}, com\.leniu\.lfcs.*={dalvik.vm.isa.x86.variant=--, ro.dalvik.vm.isa.arm64=--, ro.odm.product.cpu.abilist64=arm64-v8a, ro.boottime.adbd=--, ro.system.product.cpu.abilist=arm64-v8a,armeabi-v7a,armeabi, ro.vendor.product.cpu.abilist64=arm64-v8a, ro.system.product.cpu.abilist32=armeabi-v7a,armeabi, init.svc.adbd=--, ro.product.cpu.abilist64=arm64-v8a, ro.dalvik.vm.isa.arm=--, dalvik.vm.isa.x86_64.features=--, ro.vendor.product.cpu.abilist=arm64-v8a,armeabi-v7a,armeabi, ro.dalvik.vm.native.bridge=--, dalvik.vm.isa.x86.features=--, ro.odm.product.cpu.abilist32=armeabi-v7a,armeabi, persist.adb.wifi.guid=--, ro.adb.secure=--, dalvik.vm.isa.x86_64.variant=--, ro.product.cpu.abi2=armeabi-v7a, adb_drop_privileges=--, ro.enable.native.bridge.exec64=--, service.adb.root=--, qemu.hw.mainkeys=--, ro.vendor.product.cpu.abilist32=armeabi-v7a,armeabi, gsm.version.baseband=2.5.1.c1, ro.product.cpu.abi=arm64-v8a, ro.enable.native.bridge.exec=--, ro.bionic.2nd_arch=armeabi-v7a, ro.system.product.cpu.abilist64=arm64-v8a, adb_root=--, init.svc_debug_pid.adbd=--, ro.product.cpu.abilist32=armeabi-v7a,armeabi, ro.odm.product.cpu.abilist=arm64-v8a,armeabi-v7a,armeabi, ro.product.cpu.abilist=arm64-v8a,armeabi-v7a,armeabi, ro.bionic.arch=arm64}, com\.who\.android={ro.build.version.all_codenames=REL, ro.product.manufacturer=Xiaomi, ro.boot.ramdump=disable, ro.vendor.build.date=Sun, ro.build.hardware.version=V1, ro.hardware=qcom, ro.build.version.codename=REL, ro.build.version.release=12.0.0, ro.bootimage.build.fingerprint=Xiaomi/dipper/dipper:12.0.0/OPM1.171019.026/V10.0.11.0.OEACNFH:user/release-keys, ro.build.date.utc=1541867668, ro.bootimage.build.date.utc=1541867668, ro.product.cuptsm=XIAOMI|ESE|02|01, ro.vendor.extension_library=libqti-perfd-client.so, ro.product.cpu.abilist64=arm64-v8a, ro.product.name=dipper, ro.boot.serialno=e20b6590, ro.product.locale=zh-CN, ro.board.platform=sdm845, qcom.bluetooth.soc=cherokee, ro.boot.hardware=qcom, ro.build.user=builder, ro.boot.hwc=CN, ro.bootimage.build.date=Sun, ro.product.cpu.abi=arm64-v8a, ro.build.product=dipper, ro.build.type=user, ro.build.description=dipper-user, ro.vendor.product.manufacturer=Xiaomi, ro.vendor.product.model=MI, ro.product.cpu.abilist32=armeabi-v7a,armeabi, ro.build.version.sdk=31, ro.product.board=sdm845, ro.boot.verifiedbootstate=green, ro.build.version.incremental=V10.0.11.0.QQqun|788202866, ro.build.version.security_patch=2018-10-01, ro.product.cpu.abilist=arm64-v8a,armeabi-v7a,armeabi, ro.boot.secureboot=1, ro.vendor.product.device=dipper, ro.boot.hwlevel=MP, ro.build.date=Sun, ro.build.host=c3-miui-ota-bd123.bj, ro.build.tags=release-keys, ro.boot.usbcontroller=a600000.dwc3, ro.vendor.build.fingerprint=Xiaomi/dipper/dipper:12.0.0/OPM1.171019.026/V10.0.11.0.OEACNFH:user/release-keys, ro.product.brand=Xiaomi, ro.boot.baseband=sdm, ro.boot.veritymode=enforcing, ro.build.software.version=Android12.0.0_10, ro.build.flavor=dipper-user, ro.build.characteristics=nosdcard, ro.vendor.build.date.utc=1541867668, ro.product.model=MI, ro.boot.keymaster=1, ro.vendor.product.name=dipper, ro.product.first_api_level=31, ro.boot.hwversion=3.3.0, ro.product.device=dipper, ro.baseband=sdm, ro.build.fingerprint=Xiaomi/dipper/dipper:12.0.0/OPM1.171019.026/V10.0.11.0.OEACNFH:user/release-keys, ro.vendor.product.brand=Xiaomi, ro.build.version.preview_sdk=0, ro.product.cert=M1803E1A}, com\.netease\.sdsbq={ro.product.model=23116PN5BC, ro.product.manufacturer=Xiaomi, ro.product.name=shennong, ro.product.board=shennong, ro.product.brand=Xiaomi, ro.product.device=shennong}, .*shangzhai\.yjfm.*={ro.product.system.name=v2qzc, ro.vendor.build.version.release_or_codename=12, ro.build.vers
+07-14 04:09:06.441 21585 21585 D Zygote  : Apps device config player priority data: [.*com\.riotgames\.league\.wildrift.*, .*dts\.freefire.*]
+07-14 04:09:06.441 21585 21585 E Zygote  : The " /pcgame/app-device-prop-overlay.config" property config file not exists!
+07-14 04:09:06.443 21585 21585 D Zygote  : getAppDeviceChannelConfig pattern = .*\.mi
+07-14 04:09:06.443 21585 21585 D Zygote  : getAppDeviceChannelConfig pattern = .*\.samsung
+07-14 04:09:06.443 21585 21585 D Zygote  : getAppDeviceChannelConfig pattern = .*\.huawei
+07-14 04:09:06.444 21585 21585 D Zygote  : Apps device channel config data:{.*\.samsung={ro.product.model=SM-G9910, ro.product.manufacturer=samsung, ro.product.name=SM-G9910, ro.product.board=SM-G9910, ro.product.brand=samsung, ro.product.device=SM-G9910}, .*\.huawei={ro.product.model=BLA-AL00, ro.product.manufacturer=HUAWEI, ro.product.name=BLA-AL00, ro.product.board=BLA-AL00, ro.product.brand=HUAWEI, ro.product.device=BLA-AL00}, .*\.mi={ro.product.model=M2102K1AC, ro.product.manufacturer=Xiaomi, ro.product.name=mars, ro.product.board=mars, ro.product.brand=Xiaomi, ro.product.device=mars}}
+07-14 04:09:06.458 21585 21585 D ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+07-14 04:09:06.459 21585 21585 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+07-14 04:09:06.472  1275  1275 D BatterySaverPolicy: accessibility changed to true, updating policy.
+07-14 04:09:07.471 21515 21515 I oozh.translator: type=1400 audit(0.0:145121): avc: denied { call } for scontext=u:r:untrusted_app:s0:c58,c256,c512,c768 tcontext=u:r:adbd:s0 tclass=binder permissive=1 app=com.poozh.translator
+07-14 04:09:07.474 21585 21585 I uiautomator: type=1400 audit(0.0:145122): avc: denied { read } for name="u:object_r:qemu_sf_lcd_density_prop:s0" dev="tmpfs" ino=10441 scontext=u:r:adbd:s0 tcontext=u:object_r:qemu_sf_lcd_density_prop:s0 tclass=file permissive=1
+07-14 04:09:07.474 21585 21585 I uiautomator: type=1400 audit(0.0:145123): avc: denied { open } for path="/dev/__properties__/u:object_r:qemu_sf_lcd_density_prop:s0" dev="tmpfs" ino=10441 scontext=u:r:adbd:s0 tcontext=u:object_r:qemu_sf_lcd_density_prop:s0 tclass=file permissive=1
+07-14 04:09:07.474 21585 21585 I uiautomator: type=1400 audit(0.0:145124): avc: denied { getattr } for path="/dev/__properties__/u:object_r:qemu_sf_lcd_density_prop:s0" dev="tmpfs" ino=10441 scontext=u:r:adbd:s0 tcontext=u:object_r:qemu_sf_lcd_density_prop:s0 tclass=file permissive=1
+07-14 04:09:07.474 21585 21585 I uiautomator: type=1400 audit(0.0:145125): avc: denied { map } for path="/dev/__properties__/u:object_r:qemu_sf_lcd_density_prop:s0" dev="tmpfs" ino=10441 scontext=u:r:adbd:s0 tcontext=u:object_r:qemu_sf_lcd_density_prop:s0 tclass=file permissive=1
+07-14 04:09:07.489 21585 21585 W AccessibilityNodeInfoDumper: Fetch time: 11ms
+07-14 04:09:07.491  1275  1275 D BatterySaverPolicy: accessibility changed to false, updating policy.
+07-14 04:09:07.497 21585 21585 D hw-ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+07-14 04:09:07.497 21585 21585 D AndroidRuntime: Shutting down VM
+07-14 04:09:10.931  1556  1556 I IpClient.wlan0: type=1400 audit(0.0:145127): avc: denied { call } for scontext=u:r:network_stack:s0 tcontext=u:r:init:s0 tclass=binder permissive=1
+07-14 04:09:11.966  1275  1311 E system_server: Cannot read thread CPU times for PID 1275
+07-14 04:09:11.984  1124  1124 I surfaceflinger: type=1400 audit(0.0:145128): avc: denied { call } for scontext=u:r:init:s0 tcontext=u:r:platform_app:s0:c512,c768 tclass=binder permissive=1
+07-14 04:09:11.984  1124  1124 I surfaceflinger: type=1400 audit(0.0:145129): avc: denied { transfer } for scontext=u:r:init:s0 tcontext=u:r:platform_app:s0:c512,c768 tclass=binder permissive=1
+07-14 04:09:12.871  1275  1275 I WifiHandlerThre: type=1400 audit(0.0:145130): avc: denied { call } for scontext=u:r:system_server:s0 tcontext=u:r:init:s0 tclass=binder permissive=1
+07-14 04:09:12.871  1275  1275 I WifiHandlerThre: type=1400 audit(0.0:145131): avc: denied { sendto } for path="/dev/socket/statsdw" scontext=u:r:system_server:s0 tcontext=u:r:init:s0 tclass=unix_dgram_socket permissive=1
+07-14 04:09:22.938  1040  1040 I compat_ram_d: type=1400 audit(0.0:145132): avc: denied { read } for name="io" dev="proc" ino=4026532062 scontext=u:r:init:s0 tcontext=u:object_r:proc_pressure_io:s0 tclass=file permissive=1
+07-14 04:09:22.938  1040  1040 I compat_ram_d: type=1400 audit(0.0:145133): avc: denied { open } for path="/proc/pressure/io" dev="proc" ino=4026532062 scontext=u:r:init:s0 tcontext=u:object_r:proc_pressure_io:s0 tclass=file permissive=1
+07-14 04:09:22.938  1040  1040 I compat_ram_d: type=1400 audit(0.0:145134): avc: denied { getattr } for path="/proc/pressure/io" dev="proc" ino=4026532062 scontext=u:r:init:s0 tcontext=u:object_r:proc_pressure_io:s0 tclass=file permissive=1
+07-14 04:09:52.942  1040  1045 I NemuSysOpt: Start compat memory
+07-14 04:09:52.938  1040  1040 I compat_ram_d: type=1400 audit(0.0:145135): avc: denied { write } for name="compact_memory" dev="proc" ino=4184493 scontext=u:r:init:s0 tcontext=u:object_r:proc:s0 tclass=file permissive=1
+07-14 04:09:53.131  1040  1045 I NemuSysOpt: Compat memory done
+07-14 04:10:18.280  1116  1116 E android.hardware.power.stats@1.0-service-mock: Failed to getEnergyData
+07-14 04:10:30.371 15401 15401 I thread_report: type=1400 audit(0.0:145136): avc: denied { call } for scontext=u:r:untrusted_app:s0:c39,c256,c512,c768 tcontext=u:r:init:s0 tclass=binder permissive=1 app=com.bilibili.azurlane
+07-14 04:10:34.938  1152  1152 I opengl-gc: type=1400 audit(0.0:145137): avc: denied { ioctl } for path="/dev/vaddress" dev="tmpfs" ino=11071 ioctlcmd=0x4c19 scontext=u:r:init:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+07-14 04:11:00.004  1457  1457 I RenderThread: type=1400 audit(0.0:145138): avc: denied { ioctl } for path="/dev/vaddress" dev="tmpfs" ino=11071 ioctlcmd=0x4c19 scontext=u:r:platform_app:s0:c512,c768 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1 app=com.android.systemui
+07-14 04:11:11.965  1275  1311 E system_server: Cannot read thread CPU times for PID 1275
+07-14 04:11:25.758  1103  1103 I netd    : type=1400 audit(0.0:145139): avc: denied { call } for scontext=u:r:init:s0 tcontext=u:r:network_stack:s0 tclass=binder permissive=1
+07-14 04:11:25.758  1032  1032 I Binder:1032_2: type=1400 audit(0.0:145140): avc: denied { read } for scontext=u:r:init:s0 tcontext=u:r:init:s0 tclass=netlink_kobject_uevent_socket permissive=1
+07-14 04:11:28.041  1275  1275 I WifiHandlerThre: type=1400 audit(0.0:145141): avc: denied { map_read } for scontext=u:r:system_server:s0 tcontext=u:r:init:s0 tclass=bpf permissive=1
+07-14 04:11:46.531 21632 21632 D ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+07-14 04:11:46.533  1275  1433 W ActivityManager: Background start not allowed: service Intent { cmp=com.github.uiautomator/.Service } to com.github.uiautomator/.Service from pid=21632 uid=2000 pkg=com.android.shell startFg?=false
+07-14 04:11:46.528 21632 21632 I cmd     : type=1400 audit(0.0:145142): avc: denied { write } for path="pipe:[4223820]" dev="pipefs" ino=4223820 scontext=u:r:system_server:s0 tcontext=u:r:adbd:s0 tclass=fifo_file permissive=1
+07-14 04:12:00.233  1038  1052 I nemuinit: callHost __iconupdater_OooOoo 
+07-14 04:12:00.234  1038  1052 I nemuinit: callHost __iconupdater_OOOOoo 
+07-14 04:12:00.721  1038  1052 I nemuinit: callHost refresh_icons 
+07-14 04:12:00.721  1038  1052 I nemuinit: callHost __iconupdater_OooOoo 
+07-14 04:12:00.718  1038  1038 I tokio-runtime-w: type=1400 audit(0.0:145143): avc: denied { write } for name="dnsproxyd" dev="tmpfs" ino=11746 scontext=u:r:init:s0 tcontext=u:object_r:dnsproxyd_socket:s0 tclass=sock_file permissive=1
+07-14 04:12:00.741  1038  1038 I Binder:1038_2: type=1400 audit(0.0:145144): avc: denied { create } for scontext=u:r:init:s0 tcontext=u:r:init:s0 tclass=tcp_socket permissive=1
+07-14 04:12:00.741  1038  1038 I Binder:1038_2: type=1400 audit(0.0:145145): avc: denied { getopt } for scontext=u:r:init:s0 tcontext=u:r:init:s0 tclass=tcp_socket permissive=1
+07-14 04:12:00.741  1038  1038 I Binder:1038_2: type=1400 audit(0.0:145146): avc: denied { write } for name="fwmarkd" dev="tmpfs" ino=11750 scontext=u:r:init:s0 tcontext=u:object_r:fwmarkd_socket:s0 tclass=sock_file permissive=1
+07-14 04:12:00.741  1103  1103 I Binder:1103_2: type=1400 audit(0.0:145147): avc: denied { read write } for path="socket:[4224254]" dev="sockfs" ino=4224254 scontext=u:r:init:s0 tcontext=u:r:init:s0 tclass=tcp_socket permissive=1
+07-14 04:12:00.741  1103  1103 I Binder:1103_2: type=1400 audit(0.0:145148): avc: denied { setopt } for scontext=u:r:init:s0 tcontext=u:r:init:s0 tclass=tcp_socket permissive=1
+07-14 04:12:00.741  1038  1038 I Binder:1038_2: type=1400 audit(0.0:145149): avc: denied { connect } for scontext=u:r:init:s0 tcontext=u:r:init:s0 tclass=tcp_socket permissive=1
+07-14 04:12:00.741  1038  1038 I Binder:1038_2: type=1400 audit(0.0:145150): avc: denied { name_connect } for dest=443 scontext=u:r:init:s0 tcontext=u:object_r:port:s0 tclass=tcp_socket permissive=1
+07-14 04:12:00.831  1038  1038 I Binder:1038_2: type=1400 audit(0.0:145151): avc: denied { getattr } for laddr=10.0.2.15 lport=43092 faddr=124.160.141.122 fport=443 scontext=u:r:init:s0 tcontext=u:r:init:s0 tclass=tcp_socket permissive=1
+07-14 04:12:09.353  1275  1289 D WifiNl80211Manager: Scan result ready event
+07-14 04:12:09.353  1275  1289 D WifiNative: Scan result ready event
+07-14 04:12:11.971  1275  1311 W BatteryExternalStatsWorker: error reading modem stats:ERROR_PHONE_NOT_AVAILABLE
+07-14 04:12:11.972  1275  1311 E system_server: Cannot read thread CPU times for PID 1275
+07-14 04:12:11.968  1041  1041 I Binder:1041_2: type=1400 audit(0.0:145153): avc: denied { read } for name="event_count" dev="sysfs" ino=10010 scontext=u:r:init:s0 tcontext=u:object_r:sysfs_wakeup:s0 tclass=file permissive=1
+07-14 04:12:11.968  1041  1041 I Binder:1041_2: type=1400 audit(0.0:145154): avc: denied { open } for path="/sys/devices/virtual/wakeup/wakeup18/event_count" dev="sysfs" ino=10010 scontext=u:r:init:s0 tcontext=u:object_r:sysfs_wakeup:s0 tclass=file permissive=1
+07-14 04:12:18.280  1116  1116 E android.hardware.power.stats@1.0-service-mock: Failed to getEnergyData
+07-14 04:12:23.132  1040  1045 I NemuSysOpt: Start compat memory
+07-14 04:12:23.134  1040  1045 I NemuSysOpt: Compat memory done
+07-14 04:12:26.728  1038  1780 I nemuinit: callHost __iconupdater_OooOoo 
+07-14 04:12:26.729  1038  1780 I nemuinit: callHost __iconupdater_OOOOoo 
+07-14 04:12:26.724  1032  1032 I vold    : type=1400 audit(0.0:145155): avc: denied { transfer } for scontext=u:r:init:s0 tcontext=u:r:init:s0 tclass=binder permissive=1
+07-14 04:12:26.738  1038 23615 I nemuinit: callHost __iconupdater_OooOoo 
+07-14 04:12:26.734  1275  1275 I system_server: type=1400 audit(0.0:145156): avc: denied { transfer } for scontext=u:r:system_server:s0 tcontext=u:r:init:s0 tclass=binder permissive=1
+07-14 04:12:26.963  1038  1780 I nemuinit: callHost refresh_icons 
+07-14 04:12:26.963  1038 23615 I nemuinit: callHost __iconupdater_OOOOoo 
+07-14 04:12:26.964  1038  1780 I nemuinit: callHost __iconupdater_OooOoo 
+07-14 04:12:27.230  1038 28357 I nemuinit: callHost refresh_icons 
+07-14 04:12:27.230  1038 28357 I nemuinit: callHost __iconupdater_OooOoo 
+07-14 04:12:27.248  1103  1103 I Binder:1103_2: type=1400 audit(0.0:145157): avc: denied { use } for path="socket:[4223869]" dev="sockfs" ino=4223869 scontext=u:r:init:s0 tcontext=u:r:system_server:s0 tclass=fd permissive=1
+07-14 04:12:27.248  1103  1103 I Binder:1103_2: type=1400 audit(0.0:145158): avc: denied { read write } for path="socket:[4223869]" dev="sockfs" ino=4223869 scontext=u:r:init:s0 tcontext=u:r:system_server:s0 tclass=tcp_socket permissive=1
+07-14 04:12:27.248  1103  1103 I Binder:1103_2: type=1400 audit(0.0:145159): avc: denied { getopt } for scontext=u:r:init:s0 tcontext=u:r:system_server:s0 tclass=tcp_socket permissive=1
+07-14 04:12:27.248  1103  1103 I Binder:1103_2: type=1400 audit(0.0:145160): avc: denied { setopt } for scontext=u:r:init:s0 tcontext=u:r:system_server:s0 tclass=tcp_socket permissive=1
+07-14 04:13:11.966  1275  1311 E system_server: Cannot read thread CPU times for PID 1275
+07-14 04:14:06.222  1275  1311 W BatteryExternalStatsWorker: error reading modem stats:ERROR_PHONE_NOT_AVAILABLE
+07-14 04:14:06.223  1275  1311 E system_server: Cannot read thread CPU times for PID 1275
+07-14 04:14:17.700  1275  1294 I EntropyMixer: Writing entropy...
+07-14 04:14:18.280  1116  1116 E android.hardware.power.stats@1.0-service-mock: Failed to getEnergyData
+07-14 04:14:53.135  1040  1045 I NemuSysOpt: Start compat memory
+07-14 04:14:53.156  1040  1045 I NemuSysOpt: Compat memory done
+07-14 04:15:11.966  1275  1311 E system_server: Cannot read thread CPU times for PID 1275
+07-14 04:15:55.388  1141  1141 I storaged: type=1400 audit(0.0:145161): avc: denied { rename } for name="storaged.proto_tmp" dev="sdc3" ino=8257564 scontext=u:r:init:s0 tcontext=u:object_r:storaged_data_file:s0 tclass=file permissive=1
+07-14 04:16:18.281  1116  1116 E android.hardware.power.stats@1.0-service-mock: Failed to getEnergyData
+07-14 04:16:20.377  1275  1303 I UsageStatsService: User[0] Flushing usage stats to disk
+07-14 04:16:46.554 21666 21666 D ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+07-14 04:16:46.555  1275  1451 W ActivityManager: Background start not allowed: service Intent { cmp=com.github.uiautomator/.Service } to com.github.uiautomator/.Service from pid=21666 uid=2000 pkg=com.android.shell startFg?=false
+07-14 04:16:46.551 21666 21666 I cmd     : type=1400 audit(0.0:145162): avc: denied { write } for path="pipe:[4224334]" dev="pipefs" ino=4224334 scontext=u:r:system_server:s0 tcontext=u:r:adbd:s0 tclass=fifo_file permissive=1
+07-14 04:16:49.356  1275  1451 D WifiNl80211Manager: Scan result ready event
+07-14 04:16:49.356  1275  1451 D WifiNative: Scan result ready event
+07-14 04:16:49.368  1275  1373 W BestClock: java.time.DateTimeException: Missing NTP fix
+07-14 04:16:49.354 28488 28488 I viders.calendar: type=1400 audit(0.0:145163): avc: denied { getattr } for path="/system/framework/framework-res.apk" dev="sda6" ino=2324 scontext=u:r:priv_app:s0:c512,c768 tcontext=u:object_r:unlabeled:s0 tclass=file permissive=1
+07-14 04:16:49.391  1275  1373 W BestClock: java.time.DateTimeException: Missing NTP fix
+07-14 04:16:49.381  1275  1275 I NetworkStats: type=1400 audit(0.0:145164): avc: denied { map_write } for scontext=u:r:system_server:s0 tcontext=u:r:init:s0 tclass=bpf permissive=1
+07-14 04:16:49.396  1275  1374 W BestClock: java.time.DateTimeException: Missing NTP fix
+07-14 04:16:49.396  1275  1374 W BestClock: java.time.DateTimeException: Missing NTP fix
+07-14 04:16:49.407 28488 28496 W viders.calenda: Reducing the number of considered missed Gc histogram windows from 4334 to 100
+07-14 04:16:49.404 28488 28488 I HeapTaskDaemon: type=1400 audit(0.0:145165): avc: denied { sendto } for path="/dev/socket/logdw" scontext=u:r:priv_app:s0:c512,c768 tcontext=u:r:init:s0 tclass=unix_dgram_socket permissive=1
+07-14 04:17:11.966  1275  1311 E system_server: Cannot read thread CPU times for PID 1275
+07-14 04:17:23.157  1040  1045 I NemuSysOpt: Start compat memory
+07-14 04:17:23.184  1040  1045 I NemuSysOpt: Compat memory done
+07-14 04:18:18.281  1116  1116 E android.hardware.power.stats@1.0-service-mock: Failed to getEnergyData
+07-14 04:19:11.966  1275  1311 E system_server: Cannot read thread CPU times for PID 1275
+07-14 04:19:45.442 15183 21680 I Unity   : 2026/7/14 4:19:45 Connection was closed by server.
+07-14 04:19:45.442 15183 21680 I Unity   : Connection:OnReceive(Object, SocketAsyncEventArgs)
+07-14 04:19:45.442 15183 21680 I Unity   : System.Net.Sockets.<>c:<.cctor>b__367_10(IAsyncResult)
+07-14 04:19:45.442 15183 21680 I Unity   : System.Threading.ThreadPoolWorkQueue:Dispatch()
+07-14 04:19:45.442 15183 21680 I Unity   : 
+07-14 04:19:53.184  1040  1045 I NemuSysOpt: Start compat memory
+07-14 04:19:53.208  1040  1045 I NemuSysOpt: Compat memory done
+07-14 04:20:11.965  1275  1311 W BatteryExternalStatsWorker: error reading modem stats:ERROR_PHONE_NOT_AVAILABLE
+07-14 04:20:11.966  1275  1311 E system_server: Cannot read thread CPU times for PID 1275
+07-14 04:20:18.281  1116  1116 E android.hardware.power.stats@1.0-service-mock: Failed to getEnergyData
+07-14 04:21:11.966  1275  1311 E system_server: Cannot read thread CPU times for PID 1275
+07-14 04:21:29.356  1275  1289 D WifiNl80211Manager: Scan result ready event
+07-14 04:21:29.356  1275  1289 D WifiNative: Scan result ready event
+07-14 04:21:46.576 21690 21690 D ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+07-14 04:21:46.578  1275  1451 W ActivityManager: Background start not allowed: service Intent { cmp=com.github.uiautomator/.Service } to com.github.uiautomator/.Service from pid=21690 uid=2000 pkg=com.android.shell startFg?=false
+07-14 04:21:46.574  1022  1022 I servicemanager: type=1400 audit(0.0:145166): avc: denied { transfer } for scontext=u:r:init:s0 tcontext=u:r:adbd:s0 tclass=binder permissive=1
+07-14 04:22:01.039  1038  1052 I nemuinit: callHost __iconupdater_OooOoo 
+07-14 04:22:01.040  1038  1052 I nemuinit: callHost __iconupdater_OOOOoo 
+07-14 04:22:01.476  1038  1052 I nemuinit: callHost refresh_icons 
+07-14 04:22:01.477  1038  1052 I nemuinit: callHost __iconupdater_OooOoo 
+07-14 04:22:18.281  1116  1116 E android.hardware.power.stats@1.0-service-mock: Failed to getEnergyData
+07-14 04:22:23.208  1040  1045 I NemuSysOpt: Start compat memory
+07-14 04:22:23.214  1040  1045 I NemuSysOpt: Compat memory done
+07-14 04:22:27.523  1038 28357 I nemuinit: callHost __iconupdater_OooOoo 
+07-14 04:22:27.524  1038 28357 I nemuinit: callHost __iconupdater_OOOOoo 
+07-14 04:22:27.544  1038  1780 I nemuinit: callHost __iconupdater_OooOoo 
+07-14 04:22:27.760  1038 28357 I nemuinit: callHost refresh_icons 
+07-14 04:22:27.760  1038 23615 I nemuinit: callHost __iconupdater_OOOOoo 
+07-14 04:22:27.761  1038 28357 I nemuinit: callHost __iconupdater_OooOoo 
+07-14 04:22:28.131  1038 23615 I nemuinit: callHost refresh_icons 
+07-14 04:22:28.132  1038 23615 I nemuinit: callHost __iconupdater_OooOoo 
+07-14 04:22:28.930  1275  1286 W System  : A resource failed to call release. 
+07-14 04:23:11.965  1275  1311 E system_server: Cannot read thread CPU times for PID 1275
+07-14 04:24:18.281  1116  1116 E android.hardware.power.stats@1.0-service-mock: Failed to getEnergyData
+07-14 04:24:32.492 21707 21707 D ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+07-14 04:24:32.501  1275  1317 V DisplayPowerController[0]: Brightness [0.39763778] reason changing to: 'manual', previous reason: 'manual [ dim ]'.
+07-14 04:24:32.494 21515 21515 I oozh.translator: type=1400 audit(0.0:145167): avc: denied { call } for scontext=u:r:untrusted_app:s0:c58,c256,c512,c768 tcontext=u:r:init:s0 tclass=binder permissive=1 app=com.poozh.translator
+07-14 04:24:32.511  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.512  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.513  1275  1304 I DropBoxManagerService: add tag=system_server_wtf isTagEnabled=true flags=0x2
+07-14 04:24:32.516  1124  1183 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:24:32.494 21515 21515 I oozh.translator: type=1400 audit(0.0:145168): avc: denied { read } for scontext=u:r:untrusted_app:s0:c58,c256,c512,c768 tcontext=u:r:init:s0 tclass=unix_stream_socket permissive=1 app=com.poozh.translator
+07-14 04:24:32.521  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:24:32.522  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.522  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.522  1124  1183 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:24:32.523  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:24:32.524  1275  1304 I DropBoxManagerService: add tag=system_server_wtf isTagEnabled=true flags=0x2
+07-14 04:24:32.525  1275  1304 I DropBoxManagerService: add tag=system_server_wtf isTagEnabled=true flags=0x2
+07-14 04:24:32.525  1275  1304 I DropBoxManagerService: add tag=system_server_wtf isTagEnabled=true flags=0x2
+07-14 04:24:32.521 21515 21515 I oozh.translator: type=1400 audit(0.0:145169): avc: denied { sendto } for path="/dev/socket/statsdw" scontext=u:r:untrusted_app:s0:c58,c256,c512,c768 tcontext=u:r:init:s0 tclass=unix_dgram_socket permissive=1 app=com.poozh.translator
+07-14 04:24:32.548  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.521 21515 21515 I RenderThread: type=1400 audit(0.0:145170): avc: denied { ioctl } for path="/dev/vaddress" dev="tmpfs" ino=11071 ioctlcmd=0x4c19 scontext=u:r:untrusted_app:s0:c58,c256,c512,c768 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1 app=com.poozh.translator
+07-14 04:24:32.548  1275  1433 D CompatibilityChangeReporter: Compat change id reported: 168419799; UID 10058; state: DISABLED
+07-14 04:24:32.549  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.552 21515 21515 D CompatibilityChangeReporter: Compat change id reported: 147798919; UID 10058; state: ENABLED
+07-14 04:24:32.561  1124  1183 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:24:32.562  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:24:32.562  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.562  1275  1304 I DropBoxManagerService: add tag=system_server_wtf isTagEnabled=true flags=0x2
+07-14 04:24:32.562  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.562  1124  1183 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:24:32.562  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:24:32.524 21515 21515 I RenderThread: type=1400 audit(0.0:145171): avc: denied { map } for path="/dev/vaddress" dev="tmpfs" ino=11071 scontext=u:r:untrusted_app:s0:c58,c256,c512,c768 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1 app=com.poozh.translator
+07-14 04:24:32.524 21515 21515 I RenderThread: type=1400 audit(0.0:145172): avc: denied { read write } for path="/dev/vaddress" dev="tmpfs" ino=11071 scontext=u:r:untrusted_app:s0:c58,c256,c512,c768 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1 app=com.poozh.translator
+07-14 04:24:32.577  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.577  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.577  1124  1321 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:24:32.578  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:24:32.589  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.589  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.589  1457  1457 W ziparchive: Unable to open '/data/app/~~qWa-PXc4ZK4xleU6q_PLnQ==/com.poozh.translator-1sQCn6qYHKOjJKsUTM5KNw==/base.apk': No such file or directory
+07-14 04:24:32.590  1457  1457 E ndroid.systemu: Failed to open APK '/data/app/~~qWa-PXc4ZK4xleU6q_PLnQ==/com.poozh.translator-1sQCn6qYHKOjJKsUTM5KNw==/base.apk': I/O error
+07-14 04:24:32.591  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:24:32.591  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:24:32.594  1457  1457 W ResourcesManager: failed to preload asset path '/data/app/~~qWa-PXc4ZK4xleU6q_PLnQ==/com.poozh.translator-1sQCn6qYHKOjJKsUTM5KNw==/base.apk'
+07-14 04:24:32.594  1457  1457 W ResourcesManager: java.io.IOException: Failed to load asset path /data/app/~~qWa-PXc4ZK4xleU6q_PLnQ==/com.poozh.translator-1sQCn6qYHKOjJKsUTM5KNw==/base.apk
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at android.content.res.ApkAssets.nativeLoad(Native Method)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at android.content.res.ApkAssets.<init>(ApkAssets.java:295)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at android.content.res.ApkAssets.loadFromPath(ApkAssets.java:144)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at android.app.ResourcesManager.loadApkAssets(ResourcesManager.java:469)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at android.app.ResourcesManager.access$000(ResourcesManager.java:72)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at android.app.ResourcesManager$ApkAssetsSupplier.load(ResourcesManager.java:183)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at android.app.ResourcesManager.createApkAssetsSupplierNotLocked(ResourcesManager.java:1007)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at android.app.ResourcesManager.getResources(ResourcesManager.java:1128)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at android.app.ActivityThread.getTopLevelResources(ActivityThread.java:2471)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at android.app.ApplicationPackageManager.getResourcesForApplication(ApplicationPackageManager.java:1758)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at android.app.ApplicationPackageManager.getResourcesForApplication(ApplicationPackageManager.java:1744)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at android.app.ApplicationPackageManager.getDrawable(ApplicationPackageManager.java:1510)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at android.app.ApplicationPackageManager.loadUnbadgedItemIcon(ApplicationPackageManager.java:3040)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at android.content.pm.PackageItemInfo.loadUnbadgedIcon(PackageItemInfo.java:326)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at com.android.systemui.toast.SystemUIToast.getBadgedIcon(SystemUIToast.java:286)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at com.android.systemui.toast.SystemUIToast.inflateToastView(SystemUIToast.java:198)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at com.android.systemui.toast.SystemUIToast.<init>(SystemUIToast.java:90)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at com.android.systemui.toast.SystemUIToast.<init>(SystemUIToast.java:77)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at com.android.systemui.toast.ToastFactory.createToast(ToastFactory.java:78)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at com.android.systemui.toast.ToastUI.lambda$showToast$0(ToastUI.java:113)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at com.android.systemui.toast.ToastUI.$r8$lambda$w_gPCh3F8Xxn1jN4lkQZoUci71c(Unknown Source:0)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at com.android.systemui.toast.ToastUI$$ExternalSyntheticLambda0.run(Unknown Source:16)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at com.android.systemui.toast.ToastUI.showToast(ToastUI.java:140)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at com.android.systemui.statusbar.CommandQueue$H.handleMessage(CommandQueue.java:1451)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at android.os.Looper.loopOnce(Looper.java:201)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at android.os.Looper.loop(Looper.java:288)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at android.app.ActivityThread.main(ActivityThread.java:8085)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at java.lang.reflect.Method.invoke(Native Method)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:571)
+07-14 04:24:32.594  1457  1457 W ResourcesManager: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1091)
+07-14 04:24:32.594  1457  1457 W ziparchive: Unable to open '/data/app/~~qWa-PXc4ZK4xleU6q_PLnQ==/com.poozh.translator-1sQCn6qYHKOjJKsUTM5KNw==/base.apk': No such file or directory
+07-14 04:24:32.594  1457  1457 E ndroid.systemu: Failed to open APK '/data/app/~~qWa-PXc4ZK4xleU6q_PLnQ==/com.poozh.translator-1sQCn6qYHKOjJKsUTM5KNw==/base.apk': I/O error
+07-14 04:24:32.594  1457  1457 E ResourcesManager: failed to add asset path '/data/app/~~qWa-PXc4ZK4xleU6q_PLnQ==/com.poozh.translator-1sQCn6qYHKOjJKsUTM5KNw==/base.apk'
+07-14 04:24:32.594  1457  1457 E ResourcesManager: java.io.IOException: Failed to load asset path /data/app/~~qWa-PXc4ZK4xleU6q_PLnQ==/com.poozh.translator-1sQCn6qYHKOjJKsUTM5KNw==/base.apk
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.content.res.ApkAssets.nativeLoad(Native Method)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.content.res.ApkAssets.<init>(ApkAssets.java:295)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.content.res.ApkAssets.loadFromPath(ApkAssets.java:144)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.app.ResourcesManager.loadApkAssets(ResourcesManager.java:469)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.app.ResourcesManager.access$000(ResourcesManager.java:72)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.app.ResourcesManager$ApkAssetsSupplier.load(ResourcesManager.java:183)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.app.ResourcesManager.createAssetManager(ResourcesManager.java:551)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.app.ResourcesManager.createResourcesImpl(ResourcesManager.java:633)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.app.ResourcesManager.findOrCreateResourcesImplForKeyLocked(ResourcesManager.java:685)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.app.ResourcesManager.createResources(ResourcesManager.java:1038)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.app.ResourcesManager.getResources(ResourcesManager.java:1141)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.app.ActivityThread.getTopLevelResources(ActivityThread.java:2471)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.app.ApplicationPackageManager.getResourcesForApplication(ApplicationPackageManager.java:1758)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.app.ApplicationPackageManager.getResourcesForApplication(ApplicationPackageManager.java:1744)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.app.ApplicationPackageManager.getDrawable(ApplicationPackageManager.java:1510)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.app.ApplicationPackageManager.loadUnbadgedItemIcon(ApplicationPackageManager.java:3040)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.content.pm.PackageItemInfo.loadUnbadgedIcon(PackageItemInfo.java:326)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at com.android.systemui.toast.SystemUIToast.getBadgedIcon(SystemUIToast.java:286)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at com.android.systemui.toast.SystemUIToast.inflateToastView(SystemUIToast.java:198)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at com.android.systemui.toast.SystemUIToast.<init>(SystemUIToast.java:90)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at com.android.systemui.toast.SystemUIToast.<init>(SystemUIToast.java:77)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at com.android.systemui.toast.ToastFactory.createToast(ToastFactory.java:78)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at com.android.systemui.toast.ToastUI.lambda$showToast$0(ToastUI.java:113)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at com.android.systemui.toast.ToastUI.$r8$lambda$w_gPCh3F8Xxn1jN4lkQZoUci71c(Unknown Source:0)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at com.android.systemui.toast.ToastUI$$ExternalSyntheticLambda0.run(Unknown Source:16)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at com.android.systemui.toast.ToastUI.showToast(ToastUI.java:140)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at com.android.systemui.statusbar.CommandQueue$H.handleMessage(CommandQueue.java:1451)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.os.Looper.loopOnce(Looper.java:201)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.os.Looper.loop(Looper.java:288)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at android.app.ActivityThread.main(ActivityThread.java:8085)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at java.lang.reflect.Method.invoke(Native Method)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:571)
+07-14 04:24:32.594  1457  1457 E ResourcesManager: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1091)
+07-14 04:24:32.594  1457  1457 W PackageManager: Failure retrieving resources for com.poozh.translator
+07-14 04:24:32.595 21515 21515 W GooglePlayServicesUtil: Google Play services is missing.
+07-14 04:24:32.602 21515 21711 D TransportRuntime.JobInfoScheduler: Scheduling upload for context TransportContext(cct, VERY_LOW, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) with jobId=1775117692 in 86400000ms(Backend next call timestamp 0). Attempt 1
+07-14 04:24:32.606  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.606  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.607  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:24:32.607  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:24:32.615 21515 21715 I DynamiteModule: Considering local module com.google.mlkit.dynamite.text.japanese:10000 and remote module com.google.mlkit.dynamite.text.japanese:0
+07-14 04:24:32.615 21515 21715 I DynamiteModule: Selected local version of com.google.mlkit.dynamite.text.japanese
+07-14 04:24:32.617 21515 21515 W GooglePlayServicesUtil: Google Play services is missing.
+07-14 04:24:32.622  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.622  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.623  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:24:32.623  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:24:32.630  1457  1611 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 77824
+07-14 04:24:32.632 21515 21515 D CompatibilityChangeReporter: Compat change id reported: 160794467; UID 10058; state: ENABLED
+07-14 04:24:32.638  1457 21716 D ndroid.systemu: Features: 0 0 0
+07-14 04:24:32.638  1457 21716 E ndroid.systemu: vulkan version is 4211017
+07-14 04:24:32.640  1457 21716 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 77824
+07-14 04:24:32.640  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.640  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.640  1124  1183 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:24:32.640  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:24:32.642  1457 21716 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 77824
+07-14 04:24:32.644 21515 21715 I DynamiteModule: Considering local module com.google.mlkit.dynamite.text.latin:10000 and remote module com.google.mlkit.dynamite.text.latin:0
+07-14 04:24:32.644 21515 21715 I DynamiteModule: Selected local version of com.google.mlkit.dynamite.text.latin
+07-14 04:24:32.656  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.657  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.658  1124  1183 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:24:32.658  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:24:32.667 21515 21713 W GooglePlayServicesUtil: com.poozh.translator requires the Google Play Store, but it is missing.
+07-14 04:24:32.667 21515 21713 W GoogleApiManager: The service for com.google.android.gms.common.internal.service.zap is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null}
+07-14 04:24:32.668 21515 21713 W GooglePlayServicesUtil: com.poozh.translator requires the Google Play Store, but it is missing.
+07-14 04:24:32.668 21515 21713 W GoogleApiManager: The service for com.google.android.gms.common.internal.service.zap is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null}
+07-14 04:24:32.672  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.672  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.673  1124  1183 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:24:32.673  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:24:32.680 21515 21711 D TransportRuntime.SQLiteEventStore: Storing event with priority=DEFAULT, name=FIREBASE_ML_SDK for destination cct
+07-14 04:24:32.684 21515 21711 D TransportRuntime.JobInfoScheduler: Scheduling upload for context TransportContext(cct, DEFAULT, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) with jobId=1770136955 in 30000ms(Backend next call timestamp 0). Attempt 1
+07-14 04:24:32.690 21515 21711 D TransportRuntime.SQLiteEventStore: Storing event with priority=DEFAULT, name=FIREBASE_ML_SDK for destination cct
+07-14 04:24:32.691 21515 21711 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, DEFAULT, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+07-14 04:24:32.695  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.695  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.695  1124  1183 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:24:32.695  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:24:32.696 21515 21711 D TransportRuntime.SQLiteEventStore: Storing event with priority=VERY_LOW, name=FIREBASE_ML_SDK for destination cct
+07-14 04:24:32.697 21515 21711 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, VERY_LOW, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+07-14 04:24:32.699 21515 21711 D TransportRuntime.SQLiteEventStore: Storing event with priority=VERY_LOW, name=FIREBASE_ML_SDK for destination cct
+07-14 04:24:32.700 21515 21711 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, VERY_LOW, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+07-14 04:24:32.706  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.706  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.707  1124  1183 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:24:32.708  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:24:32.712 21515 21547 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 61440
+07-14 04:24:32.720 21515 21718 D oozh.translato: Features: 0 0 0
+07-14 04:24:32.720 21515 21718 E oozh.translato: vulkan version is 4211017
+07-14 04:24:32.721 21515 21718 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 61440
+07-14 04:24:32.721 21515 21718 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 61440
+07-14 04:24:32.723  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.723  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.724  1124  1183 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:24:32.725  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:24:32.739  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.740  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.740  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:24:32.740  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:24:32.756  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.756  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:24:32.756  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:24:32.756  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:24:32.849  1275  1275 W NotificationHistory: Attempted to add notif for locked/gone/disabled user 0
+07-14 04:24:32.861  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.poozh.translator|3108|null|10058
+07-14 04:24:32.862  1457  1457 D InterruptionStateProvider: No heads up: unimportant notification: 0|com.poozh.translator|3108|null|10058
+07-14 04:24:32.863  1457  1668 D PeopleSpaceWidgetMgr: Sbn doesn't contain valid PeopleTileKey: null/0/com.poozh.translator
+07-14 04:24:32.917  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.poozh.translator|3108|null|10058
+07-14 04:24:32.918  1457  1457 D InterruptionStateProvider: No heads up: unimportant notification: 0|com.poozh.translator|3108|null|10058
+07-14 04:24:32.924  1457  1668 D PeopleSpaceWidgetMgr: Sbn doesn't contain valid PeopleTileKey: null/0/com.poozh.translator
+07-14 04:24:32.963  1275  1275 W NotificationHistory: Attempted to add notif for locked/gone/disabled user 0
+07-14 04:24:32.978  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|android|0|com.android.server.wm.AlertWindowNotification - com.poozh.translator|1000
+07-14 04:24:32.978  1457  1457 D InterruptionStateProvider: No heads up: unimportant notification: 0|android|0|com.android.server.wm.AlertWindowNotification - com.poozh.translator|1000
+07-14 04:24:32.978  1457  1668 D PeopleSpaceWidgetMgr: Sbn doesn't contain valid PeopleTileKey: null/0/android
+07-14 04:24:34.528  1427  1427 D DropboxReceiver: dropbox tag: system_server_wtf
+07-14 04:24:34.528  1427  1427 D DropboxReceiver: dropbox time: 1783974272562
+07-14 04:24:34.528  1427  1427 D DropboxReceiver: dropbox file is not to be trackd
+07-14 04:24:34.664 21720 21720 I adbd    : type=1400 audit(0.0:145192): avc: denied { search } for name="/" dev="sda6" ino=2 scontext=u:r:adbd:s0 tcontext=u:object_r:unlabeled:s0 tclass=dir permissive=1
+07-14 04:24:34.680 21722 21722 D ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+07-14 04:24:34.668 21720 21720 I sh      : type=1400 audit(0.0:145193): avc: denied { read } for name="/" dev="sda6" ino=2 scontext=u:r:adbd:s0 tcontext=u:object_r:unlabeled:s0 tclass=dir permissive=1
+07-14 04:24:34.668 21720 21720 I sh      : type=1400 audit(0.0:145194): avc: denied { getattr } for path="/system" dev="sda6" ino=2 scontext=u:r:adbd:s0 tcontext=u:object_r:unlabeled:s0 tclass=dir permissive=1
+07-14 04:24:34.699  1275  1433 I ActivityTaskManager: START u0 {cmp=com.android.systemui/.media.MediaProjectionPermissionActivity} from uid 10058, pid 21515
+07-14 04:24:34.700  1275  1433 I ActivityTaskManager: [KeepAlive] disabled for com.android.systemui
+07-14 04:24:34.702  1275  1433 D CompatibilityChangeReporter: Compat change id reported: 197654537; UID 10058; state: ENABLED
+07-14 04:24:34.708  1275  1433 W ActivityTaskManager: Tried to set launchTime (0) < mLastActivityLaunchTime (2910557836)
+07-14 04:24:34.713  1275  1433 D CompatibilityChangeReporter: Compat change id reported: 181136395; UID 10058; state: DISABLED
+07-14 04:24:34.713  1275  1433 D CompatibilityChangeReporter: Compat change id reported: 174042936; UID 10058; state: DISABLED
+07-14 04:24:34.749  1457  1611 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 1449984
+07-14 04:24:34.748  1457  1457 I RenderThread: type=1400 audit(0.0:145195): avc: denied { search } for name="/" dev="sda6" ino=2 scontext=u:r:platform_app:s0:c512,c768 tcontext=u:object_r:unlabeled:s0 tclass=dir permissive=1 app=com.android.systemui
+07-14 04:24:34.765  1457 21726 D ndroid.systemu: Features: 0 0 0
+07-14 04:24:34.765  1457 21726 E ndroid.systemu: vulkan version is 4211017
+07-14 04:24:34.765  1457 21726 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 1449984
+07-14 04:24:34.766  1457 21726 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 1449984
+07-14 04:24:34.774  1457  1611 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 4096
+07-14 04:24:34.783  1457 21727 D ndroid.systemu: Features: 0 0 0
+07-14 04:24:34.783  1457 21727 E ndroid.systemu: vulkan version is 4211017
+07-14 04:24:34.785  1457 21727 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 4096
+07-14 04:24:34.786  1457 21727 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 4096
+07-14 04:24:34.788  1021  1021 I lmkd    : type=1400 audit(0.0:145196): avc: denied { write } for name="oom_score_adj" dev="proc" ino=4223607 scontext=u:r:init:s0 tcontext=u:r:untrusted_app:s0:c58,c256,c512,c768 tclass=file permissive=1
+07-14 04:24:34.801  1275  1295 W NotificationHistory: Attempted to remove channel for locked/gone/disabled user 0
+07-14 04:24:34.803  1275  1292 I ActivityTaskManager: Displayed com.android.systemui/.media.MediaProjectionPermissionActivity: +84ms
+07-14 04:24:34.846  1457  1668 D PeopleSpaceWidgetMgr: Sbn doesn't contain valid PeopleTileKey: null/0/android
+07-14 04:24:35.042  1275  1433 W InputManager-JNI: Input channel object '82b421e Toast (client)' was disposed without first being removed with the input manager!
+07-14 04:24:35.046  1275  1433 W NotificationService: Toast already killed. pkg=com.poozh.translator token=android.os.BinderProxy@b5415c0
+07-14 04:24:37.915 21728 21728 D ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+07-14 04:24:42.734  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.mumu.store|-1679252459|null|1000
+07-14 04:24:42.734  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.mumu.store|1|null|1000
+07-14 04:24:42.734  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.android.permissioncontroller|1|HibernationJobService|10036
+07-14 04:24:42.734  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.poozh.translator|3108|null|10058
+07-14 04:24:42.758  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.mumu.store|1|null|1000
+07-14 04:24:42.758  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.mumu.store|-1679252459|null|1000
+07-14 04:24:42.758  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.android.permissioncontroller|1|HibernationJobService|10036
+07-14 04:24:42.758  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.poozh.translator|3108|null|10058
+07-14 04:24:43.176  1042 21719 I keystore2: keystore2::watchdog: Watchdog thread idle -> terminating. Have a great day.
+07-14 04:24:45.903  1275  1275 W WindowManager: removeWindowToken: Attempted to remove non-existing token: android.os.Binder@30efe2b
+07-14 04:25:11.914 21731 21731 I adbd    : type=1400 audit(0.0:145198): avc: denied { execute } for name="sh" dev="sda6" ino=847 scontext=u:r:adbd:s0 tcontext=u:object_r:unlabeled:s0 tclass=file permissive=1
+07-14 04:25:11.914 21731 21731 I adbd    : type=1400 audit(0.0:145199): avc: denied { read open } for path="/system/bin/sh" dev="sda6" ino=847 scontext=u:r:adbd:s0 tcontext=u:object_r:unlabeled:s0 tclass=file permissive=1
+07-14 04:25:11.914 21731 21731 I adbd    : type=1400 audit(0.0:145200): avc: denied { execute_no_trans } for path="/system/bin/sh" dev="sda6" ino=847 scontext=u:r:adbd:s0 tcontext=u:object_r:unlabeled:s0 tclass=file permissive=1
+07-14 04:25:11.914 21731 21731 I sh      : type=1400 audit(0.0:145201): avc: denied { map } for path="/system/bin/sh" dev="sda6" ino=847 scontext=u:r:adbd:s0 tcontext=u:object_r:unlabeled:s0 tclass=file permissive=1
+07-14 04:25:11.914 21731 21731 I sh      : type=1400 audit(0.0:145202): avc: denied { getattr } for path="/system/bin/sh" dev="sda6" ino=847 scontext=u:r:adbd:s0 tcontext=u:object_r:unlabeled:s0 tclass=file permissive=1
+07-14 04:25:11.965  1275  1311 E system_server: Cannot read thread CPU times for PID 1275
+07-14 04:25:12.005 21731 21731 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+07-14 04:25:12.009 21731 21731 I AndroidRuntime: Using default boot image
+07-14 04:25:12.009 21731 21731 I AndroidRuntime: Leaving lock profiling enabled
+07-14 04:25:12.018 21731 21731 W app_process: ART APEX data files are untrusted.
+07-14 04:25:12.147 21731 21731 D app_process: Time zone APEX ICU file found: /apex/com.android.tzdata/etc/icu/icu_tzdata.dat
+07-14 04:25:12.147 21731 21731 D app_process: I18n APEX ICU file found: /apex/com.android.i18n/etc/icu/icudt68l.dat
+07-14 04:25:12.157 21731 21731 W app_process: Unexpected CPU variant for X86 using defaults: x86_64
+07-14 04:25:12.157 21731 21731 W System  : ClassLoader referenced unknown path: /system/framework/android.test.runner.jar
+07-14 04:25:12.180 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:25:12.180 21731 21731 E Zygote  : The " /system/etc/mumu-configs/device-prop-configs/arm.config" app property config file not exists!
+07-14 04:25:12.180 21731 21731 W Zygote  : In ".*shootgame.*" have not valid property config, ignore it
+07-14 04:25:12.180 21731 21731 E Zygote  : The " /system/etc/mumu-configs/device-prop-configs/arm.config" app property config file not exists!
+07-14 04:25:12.180 21731 21731 W Zygote  : In ".*hanju.*" have not valid property config, ignore it
+07-14 04:25:12.181 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:25:12.181 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/p50pro.config
+07-14 04:25:12.181 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/p50pro.config
+07-14 04:25:12.181 21731 21731 I Zygote  : getAppDeviceConfig find player priority
+07-14 04:25:12.182 21731 21731 I Zygote  : getAppDeviceConfig find player priority
+07-14 04:25:12.183 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/tzyxmznew.config
+07-14 04:25:12.183 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mate10pro.config
+07-14 04:25:12.183 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/gjqtmyr.config
+07-14 04:25:12.183 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mate10pro.config
+07-14 04:25:12.183 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:25:12.183 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi6.config
+07-14 04:25:12.184 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mate10pro.config
+07-14 04:25:12.184 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mate10pro.config
+07-14 04:25:12.184 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi11pro.config
+07-14 04:25:12.184 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:25:12.184 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:25:12.184 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:25:12.184 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:25:12.184 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:25:12.184 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:25:12.184 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:25:12.185 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:25:12.185 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:25:12.185 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi11pro.config
+07-14 04:25:12.185 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi11pro.config
+07-14 04:25:12.185 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi11pro.config
+07-14 04:25:12.185 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi11pro.config
+07-14 04:25:12.185 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi11pro.config
+07-14 04:25:12.185 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:25:12.185 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:25:12.185 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:25:12.186 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/mumu.config
+07-14 04:25:12.187 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi14pro.config
+07-14 04:25:12.187 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi14pro.config
+07-14 04:25:12.187 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi14pro.config
+07-14 04:25:12.187 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/overseas_sim_info.config
+07-14 04:25:12.188 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/overseas_sim_info.config
+07-14 04:25:12.188 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:25:12.188 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/x86.config
+07-14 04:25:12.189 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/tzyxmznew.config
+07-14 04:25:12.189 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:25:12.189 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/pad.config
+07-14 04:25:12.193 21731 21731 I Zygote  : config file alreay parse:/system/etc/mumu-configs/device-prop-configs/yyb.config
+07-14 04:25:12.193 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsungsms9006.config
+07-14 04:25:12.193 21731 21731 I Zygote  : config file alreay parse:/system/etc/mumu-configs/device-prop-configs/yyb.config
+07-14 04:25:12.193 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:25:12.194 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/coc.config
+07-14 04:25:12.194 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/liapp.config
+07-14 04:25:12.194 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:25:12.194 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/overseas_sim_info.config
+07-14 04:25:12.194 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/liapp.config
+07-14 04:25:12.194 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/liapp.config
+07-14 04:25:12.194 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:25:12.194 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:25:12.195 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:25:12.195 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.195 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:25:12.195 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsungsms9080.config
+07-14 04:25:12.195 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi14pro.config
+07-14 04:25:12.196 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.196 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.196 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:25:12.196 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/xiaomi8_arm.config
+07-14 04:25:12.197 21731 21731 I Zygote  : config file alreay parse:/system/etc/mumu-configs/device-prop-configs/yyb.config
+07-14 04:25:12.197 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_v2q.config
+07-14 04:25:12.197 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_v2q.config
+07-14 04:25:12.197 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_v2q.config
+07-14 04:25:12.197 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_v2q.config
+07-14 04:25:12.197 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.197 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.197 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsungsms9080.config
+07-14 04:25:12.197 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.197 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.197 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.197 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/liapp.config
+07-14 04:25:12.198 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.198 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.198 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.198 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.198 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.198 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.198 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsungsmg9910.config
+07-14 04:25:12.199 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.199 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/yunos.config
+07-14 04:25:12.199 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/yunos.config
+07-14 04:25:12.199 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/yunos.config
+07-14 04:25:12.199 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.199 21731 21731 I Zygote  : config file alreay parse:/system/etc/mumu-configs/device-prop-configs/yyb.config
+07-14 04:25:12.199 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/yunos.config
+07-14 04:25:12.199 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_s22_ultra.config
+07-14 04:25:12.199 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_s22_ultra.config
+07-14 04:25:12.200 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.200 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.200 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.200 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.200 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_s22_ultra.config
+07-14 04:25:12.200 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.200 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_s22_ultra.config
+07-14 04:25:12.200 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.200 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.201 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_s22_ultra.config
+07-14 04:25:12.201 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.201 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.201 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/arm64.config
+07-14 04:25:12.201 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/liapp.config
+07-14 04:25:12.201 21731 21731 I Zygote  : config file alreay parse:/data/system/etc/mumu-configs/device-prop-configs/samsung_s22_ultra.config
+07-14 04:25:12.215 21731 21731 D Zygote  : Apps device config data:{com\.wan\.lzgtwan={ro.build.version.all_codenames=REL, ro.product.manufacturer=Xiaomi, ro.boot.ramdump=disable, ro.vendor.build.date=Sun, ro.build.hardware.version=V1, ro.hardware=qcom, ro.build.version.codename=REL, ro.build.version.release=12.0.0, ro.bootimage.build.fingerprint=Xiaomi/dipper/dipper:12.0.0/OPM1.171019.026/V10.0.11.0.OEACNFH:user/release-keys, ro.build.date.utc=1541867668, ro.bootimage.build.date.utc=1541867668, ro.product.cuptsm=XIAOMI|ESE|02|01, ro.vendor.extension_library=libqti-perfd-client.so, ro.product.cpu.abilist64=arm64-v8a, ro.product.name=dipper, ro.boot.serialno=e20b6590, ro.product.locale=zh-CN, ro.board.platform=sdm845, qcom.bluetooth.soc=cherokee, ro.boot.hardware=qcom, ro.build.user=builder, ro.boot.hwc=CN, ro.bootimage.build.date=Sun, ro.product.cpu.abi=arm64-v8a, ro.build.product=dipper, ro.build.type=user, ro.build.description=dipper-user, ro.vendor.product.manufacturer=Xiaomi, ro.vendor.product.model=MI, ro.product.cpu.abilist32=armeabi-v7a,armeabi, ro.build.version.sdk=31, ro.product.board=sdm845, ro.boot.verifiedbootstate=green, ro.build.version.incremental=V10.0.11.0.QQqun|788202866, ro.build.version.security_patch=2018-10-01, ro.product.cpu.abilist=arm64-v8a,armeabi-v7a,armeabi, ro.boot.secureboot=1, ro.vendor.product.device=dipper, ro.boot.hwlevel=MP, ro.build.date=Sun, ro.build.host=c3-miui-ota-bd123.bj, ro.build.tags=release-keys, ro.boot.usbcontroller=a600000.dwc3, ro.vendor.build.fingerprint=Xiaomi/dipper/dipper:12.0.0/OPM1.171019.026/V10.0.11.0.OEACNFH:user/release-keys, ro.product.brand=Xiaomi, ro.boot.baseband=sdm, ro.boot.veritymode=enforcing, ro.build.software.version=Android12.0.0_10, ro.build.flavor=dipper-user, ro.build.characteristics=nosdcard, ro.vendor.build.date.utc=1541867668, ro.product.model=MI, ro.boot.keymaster=1, ro.vendor.product.name=dipper, ro.product.first_api_level=31, ro.boot.hwversion=3.3.0, ro.product.device=dipper, ro.baseband=sdm, ro.build.fingerprint=Xiaomi/dipper/dipper:12.0.0/OPM1.171019.026/V10.0.11.0.OEACNFH:user/release-keys, ro.vendor.product.brand=Xiaomi, ro.build.version.preview_sdk=0, ro.product.cert=M1803E1A}, com\.yingche\.qnzl.*={ro.product.model=SM-S9080, ro.product.manufacturer=samsung, ro.product.name=SM-S9080, ro.product.board=SM-S9080, ro.product.brand=samsung, ro.product.device=SM-S9080}, com\.netease\.harrypotter.*={ro.product.model=MuMu, ro.product.manufacturer=Netease, ro.product.name=cancro, ro.product.board=hammerhead, ro.product.brand=Android, ro.product.device=cancro}, .*shangzhai\.yjfm.*={ro.product.system.name=v2qzc, ro.vendor.build.version.release_or_codename=12, ro.build.version.all_codenames=REL, ro.product.system_ext.device=qssi, ro.build.version.release_or_codename=12, ro.vendor.build.date=Wed Jul  6 12:02:44 KST 2022, ro.product.product.device=qssi, ro.build.version.security_index=1, ro.build.version.codename=REL, ro.system.build.version.release_or_codename=12, ro.bootimage.build.fingerprint=samsung/v2qzc/v2q:12/RP1A.200720.012/W2022ZCS2CVG1:user/release-keys, ro.product.name=v2qzc, ro.product.locale=zh-CN, ro.system.build.date.utc=1657075617, ro.product.vendor.model=SM-W2022, ro.bootloader=W2022ZCS2CVG1, ro.product.vendor.brand=samsung, ro.bootmode=unknown, ro.build.display.id=SP1A.210812.016.W2022ZCS2CVG1, ro.build.changelist=24219452, ro.build.user=dpi, ro.system_ext.build.fingerprint=samsung/v2qzc/qssi:12/SP1A.210812.016/W2022ZCS2CVG1:user/release-keys, gsm.version.baseband=W2022ZCS2CVG1,W2022ZCS2CVG1, ro.product.property_source_order=odm,vendor,product,system_ext,system, ro.system.build.version.release=12, ro.product.board=lahaina, ro.product.system.manufacturer=samsung, gsm.version.ril-impl=Samsung RIL v4.0, ro.build.PDA=W2022ZCS2CVG1, ro.product.build.id=SP1A.210812.016, ro.product.system_ext.model=SM-W2022, ro.product.odm.name=v2qzc, ro.build.official.release=true, ro.build.version.security_patch=2022-05-01, ro.system.build.type=user, ro.product.build.version.release=12, ro.product.system_ext.manufacturer=samsung, ro.odm.build.tags=release-keys, 
+07-14 04:25:12.215 21731 21731 D Zygote  : Apps device config player priority data: [.*com\.riotgames\.league\.wildrift.*, .*dts\.freefire.*]
+07-14 04:25:12.215 21731 21731 E Zygote  : The " /pcgame/app-device-prop-overlay.config" property config file not exists!
+07-14 04:25:12.216 21731 21731 D Zygote  : getAppDeviceChannelConfig pattern = .*\.mi
+07-14 04:25:12.216 21731 21731 D Zygote  : getAppDeviceChannelConfig pattern = .*\.samsung
+07-14 04:25:12.217 21731 21731 D Zygote  : getAppDeviceChannelConfig pattern = .*\.huawei
+07-14 04:25:12.218 21731 21731 D Zygote  : Apps device channel config data:{.*\.samsung={ro.product.model=SM-G9910, ro.product.manufacturer=samsung, ro.product.name=SM-G9910, ro.product.board=SM-G9910, ro.product.brand=samsung, ro.product.device=SM-G9910}, .*\.huawei={ro.product.model=BLA-AL00, ro.product.manufacturer=HUAWEI, ro.product.name=BLA-AL00, ro.product.board=BLA-AL00, ro.product.brand=HUAWEI, ro.product.device=BLA-AL00}, .*\.mi={ro.product.model=M2102K1AC, ro.product.manufacturer=Xiaomi, ro.product.name=mars, ro.product.board=mars, ro.product.brand=Xiaomi, ro.product.device=mars}}
+07-14 04:25:12.225 21731 21731 D ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+07-14 04:25:12.225 21731 21731 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+07-14 04:25:12.243  1275  1275 D BatterySaverPolicy: accessibility changed to true, updating policy.
+07-14 04:25:13.238  1457  1457 I ndroid.systemui: type=1400 audit(0.0:145212): avc: denied { call } for scontext=u:r:platform_app:s0:c512,c768 tcontext=u:r:adbd:s0 tclass=binder permissive=1 app=com.android.systemui
+07-14 04:25:13.303  2073  2199 W MediaProvider: isAppCloneUserPair failed. Users: 0 and 0
+07-14 04:25:13.303  2073  2199 W MediaProvider: isAppCloneUserPair for user 0: false
+07-14 04:25:13.301  2073  2073 I Thread-3: type=1400 audit(0.0:145213): avc: denied { sendto } for path="/dev/socket/logdw" scontext=u:r:mediaprovider_app:s0:c37,c256,c512,c768 tcontext=u:r:init:s0 tclass=unix_dgram_socket permissive=1 app=com.android.providers.media.module
+07-14 04:25:13.358 21731 21731 W AccessibilityNodeInfoDumper: Fetch time: 112ms
+07-14 04:25:13.359  2073  2190 W StorageManager: ignore the failure of setting attributes for /storage/emulated/0/dlg.xml
+07-14 04:25:13.359  1275  1275 D BatterySaverPolicy: accessibility changed to false, updating policy.
+07-14 04:25:13.374 21731 21731 D hw-ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+07-14 04:25:13.374 21731 21731 D AndroidRuntime: Shutting down VM
+07-14 04:25:13.358  1275  1275 I system_server: type=1400 audit(0.0:145214): avc: denied { connectto } for path="/dev/socket/property_service" scontext=u:r:system_server:s0 tcontext=u:r:kernel:s0 tclass=unix_stream_socket permissive=1
+07-14 04:25:13.380  2073  2190 W StorageManager: ignore the failure of setting attributes for /storage/emulated/0/dlg.xml
+07-14 04:25:23.214  1040  1045 I NemuSysOpt: Start compat memory
+07-14 04:25:23.231  1040  1045 I NemuSysOpt: Compat memory done
+07-14 04:25:25.190 21515 21711 D TransportRuntime.CctTransportBackend: Making request to: https://firebaselogging.googleapis.com/v0cc/log/batch?format=json_proto3
+07-14 04:25:25.191 21515 21515 I pool-1-thread-1: type=1400 audit(0.0:145215): avc: denied { connectto } for path="/dev/socket/dnsproxyd" scontext=u:r:untrusted_app:s0:c58,c256,c512,c768 tcontext=u:r:init:s0 tclass=unix_stream_socket permissive=1 app=com.poozh.translator
+07-14 04:25:25.204  1103  1103 I SkDestroyListen: type=1400 audit(0.0:145216): avc: denied { read } for scontext=u:r:init:s0 tcontext=u:r:init:s0 tclass=netlink_tcpdiag_socket permissive=1
+07-14 04:25:25.214  1103  1103 I Binder:1103_2: type=1400 audit(0.0:145217): avc: denied { read write } for path="socket:[4224631]" dev="sockfs" ino=4224631 scontext=u:r:init:s0 tcontext=u:r:untrusted_app:s0:c58,c256,c512,c768 tclass=tcp_socket permissive=1
+07-14 04:25:25.214  1103  1103 I Binder:1103_2: type=1400 audit(0.0:145218): avc: denied { getopt } for scontext=u:r:init:s0 tcontext=u:r:untrusted_app:s0:c58,c256,c512,c768 tclass=tcp_socket permissive=1
+07-14 04:25:25.214  1103  1103 I Binder:1103_2: type=1400 audit(0.0:145219): avc: denied { setopt } for scontext=u:r:init:s0 tcontext=u:r:untrusted_app:s0:c58,c256,c512,c768 tclass=tcp_socket permissive=1
+07-14 04:25:25.394  1103  1103 I netd    : type=1400 audit(0.0:145220): avc: denied { create } for scontext=u:r:init:s0 tcontext=u:r:init:s0 tclass=netlink_tcpdiag_socket permissive=1
+07-14 04:25:25.394  1103  1103 I netd    : type=1400 audit(0.0:145221): avc: denied { connect } for scontext=u:r:init:s0 tcontext=u:r:init:s0 tclass=netlink_tcpdiag_socket permissive=1
+07-14 04:25:27.683  1275  1317 V DisplayPowerController[0]: Brightness [0.05] reason changing to: 'manual [ dim ]', previous reason: 'manual'.
+07-14 04:25:27.689  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.689  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.689  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:25:27.690  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:25:27.690  1275  1304 I DropBoxManagerService: add tag=system_server_wtf isTagEnabled=true flags=0x2
+07-14 04:25:27.691  1275  1304 I DropBoxManagerService: add tag=system_server_wtf isTagEnabled=true flags=0x2
+07-14 04:25:27.705  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.706  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.706  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:25:27.706  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:25:27.706  1275  1304 I DropBoxManagerService: add tag=system_server_wtf isTagEnabled=true flags=0x2
+07-14 04:25:27.707  1275  1304 I DropBoxManagerService: add tag=system_server_wtf isTagEnabled=true flags=0x2
+07-14 04:25:27.722  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.722  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.723  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:25:27.723  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:25:27.723  1275  1304 I DropBoxManagerService: add tag=system_server_wtf isTagEnabled=true flags=0x2
+07-14 04:25:27.739  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.739  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.739  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:25:27.739  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:25:27.755  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.756  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.756  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:25:27.756  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:25:27.772  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.773  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.773  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:25:27.773  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:25:27.789  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.789  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.789  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:25:27.789  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:25:27.806  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.806  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.806  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:25:27.806  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:25:27.822  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.822  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.822  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:25:27.823  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:25:27.839  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.839  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.839  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:25:27.839  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:25:27.856  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.856  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.856  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:25:27.856  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:25:27.872  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.872  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.873  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:25:27.873  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:25:27.889  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.889  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.889  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:25:27.889  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:25:27.906  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.906  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.906  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:25:27.906  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:25:27.922  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.922  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.923  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:25:27.923  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:25:27.939  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.939  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:25:27.939  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:25:27.940  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:25:29.693  1427  1427 D DropboxReceiver: dropbox tag: system_server_wtf
+07-14 04:25:29.693  1427  1427 D DropboxReceiver: dropbox time: 1783974327723
+07-14 04:25:29.693  1427  1427 D DropboxReceiver: dropbox file is not to be trackd
+07-14 04:26:09.357  1275  1594 D WifiNl80211Manager: Scan result ready event
+07-14 04:26:09.357  1275  1594 D WifiNative: Scan result ready event
+07-14 04:26:11.965  1275  1311 W BatteryExternalStatsWorker: error reading modem stats:ERROR_PHONE_NOT_AVAILABLE
+07-14 04:26:11.967  1275  1311 E system_server: Cannot read thread CPU times for PID 1275
+07-14 04:26:11.964  1041  1041 I Binder:1041_2: type=1400 audit(0.0:145224): avc: denied { read } for name="event_count" dev="sysfs" ino=10010 scontext=u:r:init:s0 tcontext=u:object_r:sysfs_wakeup:s0 tclass=file permissive=1
+07-14 04:26:11.964  1041  1041 I Binder:1041_2: type=1400 audit(0.0:145225): avc: denied { open } for path="/sys/devices/virtual/wakeup/wakeup18/event_count" dev="sysfs" ino=10010 scontext=u:r:init:s0 tcontext=u:object_r:sysfs_wakeup:s0 tclass=file permissive=1
+07-14 04:26:18.281  1116  1116 E android.hardware.power.stats@1.0-service-mock: Failed to getEnergyData
+07-14 04:26:36.944  1556 26909 D NetworkMonitor/114: isDataStall: result=2, tcp packets received=0, latest tcp fail rate=100, consecutive dns timeout count=0
+07-14 04:26:36.944  1556 26909 D NetworkMonitor/114: Suspecting data stall, reevaluate
+07-14 04:26:36.944  1275  1594 D ConnectivityService: Data stall detected with methods: 2
+07-14 04:26:36.946  1556 21752 D NetworkMonitor/114: Validation disabled.
+07-14 04:26:36.950  1275  1383 D ConnectivityService: [114 WIFI] validation passed
+07-14 04:26:36.941  1556  1556 I NetworkMonitor/: type=1400 audit(0.0:145226): avc: denied { sendto } for path="/dev/socket/logdw" scontext=u:r:network_stack:s0 tcontext=u:r:init:s0 tclass=unix_dgram_socket permissive=1
+07-14 04:26:46.584  2073  2073 I Thread-5: type=1400 audit(0.0:145227): avc: denied { use } for path="/dev/null" dev="tmpfs" ino=9196 scontext=u:r:mediaprovider_app:s0:c37,c256,c512,c768 tcontext=u:r:kernel:s0 tclass=fd permissive=1 app=com.android.providers.media.module
+07-14 04:26:46.605 21754 21754 D ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+07-14 04:26:46.606  1275  1594 W ActivityManager: Background start not allowed: service Intent { cmp=com.github.uiautomator/.Service } to com.github.uiautomator/.Service from pid=21754 uid=2000 pkg=com.android.shell startFg?=false
+07-14 04:26:56.966  1556 26909 D NetworkMonitor/114: isDataStall: result=2, tcp packets received=0, latest tcp fail rate=100, consecutive dns timeout count=0
+07-14 04:26:56.966  1556 26909 D NetworkMonitor/114: Suspecting data stall, reevaluate
+07-14 04:26:56.966  1275  1594 D ConnectivityService: Data stall detected with methods: 2
+07-14 04:26:56.966  1556 21757 D NetworkMonitor/114: Validation disabled.
+07-14 04:26:56.967  1275  1383 D ConnectivityService: [114 WIFI] validation passed
+07-14 04:27:11.965  1275  1311 E system_server: Cannot read thread CPU times for PID 1275
+07-14 04:27:16.982  1556 26909 D NetworkMonitor/114: isDataStall: result=2, tcp packets received=0, latest tcp fail rate=100, consecutive dns timeout count=0
+07-14 04:27:16.982  1556 26909 D NetworkMonitor/114: Suspecting data stall, reevaluate
+07-14 04:27:16.982  1275  1289 D ConnectivityService: Data stall detected with methods: 2
+07-14 04:27:16.982  1556 21758 D NetworkMonitor/114: Validation disabled.
+07-14 04:27:16.983  1275  1383 D ConnectivityService: [114 WIFI] validation passed
+07-14 04:27:36.998  1556 26909 D NetworkMonitor/114: isDataStall: result=2, tcp packets received=0, latest tcp fail rate=100, consecutive dns timeout count=0
+07-14 04:27:36.998  1556 26909 D NetworkMonitor/114: Suspecting data stall, reevaluate
+07-14 04:27:36.999  1275  1594 D ConnectivityService: Data stall detected with methods: 2
+07-14 04:27:36.999  1556 21759 D NetworkMonitor/114: Validation disabled.
+07-14 04:27:37.000  1275  1383 D ConnectivityService: [114 WIFI] validation passed
+07-14 04:27:53.231  1040  1045 I NemuSysOpt: Start compat memory
+07-14 04:27:53.228  1040  1040 I compat_ram_d: type=1400 audit(0.0:145228): avc: denied { read } for name="cpu" dev="proc" ino=4026532064 scontext=u:r:init:s0 tcontext=u:object_r:proc_pressure_cpu:s0 tclass=file permissive=1
+07-14 04:27:53.228  1040  1040 I compat_ram_d: type=1400 audit(0.0:145229): avc: denied { open } for path="/proc/pressure/cpu" dev="proc" ino=4026532064 scontext=u:r:init:s0 tcontext=u:object_r:proc_pressure_cpu:s0 tclass=file permissive=1
+07-14 04:27:53.254  1040  1045 I NemuSysOpt: Compat memory done
+07-14 04:27:53.228  1040  1040 I compat_ram_d: type=1400 audit(0.0:145230): avc: denied { getattr } for path="/proc/pressure/cpu" dev="proc" ino=4026532064 scontext=u:r:init:s0 tcontext=u:object_r:proc_pressure_cpu:s0 tclass=file permissive=1
+07-14 04:27:57.009  1556 26909 D NetworkMonitor/114: isDataStall: result=2, tcp packets received=0, latest tcp fail rate=100, consecutive dns timeout count=0
+07-14 04:27:57.009  1556 26909 D NetworkMonitor/114: Suspecting data stall, reevaluate
+07-14 04:27:57.009  1275  1289 D ConnectivityService: Data stall detected with methods: 2
+07-14 04:27:57.010  1556 21760 D NetworkMonitor/114: Validation disabled.
+07-14 04:27:57.011  1275  1383 D ConnectivityService: [114 WIFI] validation passed
+07-14 04:28:17.031  1556 26909 D NetworkMonitor/114: isDataStall: result=2, tcp packets received=0, latest tcp fail rate=100, consecutive dns timeout count=0
+07-14 04:28:17.031  1556 26909 D NetworkMonitor/114: Suspecting data stall, reevaluate
+07-14 04:28:17.031  1275  1289 D ConnectivityService: Data stall detected with methods: 2
+07-14 04:28:17.031  1556 21761 D NetworkMonitor/114: Validation disabled.
+07-14 04:28:17.032  1275  1383 D ConnectivityService: [114 WIFI] validation passed
+07-14 04:28:18.281  1116  1116 E android.hardware.power.stats@1.0-service-mock: Failed to getEnergyData
+07-14 04:28:35.279 15183 21762 E NotificationWork: title: 弹尽粮绝喵  content: 指挥官～家里已经没东西吃了喵～大家都饿趴下了喵…   id: 2
+07-14 04:28:35.288 15183 15199 I WM-WorkerWrapper: Worker result SUCCESS for Work [ id=1ce70fa1-ded9-4959-bcf2-706b23e603b1, tags={ com.ys.util.impl.NotificationWork, 2 } ]
+07-14 04:28:35.493  1275  1275 W NotificationHistory: Attempted to add notif for locked/gone/disabled user 0
+07-14 04:28:35.503  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.bilibili.azurlane|2|null|10039
+07-14 04:28:35.503  1457  1457 D InterruptionStateProvider: No heads up: unimportant notification: 0|com.bilibili.azurlane|2|null|10039
+07-14 04:28:35.504  1457  1668 D PeopleSpaceWidgetMgr: Sbn doesn't contain valid PeopleTileKey: null/0/com.bilibili.azurlane
+07-14 04:28:37.052  1556 26909 D NetworkMonitor/114: isDataStall: result=2, tcp packets received=0, latest tcp fail rate=100, consecutive dns timeout count=0
+07-14 04:28:37.052  1556 26909 D NetworkMonitor/114: Suspecting data stall, reevaluate
+07-14 04:28:37.052  1275  1594 D ConnectivityService: Data stall detected with methods: 2
+07-14 04:28:37.052  1556 21765 D NetworkMonitor/114: Validation disabled.
+07-14 04:28:37.053  1275  1383 D ConnectivityService: [114 WIFI] validation passed
+07-14 04:28:45.501  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.mumu.store|1|null|1000
+07-14 04:28:45.501  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.mumu.store|-1679252459|null|1000
+07-14 04:28:45.501  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.bilibili.azurlane|2|null|10039
+07-14 04:28:45.501  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.android.permissioncontroller|1|HibernationJobService|10036
+07-14 04:28:45.501  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.poozh.translator|3108|null|10058
+07-14 04:28:57.074  1556 26909 D NetworkMonitor/114: isDataStall: result=2, tcp packets received=0, latest tcp fail rate=100, consecutive dns timeout count=0
+07-14 04:28:57.074  1556 26909 D NetworkMonitor/114: Suspecting data stall, reevaluate
+07-14 04:28:57.074  1275  1289 D ConnectivityService: Data stall detected with methods: 2
+07-14 04:28:57.074  1556 21766 D NetworkMonitor/114: Validation disabled.
+07-14 04:28:57.077  1275  1383 D ConnectivityService: [114 WIFI] validation passed
+07-14 04:29:07.658 21769 21769 D ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+07-14 04:29:07.661  1275  1317 V DisplayPowerController[0]: Brightness [0.39763778] reason changing to: 'manual', previous reason: 'manual [ dim ]'.
+07-14 04:29:07.673  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.673  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.673  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:29:07.674  1275  1304 I DropBoxManagerService: add tag=system_server_wtf isTagEnabled=true flags=0x2
+07-14 04:29:07.674  1275  1304 I DropBoxManagerService: add tag=system_server_wtf isTagEnabled=true flags=0x2
+07-14 04:29:07.675  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:29:07.689  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.689  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.690  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:29:07.690  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:29:07.690  1275  1304 I DropBoxManagerService: add tag=system_server_wtf isTagEnabled=true flags=0x2
+07-14 04:29:07.691  1275  1304 I DropBoxManagerService: add tag=system_server_wtf isTagEnabled=true flags=0x2
+07-14 04:29:07.691  1457  1611 D OpenGLRenderer: endAllActiveAnimators on 0x7aba7c8a5760 (RippleDrawable) with handle 0x7ab98c713ad0
+07-14 04:29:07.692  1275  1289 W InputManager-JNI: Input channel object '357ddc7 Sys2009:com.android.systemui/com.android.systemui.media.MediaProjectionPermissionActivity (client)' was disposed without first being removed with the input manager!
+07-14 04:29:07.696  1124  2998 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 3690496
+07-14 04:29:07.705  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.705  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.710  1275  1295 V WindowManager: Unknown focus tokens, dropping reportFocusChanged
+07-14 04:29:07.711  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:29:07.711  1275  1304 I DropBoxManagerService: add tag=system_server_wtf isTagEnabled=true flags=0x2
+07-14 04:29:07.698  1275  1275 I Binder:1275_2: type=1400 audit(0.0:145231): avc: denied { ioctl } for path="/dev/vaddress" dev="tmpfs" ino=11071 ioctlcmd=0x4c19 scontext=u:r:system_server:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+07-14 04:29:07.712  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:29:07.714 21515 21515 D CompatibilityChangeReporter: Compat change id reported: 78294732; UID 10058; state: ENABLED
+07-14 04:29:07.723  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.723  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.728  1124  1183 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:29:07.729  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:29:07.730  1457  1457 W ziparchive: Unable to open '/data/app/~~qWa-PXc4ZK4xleU6q_PLnQ==/com.poozh.translator-1sQCn6qYHKOjJKsUTM5KNw==/base.apk': No such file or directory
+07-14 04:29:07.730  1457  1457 E ndroid.systemu: Failed to open APK '/data/app/~~qWa-PXc4ZK4xleU6q_PLnQ==/com.poozh.translator-1sQCn6qYHKOjJKsUTM5KNw==/base.apk': I/O error
+07-14 04:29:07.731  1457  1457 W ResourcesManager: failed to preload asset path '/data/app/~~qWa-PXc4ZK4xleU6q_PLnQ==/com.poozh.translator-1sQCn6qYHKOjJKsUTM5KNw==/base.apk'
+07-14 04:29:07.731  1457  1457 W ResourcesManager: java.io.IOException: Failed to load asset path /data/app/~~qWa-PXc4ZK4xleU6q_PLnQ==/com.poozh.translator-1sQCn6qYHKOjJKsUTM5KNw==/base.apk
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at android.content.res.ApkAssets.nativeLoad(Native Method)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at android.content.res.ApkAssets.<init>(ApkAssets.java:295)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at android.content.res.ApkAssets.loadFromPath(ApkAssets.java:144)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at android.app.ResourcesManager.loadApkAssets(ResourcesManager.java:469)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at android.app.ResourcesManager.access$000(ResourcesManager.java:72)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at android.app.ResourcesManager$ApkAssetsSupplier.load(ResourcesManager.java:183)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at android.app.ResourcesManager.createApkAssetsSupplierNotLocked(ResourcesManager.java:1007)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at android.app.ResourcesManager.getResources(ResourcesManager.java:1128)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at android.app.ActivityThread.getTopLevelResources(ActivityThread.java:2471)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at android.app.ApplicationPackageManager.getResourcesForApplication(ApplicationPackageManager.java:1758)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at android.app.ApplicationPackageManager.getResourcesForApplication(ApplicationPackageManager.java:1744)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at android.app.ApplicationPackageManager.getDrawable(ApplicationPackageManager.java:1510)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at android.app.ApplicationPackageManager.loadUnbadgedItemIcon(ApplicationPackageManager.java:3040)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at android.content.pm.PackageItemInfo.loadUnbadgedIcon(PackageItemInfo.java:326)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at com.android.systemui.toast.SystemUIToast.getBadgedIcon(SystemUIToast.java:286)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at com.android.systemui.toast.SystemUIToast.inflateToastView(SystemUIToast.java:198)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at com.android.systemui.toast.SystemUIToast.<init>(SystemUIToast.java:90)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at com.android.systemui.toast.SystemUIToast.<init>(SystemUIToast.java:77)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at com.android.systemui.toast.ToastFactory.createToast(ToastFactory.java:78)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at com.android.systemui.toast.ToastUI.lambda$showToast$0(ToastUI.java:113)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at com.android.systemui.toast.ToastUI.$r8$lambda$w_gPCh3F8Xxn1jN4lkQZoUci71c(Unknown Source:0)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at com.android.systemui.toast.ToastUI$$ExternalSyntheticLambda0.run(Unknown Source:16)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at com.android.systemui.toast.ToastUI.showToast(ToastUI.java:140)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at com.android.systemui.statusbar.CommandQueue$H.handleMessage(CommandQueue.java:1451)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at android.os.Looper.loopOnce(Looper.java:201)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at android.os.Looper.loop(Looper.java:288)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at android.app.ActivityThread.main(ActivityThread.java:8085)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at java.lang.reflect.Method.invoke(Native Method)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:571)
+07-14 04:29:07.731  1457  1457 W ResourcesManager: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1091)
+07-14 04:29:07.731  1457  1457 W ziparchive: Unable to open '/data/app/~~qWa-PXc4ZK4xleU6q_PLnQ==/com.poozh.translator-1sQCn6qYHKOjJKsUTM5KNw==/base.apk': No such file or directory
+07-14 04:29:07.731  1457  1457 E ndroid.systemu: Failed to open APK '/data/app/~~qWa-PXc4ZK4xleU6q_PLnQ==/com.poozh.translator-1sQCn6qYHKOjJKsUTM5KNw==/base.apk': I/O error
+07-14 04:29:07.731  1457  1457 E ResourcesManager: failed to add asset path '/data/app/~~qWa-PXc4ZK4xleU6q_PLnQ==/com.poozh.translator-1sQCn6qYHKOjJKsUTM5KNw==/base.apk'
+07-14 04:29:07.731  1457  1457 E ResourcesManager: java.io.IOException: Failed to load asset path /data/app/~~qWa-PXc4ZK4xleU6q_PLnQ==/com.poozh.translator-1sQCn6qYHKOjJKsUTM5KNw==/base.apk
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.content.res.ApkAssets.nativeLoad(Native Method)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.content.res.ApkAssets.<init>(ApkAssets.java:295)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.content.res.ApkAssets.loadFromPath(ApkAssets.java:144)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.app.ResourcesManager.loadApkAssets(ResourcesManager.java:469)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.app.ResourcesManager.access$000(ResourcesManager.java:72)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.app.ResourcesManager$ApkAssetsSupplier.load(ResourcesManager.java:183)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.app.ResourcesManager.createAssetManager(ResourcesManager.java:551)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.app.ResourcesManager.createResourcesImpl(ResourcesManager.java:633)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.app.ResourcesManager.findOrCreateResourcesImplForKeyLocked(ResourcesManager.java:685)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.app.ResourcesManager.createResources(ResourcesManager.java:1038)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.app.ResourcesManager.getResources(ResourcesManager.java:1141)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.app.ActivityThread.getTopLevelResources(ActivityThread.java:2471)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.app.ApplicationPackageManager.getResourcesForApplication(ApplicationPackageManager.java:1758)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.app.ApplicationPackageManager.getResourcesForApplication(ApplicationPackageManager.java:1744)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.app.ApplicationPackageManager.getDrawable(ApplicationPackageManager.java:1510)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.app.ApplicationPackageManager.loadUnbadgedItemIcon(ApplicationPackageManager.java:3040)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.content.pm.PackageItemInfo.loadUnbadgedIcon(PackageItemInfo.java:326)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at com.android.systemui.toast.SystemUIToast.getBadgedIcon(SystemUIToast.java:286)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at com.android.systemui.toast.SystemUIToast.inflateToastView(SystemUIToast.java:198)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at com.android.systemui.toast.SystemUIToast.<init>(SystemUIToast.java:90)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at com.android.systemui.toast.SystemUIToast.<init>(SystemUIToast.java:77)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at com.android.systemui.toast.ToastFactory.createToast(ToastFactory.java:78)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at com.android.systemui.toast.ToastUI.lambda$showToast$0(ToastUI.java:113)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at com.android.systemui.toast.ToastUI.$r8$lambda$w_gPCh3F8Xxn1jN4lkQZoUci71c(Unknown Source:0)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at com.android.systemui.toast.ToastUI$$ExternalSyntheticLambda0.run(Unknown Source:16)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at com.android.systemui.toast.ToastUI.showToast(ToastUI.java:140)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at com.android.systemui.statusbar.CommandQueue$H.handleMessage(CommandQueue.java:1451)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.os.Looper.loopOnce(Looper.java:201)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.os.Looper.loop(Looper.java:288)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at android.app.ActivityThread.main(ActivityThread.java:8085)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at java.lang.reflect.Method.invoke(Native Method)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:571)
+07-14 04:29:07.731  1457  1457 E ResourcesManager: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1091)
+07-14 04:29:07.731  1457  1457 W PackageManager: Failure retrieving resources for com.poozh.translator
+07-14 04:29:07.736  1275  1289 W AppOps  : Noting op not finished: uid 10058 pkg com.poozh.translator code 24 startTime of in progress event=1783974272683
+07-14 04:29:07.739  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.740  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.741  1124  2998 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:29:07.742 21515 21547 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 3506176
+07-14 04:29:07.743  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:29:07.749 21515 21773 D oozh.translato: Features: 0 0 0
+07-14 04:29:07.749 21515 21773 E oozh.translato: vulkan version is 4211017
+07-14 04:29:07.749 21515 21773 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 3506176
+07-14 04:29:07.750  1457  1611 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 81920
+07-14 04:29:07.751 21515 21773 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 3506176
+07-14 04:29:07.761  1457 21774 D ndroid.systemu: Features: 0 0 0
+07-14 04:29:07.761  1457 21774 E ndroid.systemu: vulkan version is 4211017
+07-14 04:29:07.762  1457 21774 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 81920
+07-14 04:29:07.762  1457 21774 D gralloc_x86: gralloc_alloc: Creating ashmem region of size 81920
+07-14 04:29:07.766  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.767  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.767  1124  1183 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:29:07.768  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:29:07.748  1457  1457 I RenderThread: type=1400 audit(0.0:145232): avc: denied { open } for path="/system/etc/mumu-configs/currentApp" dev="sdc3" ino=4849862 scontext=u:r:platform_app:s0:c512,c768 tcontext=u:object_r:system_data_file:s0 tclass=file permissive=1 app=com.android.systemui
+07-14 04:29:07.772  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.772  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.773  1124  1183 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:29:07.773  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:29:07.790  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.790  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.791  1124  1182 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:29:07.792  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:29:07.806  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.807  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.808  1124  1182 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:29:07.808  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:29:07.812  1275  1289 W InputManager-JNI: Input channel object '7216760 com.android.systemui/com.android.systemui.media.MediaProjectionPermissionActivity (client)' was disposed without first being removed with the input manager!
+07-14 04:29:07.822  1124  1124 W SurfaceFlinger: couldn't log to binary event log: overflow.
+07-14 04:29:07.823  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.823  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.824  1124  1321 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:29:07.824  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:29:07.840  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.840  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.840  1124  1321 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:29:07.841  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:29:07.856  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.857  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.858  1124  1322 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:29:07.859  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:29:07.873  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.873  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.873  1124  1322 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:29:07.873  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:29:07.889  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.889  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.890  1124  1322 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:29:07.890  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:29:07.905  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.906  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.907  1124  1322 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:29:07.907  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:29:07.922  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.922  1275  1430 E DisplayDeviceConfig: requesting nits when no mapping exists.
+07-14 04:29:07.923  1124  1322 E HWComposer: operator(): operator() failed for display 4619827820427265280: Unsupported (8)
+07-14 04:29:07.923  1275  1430 E SurfaceFlinger: setDisplayBrightness: failed to transact: -38
+07-14 04:29:07.932  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.poozh.translator|3108|null|10058
+07-14 04:29:07.932  1457  1457 D InterruptionStateProvider: No heads up: unimportant notification: 0|com.poozh.translator|3108|null|10058
+07-14 04:29:07.934  1457  1668 D PeopleSpaceWidgetMgr: Sbn doesn't contain valid PeopleTileKey: null/0/com.poozh.translator
+07-14 04:29:07.941  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.poozh.translator|3108|null|10058
+07-14 04:29:07.941  1457  1457 D InterruptionStateProvider: No heads up: unimportant notification: 0|com.poozh.translator|3108|null|10058
+07-14 04:29:07.942  1457  1668 D PeopleSpaceWidgetMgr: Sbn doesn't contain valid PeopleTileKey: null/0/com.poozh.translator
+07-14 04:29:08.012  1275  1275 W NotificationHistory: Attempted to add notif for locked/gone/disabled user 0
+07-14 04:29:08.024  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|android|0|com.android.server.wm.AlertWindowNotification - com.poozh.translator|1000
+07-14 04:29:08.024  1457  1457 D InterruptionStateProvider: No heads up: unimportant notification: 0|android|0|com.android.server.wm.AlertWindowNotification - com.poozh.translator|1000
+07-14 04:29:08.024  1457  1668 D PeopleSpaceWidgetMgr: Sbn doesn't contain valid PeopleTileKey: null/0/android
+07-14 04:29:09.675  1427  1427 D DropboxReceiver: dropbox tag: system_server_wtf
+07-14 04:29:09.675  1427  1427 D DropboxReceiver: dropbox time: 1783974547711
+07-14 04:29:09.675  1427  1427 D DropboxReceiver: dropbox file is not to be trackd
+07-14 04:29:10.211  1275  1289 W InputManager-JNI: Input channel object '2af6870 Toast (client)' was disposed without first being removed with the input manager!
+07-14 04:29:10.213  1275  1289 W NotificationService: Toast already killed. pkg=com.poozh.translator token=android.os.BinderProxy@b89d532
+07-14 04:29:11.805 21776 21776 D ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+07-14 04:29:11.965  1275  1311 E system_server: Cannot read thread CPU times for PID 1275
+07-14 04:29:12.365 21779 21779 D ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+07-14 04:29:12.392  1275  1286 W System  : A resource failed to call close. 
+07-14 04:29:17.812  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.mumu.store|1|null|1000
+07-14 04:29:17.812  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.mumu.store|-1679252459|null|1000
+07-14 04:29:17.812  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.bilibili.azurlane|2|null|10039
+07-14 04:29:17.812  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.android.permissioncontroller|1|HibernationJobService|10036
+07-14 04:29:17.812  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.poozh.translator|3108|null|10058
+07-14 04:29:17.812  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|android|0|com.android.server.wm.AlertWindowNotification - com.poozh.translator|1000
+07-14 04:29:17.813  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.mumu.store|1|null|1000
+07-14 04:29:17.813  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.mumu.store|-1679252459|null|1000
+07-14 04:29:17.813  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.bilibili.azurlane|2|null|10039
+07-14 04:29:17.813  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.android.permissioncontroller|1|HibernationJobService|10036
+07-14 04:29:17.813  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|com.poozh.translator|3108|null|10058
+07-14 04:29:17.813  1457  1457 D InterruptionStateProvider: No bubble up: not allowed to bubble: 0|android|0|com.android.server.wm.AlertWindowNotification - com.poozh.translator|1000
+07-14 04:29:18.931  1042 21772 I keystore2: keystore2::watchdog: Watchdog thread idle -> terminating. Have a great day.
+07-14 04:29:21.057  1275  1275 W WindowManager: removeWindowToken: Attempted to remove non-existing token: android.os.Binder@d31af40
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: Couldn't encode request, returning with 400
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: java.net.SocketTimeoutException: failed to connect to firebaselogging.googleapis.com/172.217.117.4 (port 443) from /10.0.2.15 (port 34174) after 30000ms
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at libcore.io.IoBridge.connectErrno(IoBridge.java:236)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at libcore.io.IoBridge.connect(IoBridge.java:180)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at java.net.PlainSocketImpl.socketConnect(PlainSocketImpl.java:142)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:390)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:230)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:212)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:436)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at java.net.Socket.connect(Socket.java:621)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.android.okhttp.internal.Platform.connectSocket(Platform.java:182)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.android.okhttp.internal.io.RealConnection.connectSocket(RealConnection.java:145)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.android.okhttp.internal.io.RealConnection.connect(RealConnection.java:116)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.android.okhttp.internal.http.StreamAllocation.findConnection(StreamAllocation.java:186)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.android.okhttp.internal.http.StreamAllocation.findHealthyConnection(StreamAllocation.java:128)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.android.okhttp.internal.http.StreamAllocation.newStream(StreamAllocation.java:97)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.android.okhttp.internal.http.HttpEngine.connect(HttpEngine.java:289)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.android.okhttp.internal.http.HttpEngine.sendRequest(HttpEngine.java:232)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.android.okhttp.internal.huc.HttpURLConnectionImpl.execute(HttpURLConnectionImpl.java:465)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.android.okhttp.internal.huc.HttpURLConnectionImpl.connect(HttpURLConnectionImpl.java:131)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.android.okhttp.internal.huc.HttpURLConnectionImpl.getOutputStream(HttpURLConnectionImpl.java:262)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.android.okhttp.internal.huc.DelegatingHttpsURLConnection.getOutputStream(DelegatingHttpsURLConnection.java:219)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.android.okhttp.internal.huc.HttpsURLConnectionImpl.getOutputStream(HttpsURLConnectionImpl.java:30)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.google.android.datatransport.cct.CctTransportBackend.doSend(CctTransportBackend.java:304)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.google.android.datatransport.cct.CctTransportBackend.access$lambda$0(Unknown Source:0)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.google.android.datatransport.cct.CctTransportBackend$$Lambda$1.apply(Unknown Source:4)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.google.android.datatransport.runtime.retries.Retries.retry(Retries.java:54)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.google.android.datatransport.cct.CctTransportBackend.send(CctTransportBackend.java:373)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.google.android.datatransport.runtime.scheduling.jobscheduling.Uploader.logAndUpdateState(Uploader.java:121)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.google.android.datatransport.runtime.scheduling.jobscheduling.Uploader.lambda$upload$1(Uploader.java:88)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.google.android.datatransport.runtime.scheduling.jobscheduling.Uploader$$Lambda$1.run(Unknown Source:8)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at com.google.android.datatransport.runtime.SafeLoggingExecutor$SafeLoggingRunnable.run(SafeLoggingExecutor.java:47)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+07-14 04:29:25.398 21515 21711 E TransportRuntime.CctTransportBackend: 	at java.lang.Thread.run(Thread.java:920)
+07-14 04:30:18.281  1116  1116 E android.hardware.power.stats@1.0-service-mock: Failed to getEnergyData
+07-14 04:30:23.255  1040  1045 I NemuSysOpt: Start compat memory
+07-14 04:30:23.359  1040  1045 I NemuSysOpt: Compat memory done
+07-14 04:30:35.188  1103  1103 I Binder:1103_2: type=1400 audit(0.0:145233): avc: denied { use } for path="socket:[4224795]" dev="sockfs" ino=4224795 scontext=u:r:init:s0 tcontext=u:r:untrusted_app:s0:c39,c256,c512,c768 tclass=fd permissive=1
+07-14 04:30:35.251 15401 15401 I thread_report: type=1400 audit(0.0:145234): avc: denied { search } for name="/" dev="sda6" ino=2 scontext=u:r:untrusted_app:s0:c39,c256,c512,c768 tcontext=u:object_r:unlabeled:s0 tclass=dir permissive=1 app=com.bilibili.azurlane
+07-14 04:30:47.384 21789 21789 I logcat  : type=1400 audit(0.0:145235): avc: denied { write } for name="logdr" dev="tmpfs" ino=9519 scontext=u:r:adbd:s0 tcontext=u:object_r:logdr_socket:s0 tclass=sock_file permissive=1
