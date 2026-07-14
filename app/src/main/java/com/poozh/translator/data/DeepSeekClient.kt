@@ -266,6 +266,7 @@ class DeepSeekClient(
         provider: ModelProviderPreset,
         stream: Boolean
     ): Request {
+        android.util.Log.d("DeepSeekClient", "buildRequest: thinkingEnabled=${settings.thinkingEnabled} stream=$stream model=${settings.model}")
         val body = buildRequestJson(text, language, settings.model, provider.supportsJsonMode, stream, settings.thinkingEnabled)
             .toString()
             .toRequestBody(JSON_MEDIA_TYPE)

@@ -609,11 +609,12 @@ class FloatingTranslatorService : Service() {
                         val now = System.currentTimeMillis()
                         if (now - lastPartialShownAt < 80L) return@runOnMain
                         lastPartialShownAt = now
-                        showReadingPage() // keep the panel open on the reading page
+                        // IMPORTANT: do NOT call showReadingPage() here — it
+                        // rebuilds the entire ScrollView + TextView and triggers
+                        // swapContent's fade-out/fade-in animation, which makes
+                        // the panel flicker on every streaming token. Instead,
+                        // just update the existing readingText in place.
                         if (partial.isEmpty()) {
-                            // Reasoning-model "thinking" phase (reasoning_content
-                            // streaming, no translation yet). Show a clear indicator
-                            // so the stream doesn't look dead during the long wait.
                             readingText?.text = "原文\n$text\n\n🤔 模型正在思考…"
                             showStatus("模型思考中")
                         } else {
