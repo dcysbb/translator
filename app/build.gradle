@@ -11,8 +11,8 @@ android {
         applicationId "com.poozh.translator"
         minSdk 26
         targetSdk 36
-        versionCode 19
-        versionName "0.5.5"
+        versionCode 21
+        versionName "0.6.1"
     }
 
     signingConfigs {
