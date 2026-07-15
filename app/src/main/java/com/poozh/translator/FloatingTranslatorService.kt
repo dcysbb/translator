@@ -495,34 +495,44 @@ class FloatingTranslatorService : Service() {
             when (event.actionMasked) {
                 android.view.MotionEvent.ACTION_DOWN -> {
                     downX = event.rawX; downY = event.rawY; isPotentialTap = true
-                    false // let ScrollView handle scroll
+                    // Claim the gesture so we get UP; ScrollView won't scroll
+                    // unless we release on MOVE.
+                    v.parent?.requestDisallowInterceptTouchEvent(true)
+                    true
                 }
                 android.view.MotionEvent.ACTION_MOVE -> {
                     if (isPotentialTap &&
                         (Math.abs(event.rawX - downX) > slop || Math.abs(event.rawY - downY) > slop)) {
-                        isPotentialTap = false // it's a scroll, not a tap
+                        isPotentialTap = false
+                        // Release so the parent ScrollView can scroll.
+                        v.parent?.requestDisallowInterceptTouchEvent(false)
                     }
-                    false
+                    true
                 }
                 android.view.MotionEvent.ACTION_UP -> {
-                    if (!isPotentialTap) return@setOnTouchListener false
+                    val wasTap = isPotentialTap
+                    isPotentialTap = false
+                    v.parent?.requestDisallowInterceptTouchEvent(false)
+                    if (!wasTap) return@setOnTouchListener true
                     // Find the character offset at the touch point.
-                    val layout = tv.layout ?: return@setOnTouchListener false
+                    val layout = tv.layout ?: return@setOnTouchListener true
                     val x = event.x.toInt() - tv.totalPaddingLeft + tv.scrollX
                     val y = event.y.toInt() - tv.totalPaddingTop + tv.scrollY
                     val line = layout.getLineForVertical(y)
-                    if (line < 0 || line > layout.lineCount - 1) return@setOnTouchListener false
+                    if (line < 0 || line > layout.lineCount - 1) return@setOnTouchListener true
                     val off = layout.getOffsetForHorizontal(line, x.toFloat())
-                    if (off < 0) return@setOnTouchListener false
-                    val spanned = tv.text as? android.text.Spanned ?: return@setOnTouchListener false
-                    if (off >= spanned.length) return@setOnTouchListener false
+                    val spanned = tv.text as? android.text.Spanned ?: return@setOnTouchListener true
+                    if (off < 0 || off >= spanned.length) return@setOnTouchListener true
                     val spans = spanned.getSpans(off, off, ClickableSpan::class.java)
                     if (spans.isNotEmpty()) {
                         spans[0].onClick(v)
-                        true // consume the tap
-                    } else {
-                        false
                     }
+                    true
+                }
+                android.view.MotionEvent.ACTION_CANCEL -> {
+                    isPotentialTap = false
+                    v.parent?.requestDisallowInterceptTouchEvent(false)
+                    true
                 }
                 else -> false
             }
