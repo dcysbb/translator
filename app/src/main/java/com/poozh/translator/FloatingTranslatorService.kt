@@ -25,7 +25,6 @@ import android.os.IBinder
 import android.provider.Settings
 import android.text.SpannableStringBuilder
 import android.text.TextPaint
-import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.StyleSpan
 import android.view.Gravity
@@ -409,14 +408,19 @@ class FloatingTranslatorService : Service() {
             Md3.applyTextStyle(this, Md3TextStyle.BodyLarge, Md3.dark.onSurface)
             setLineSpacing(dp(5).toFloat(), 1.0f)
             setPadding(dp(4), dp(3), dp(4), dp(22))
-            movementMethod = LinkMovementMethod.getInstance()
+            // Do NOT use LinkMovementMethod — it conflicts with ScrollView's
+            // touch handling and swallows scroll gestures. Instead we detect
+            // taps on word spans via a custom OnTouchListener (set below).
         }
         // Render with clickable word spans when we have a complete result.
         val result = lastResult
+        val tv = readingText!!
         if (result != null && result.words.isNotEmpty()) {
-            readingText!!.text = buildSpannableReadingText(result)
+            tv.text = buildSpannableReadingText(result)
+            // Attach a scroll-friendly tap detector for word spans.
+            attachWordTapDetector(tv)
         } else {
-            readingText!!.text = currentReadingText()
+            tv.text = currentReadingText()
         }
         scroll.addView(readingText)
         swapContent(scroll)
@@ -474,6 +478,55 @@ class FloatingTranslatorService : Service() {
         val start = this.length
         this.append(text).append("\n")
         this.setSpan(StyleSpan(android.graphics.Typeface.BOLD), start, this.length - 1, 0)
+    }
+
+    /**
+     * Detect taps on ClickableSpan word entries inside the TextView without
+     * using LinkMovementMethod (which conflicts with ScrollView scrolling).
+     * Uses ACTION_UP + touch-slop check so a scroll/drag doesn't trigger a
+     * word tap.
+     */
+    private fun attachWordTapDetector(tv: TextView) {
+        val slop = android.view.ViewConfiguration.get(tv.context).scaledTouchSlop
+        var downX = 0f
+        var downY = 0f
+        var isPotentialTap = false
+        tv.setOnTouchListener { v, event ->
+            when (event.actionMasked) {
+                android.view.MotionEvent.ACTION_DOWN -> {
+                    downX = event.rawX; downY = event.rawY; isPotentialTap = true
+                    false // let ScrollView handle scroll
+                }
+                android.view.MotionEvent.ACTION_MOVE -> {
+                    if (isPotentialTap &&
+                        (Math.abs(event.rawX - downX) > slop || Math.abs(event.rawY - downY) > slop)) {
+                        isPotentialTap = false // it's a scroll, not a tap
+                    }
+                    false
+                }
+                android.view.MotionEvent.ACTION_UP -> {
+                    if (!isPotentialTap) return@setOnTouchListener false
+                    // Find the character offset at the touch point.
+                    val layout = tv.layout ?: return@setOnTouchListener false
+                    val x = event.x.toInt() - tv.totalPaddingLeft + tv.scrollX
+                    val y = event.y.toInt() - tv.totalPaddingTop + tv.scrollY
+                    val line = layout.getLineForVertical(y)
+                    if (line < 0 || line > layout.lineCount - 1) return@setOnTouchListener false
+                    val off = layout.getOffsetForHorizontal(line, x.toFloat())
+                    if (off < 0) return@setOnTouchListener false
+                    val spanned = tv.text as? android.text.Spanned ?: return@setOnTouchListener false
+                    if (off >= spanned.length) return@setOnTouchListener false
+                    val spans = spanned.getSpans(off, off, ClickableSpan::class.java)
+                    if (spans.isNotEmpty()) {
+                        spans[0].onClick(v)
+                        true // consume the tap
+                    } else {
+                        false
+                    }
+                }
+                else -> false
+            }
+        }
     }
 
     /** Pop-up showing the word + details, with a "收藏" button. */
