@@ -45,6 +45,7 @@ import com.poozh.translator.data.FavoritesManager
 import com.poozh.translator.data.ModelProviders
 import com.poozh.translator.data.SettingsSnapshot
 import com.poozh.translator.data.HistoryManager
+import com.poozh.translator.model.AnalysisProgress
 import com.poozh.translator.model.AnalysisResult
 import com.poozh.translator.model.LanguageDetector
 import com.poozh.translator.model.RefreshAction
@@ -89,9 +90,9 @@ class FloatingTranslatorService : Service() {
     private var activeTranslationRequestId = 0L
     private var bubbleStateAnimator: AnimatorSet? = null
     private var bubbleFeedbackState: BubbleFeedbackState? = null
-    /** Last partial translation shown, used to throttle UI updates (~80ms). */
-    private var lastPartialShown = ""
+    /** Last progress snapshot shown, used to throttle UI updates (~80ms). */
     private var lastPartialShownAt = 0L
+    private var lastProgressShown: AnalysisProgress? = null
     private var hiddenOverlayState: HiddenOverlayState? = null
 
     private data class HiddenOverlayState(
@@ -408,19 +409,31 @@ class FloatingTranslatorService : Service() {
             Md3.applyTextStyle(this, Md3TextStyle.BodyLarge, Md3.dark.onSurface)
             setLineSpacing(dp(5).toFloat(), 1.0f)
             setPadding(dp(4), dp(3), dp(4), dp(22))
-            // Do NOT use LinkMovementMethod — it conflicts with ScrollView's
-            // touch handling and swallows scroll gestures. Instead we detect
-            // taps on word spans via a custom OnTouchListener (set below).
         }
-        // Render with clickable word spans when we have a complete result.
-        val result = lastResult
         val tv = readingText!!
-        if (result != null && result.words.isNotEmpty()) {
-            tv.text = buildSpannableReadingText(result)
-            // Attach a scroll-friendly tap detector for word spans.
-            attachWordTapDetector(tv)
-        } else {
-            tv.text = currentReadingText()
+        when (val state = translationUiState) {
+            is TranslationUiState.Complete -> {
+                tv.text = buildSpannableReadingText(state.result)
+                if (state.result.words.isNotEmpty()) attachWordTapDetector(tv)
+            }
+            is TranslationUiState.InProgress -> {
+                tv.text = buildSpannableProgressText(
+                    AnalysisProgress(
+                        sourceText = state.sourceText,
+                        translation = state.partialTranslation,
+                        words = state.words,
+                        grammar = state.grammar,
+                        isThinking = state.isThinking
+                    )
+                )
+                if (state.words.isNotEmpty()) attachWordTapDetector(tv)
+            }
+            is TranslationUiState.Interrupted -> {
+                tv.text = SpannableStringBuilder(buildSpannableProgressText(state.progress))
+                    .append("\n\n⚠ ${state.message}")
+                if (state.progress.words.isNotEmpty()) attachWordTapDetector(tv)
+            }
+            else -> tv.text = currentReadingText()
         }
         scroll.addView(readingText)
         swapContent(scroll)
@@ -429,28 +442,59 @@ class FloatingTranslatorService : Service() {
     /**
      * Build a SpannableStringBuilder for the reading page. Section headers get
      * bold style, and each word's surface text is wrapped in a ClickableSpan
-     * that pops up a dialog to add it to favourites.
+     * whose word surfaces open the in-overlay detail page for favourites.
      */
     private fun buildSpannableReadingText(result: AnalysisResult): CharSequence {
+        return buildSpannableAnalysisText(
+            sourceText = result.sourceText,
+            translation = result.translation,
+            words = result.words,
+            grammar = result.grammar
+        )
+    }
+
+    private fun buildSpannableProgressText(progress: AnalysisProgress): CharSequence {
+        val content = buildSpannableAnalysisText(
+            sourceText = progress.sourceText,
+            translation = progress.translation,
+            words = progress.words,
+            grammar = progress.grammar
+        )
+        if (progress.translation.isBlank() && progress.words.isEmpty() && progress.grammar.isEmpty()) {
+            return SpannableStringBuilder().apply {
+                append("原文\n").append(progress.sourceText)
+                append(if (progress.isThinking) "\n\n模型正在思考…" else "\n\n正在连接模型服务…")
+            }
+        }
+        val footer = if (progress.grammar.isNotEmpty()) "\n正在收尾解析…" else "\n正在解析详细内容…"
+        return SpannableStringBuilder(content).append(footer)
+    }
+
+    private fun buildSpannableAnalysisText(
+        sourceText: String,
+        translation: String,
+        words: List<TermNote>,
+        grammar: List<String>
+    ): CharSequence {
         val sb = SpannableStringBuilder()
         // 原文
         sb.appendBoldLine("━━ 原文 ━━")
-        sb.append(result.sourceText.ifBlank { "未识别到文本" }).append("\n\n")
+        sb.append(sourceText.ifBlank { "未识别到文本" }).append("\n\n")
         // 译文
         sb.appendBoldLine("━━ 译文 ━━")
-        sb.append(result.translation.ifBlank { "暂无翻译" })
+        sb.append(translation.ifBlank { "暂无翻译" })
         // 单词释义
-        if (result.words.isNotEmpty()) {
+        if (words.isNotEmpty()) {
             sb.append("\n\n")
             sb.appendBoldLine("━━ 单词释义 ━━")
-            for (w in result.words) {
+            for (w in words) {
                 sb.append("• ")
                 // The clickable surface
                 val surfaceStart = sb.length
                 sb.append(w.surface)
                 sb.setSpan(object : ClickableSpan() {
                     override fun onClick(widget: View) {
-                        showWordDialog(w)
+                        showWordDetailsPage(w)
                     }
                     override fun updateDrawState(tp: TextPaint) {
                         tp.isUnderlineText = false
@@ -466,10 +510,10 @@ class FloatingTranslatorService : Service() {
             }
         }
         // 语法解析
-        if (result.grammar.isNotEmpty()) {
+        if (grammar.isNotEmpty()) {
             sb.append("\n")
             sb.appendBoldLine("━━ 语法解析 ━━")
-            for (g in result.grammar) sb.append("• $g\n")
+            for (g in grammar) sb.append("• $g\n")
         }
         return sb.trim()
     }
@@ -523,7 +567,7 @@ class FloatingTranslatorService : Service() {
                     val off = layout.getOffsetForHorizontal(line, x.toFloat())
                     val spanned = tv.text as? android.text.Spanned ?: return@setOnTouchListener true
                     if (off < 0 || off >= spanned.length) return@setOnTouchListener true
-                    val spans = spanned.getSpans(off, off, ClickableSpan::class.java)
+                    val spans = spanned.getSpans(off, (off + 1).coerceAtMost(spanned.length), ClickableSpan::class.java)
                     if (spans.isNotEmpty()) {
                         spans[0].onClick(v)
                     }
@@ -539,38 +583,55 @@ class FloatingTranslatorService : Service() {
         }
     }
 
-    /** Pop-up showing the word + details, with a "收藏" button. */
-    private fun showWordDialog(word: TermNote) {
-        val msg = buildString {
-            append(word.surface)
-            word.reading.takeIf { it.isNotBlank() }?.let { append("  【$it】") }
-            append("\n")
-            word.meaning.takeIf { it.isNotBlank() }?.let { append(it) }
-            word.note.takeIf { it.isNotBlank() }?.let { append("\n").append(it) }
+    /** Show word details inside the existing overlay window. */
+    private fun showWordDetailsPage(word: TermNote) {
+        readingText = null
+        titleText?.text = "单词详情"
+        val scroll = ScrollView(this).apply { clipToPadding = false }
+        val page = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(4), dp(4), dp(4), dp(14))
+        }
+        page.addView(TextView(this).apply {
+            text = word.surface
+            Md3.applyTextStyle(this, Md3TextStyle.HeadlineSmall, Md3.dark.primary)
+            setPadding(dp(13), dp(13), dp(13), dp(5))
+        })
+        word.reading.takeIf { it.isNotBlank() }?.let {
+            page.addView(statusLine("读音", it))
+        }
+        word.meaning.takeIf { it.isNotBlank() }?.let {
+            page.addView(statusLine("释义", it))
+        }
+        word.note.takeIf { it.isNotBlank() }?.let {
+            page.addView(statusLine("备注", it))
         }
         val alreadyFav = FavoritesManager.isFavorite(this, word.surface)
-        val btnLabel = if (alreadyFav) "已收藏" else "收藏"
-        android.app.AlertDialog.Builder(this)
-            .setTitle(word.surface)
-            .setMessage(msg)
-            .setPositiveButton(btnLabel) { _, _ ->
-                if (!alreadyFav) {
-                    val added = FavoritesManager.addFavorite(
-                        context = this,
-                        word = word.surface,
-                        reading = word.reading,
-                        meaning = word.meaning,
-                        note = word.note,
-                        sourceContext = lastStableText.take(200)
-                    )
-                    Toast.makeText(this, if (added) "已加入收藏" else "已在收藏中", Toast.LENGTH_SHORT).show()
-                }
+        page.addView(menuAction(if (alreadyFav) "取消收藏" else "收藏") {
+            if (alreadyFav) {
+                FavoritesManager.removeFavoriteByWord(this, word.surface)
+                Toast.makeText(this, "已取消收藏", Toast.LENGTH_SHORT).show()
+            } else {
+                val added = FavoritesManager.addFavorite(
+                    context = this,
+                    word = word.surface,
+                    reading = word.reading,
+                    meaning = word.meaning,
+                    note = word.note,
+                    sourceContext = lastStableText.take(200)
+                )
+                Toast.makeText(this, if (added) "已加入收藏" else "已在收藏中", Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton("关闭", null)
-            .show()
+            showWordDetailsPage(word)
+        })
+        page.addView(menuAction("返回阅读") { showReadingPage() })
+        scroll.addView(page)
+        swapContent(scroll)
+        showStatus(if (alreadyFav) "已收藏" else "单词详情")
     }
 
     private fun showFavoritesPage() {
+        readingText = null
         titleText?.text = "收藏夹"
         val scroll = ScrollView(this).apply { clipToPadding = false }
         val menu = LinearLayout(this).apply {
@@ -626,6 +687,7 @@ class FloatingTranslatorService : Service() {
     }
 
     private fun showMorePage() {
+        readingText = null
         titleText?.text = "更多"
         val scroll = ScrollView(this).apply { clipToPadding = false }
         val menu = LinearLayout(this).apply {
@@ -689,9 +751,13 @@ class FloatingTranslatorService : Service() {
     }
 
     private fun refreshOnce() {
-        if (ocrBusy || translating) {
+        if (ocrBusy) {
             showStatus("正在处理当前文本")
             return
+        }
+        if (translating) {
+            cancelActiveTranslation()
+            showStatus("已中断旧翻译，正在刷新")
         }
         if (panelView == null) showPanel() else showReadingPage()
 
@@ -827,8 +893,8 @@ class FloatingTranslatorService : Service() {
 
         translating = true
         val requestId = ++activeTranslationRequestId
-        lastPartialShown = ""
         lastPartialShownAt = 0L
+        lastProgressShown = null
         showStatus("正在翻译")
         currentTranslation?.cancel()
         currentTranslation = deepSeekClient.analyze(
@@ -836,13 +902,15 @@ class FloatingTranslatorService : Service() {
             language = LanguageDetector.detect(text),
             settings = snapshot,
             callback = object : DeepSeekClient.ResultCallback {
-                override fun onTranslationProgress(partial: String) {
+                override fun onAnalysisProgress(progress: AnalysisProgress) {
                     runOnMain {
                         if (!translating || requestId != activeTranslationRequestId) return@runOnMain
                         translationUiState = TranslationUiState.InProgress(
                             sourceText = text,
-                            partialTranslation = partial,
-                            isThinking = partial.isEmpty()
+                            partialTranslation = progress.translation,
+                            isThinking = progress.isThinking,
+                            words = progress.words,
+                            grammar = progress.grammar
                         )
                         updateBubbleFeedback()
                         // The panel may be collapsed. State is still retained so
@@ -853,19 +921,27 @@ class FloatingTranslatorService : Service() {
                         val now = System.currentTimeMillis()
                         if (now - lastPartialShownAt < 80L) return@runOnMain
                         lastPartialShownAt = now
-                        // IMPORTANT: do NOT call showReadingPage() here — it
-                        // rebuilds the entire ScrollView + TextView and triggers
-                        // swapContent's fade-out/fade-in animation, which makes
-                        // the panel flicker on every streaming token. Instead,
-                        // just update the existing readingText in place.
-                        if (partial.isEmpty()) {
-                            readingText?.text = translationUiState.displayText()
-                            showStatus("模型思考中")
+                        if (progress == lastProgressShown) return@runOnMain
+                        lastProgressShown = progress
+                        renderProgressInPlace(progress)
+                        showStatus(translationUiState.statusText())
+                    }
+                }
+
+                override fun onPartialFailure(progress: AnalysisProgress, message: String) {
+                    runOnMain {
+                        if (requestId != activeTranslationRequestId) return@runOnMain
+                        translating = false
+                        currentTranslation = null
+                        lastResult = null
+                        translationUiState = TranslationUiState.Interrupted(text, progress, message)
+                        readingText?.text = SpannableStringBuilder(buildSpannableProgressText(progress))
+                            .append("\n\n⚠ $message")
+                        if (panelView != null) {
+                            showStatus("解析不完整")
                         } else {
-                            if (partial == lastPartialShown) return@runOnMain
-                            lastPartialShown = partial
-                            readingText?.text = translationUiState.displayText()
-                            showStatus("正在翻译")
+                            updateBubbleFeedback()
+                            Toast.makeText(this@FloatingTranslatorService, "解析不完整，点悬浮球查看", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
@@ -913,6 +989,20 @@ class FloatingTranslatorService : Service() {
         )
     }
 
+    private fun renderProgressInPlace(progress: AnalysisProgress) {
+        val textView = readingText ?: return
+        textView.text = buildSpannableProgressText(progress)
+        if (progress.words.isNotEmpty()) attachWordTapDetector(textView)
+    }
+
+    private fun cancelActiveTranslation() {
+        if (!translating && currentTranslation == null) return
+        activeTranslationRequestId++
+        currentTranslation?.cancel()
+        currentTranslation = null
+        translating = false
+    }
+
     private fun retranslateLastText() {
         if (ocrBusy || translating) {
             showStatus("正在处理当前文本")
@@ -958,7 +1048,9 @@ class FloatingTranslatorService : Service() {
     }
 
     private fun copyResult() {
-        val text = lastResult?.toDisplayText() ?: readingText?.text?.toString().orEmpty()
+        val text = lastResult?.toDisplayText()
+            ?: readingText?.text?.toString()
+            ?: translationUiState.displayText()
         if (text.isBlank()) return
         val clipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
         clipboard.setPrimaryClip(ClipData.newPlainText("translation", text))
@@ -1007,6 +1099,7 @@ class FloatingTranslatorService : Service() {
             is TranslationUiState.InProgress -> BubbleFeedbackState.IN_PROGRESS
             is TranslationUiState.Complete -> BubbleFeedbackState.COMPLETE
             is TranslationUiState.Failed -> BubbleFeedbackState.FAILED
+            is TranslationUiState.Interrupted -> BubbleFeedbackState.FAILED
         }
         // Partial text can arrive many times per second. Once the correct
         // collapsed-state animation is running, do not restart it per token.
@@ -1040,6 +1133,11 @@ class FloatingTranslatorService : Service() {
                 Md3.light.error,
                 "屏幕翻译，翻译失败"
             )
+            is TranslationUiState.Interrupted -> Triple(
+                Md3.light.errorContainer,
+                Md3.light.error,
+                "屏幕翻译，解析不完整"
+            )
         }
         bubble.background = Md3.ripple(
             context = this,
@@ -1057,6 +1155,7 @@ class FloatingTranslatorService : Service() {
             is TranslationUiState.InProgress -> floatArrayOf(1f, 0.90f, 1f)
             is TranslationUiState.Complete -> floatArrayOf(1f, 1.12f, 1f)
             is TranslationUiState.Failed -> floatArrayOf(1f, 0.88f, 1f)
+            is TranslationUiState.Interrupted -> floatArrayOf(1f, 0.88f, 1f)
             TranslationUiState.Idle -> return
         }
         val scaleX = ObjectAnimator.ofFloat(bubble, View.SCALE_X, *values)

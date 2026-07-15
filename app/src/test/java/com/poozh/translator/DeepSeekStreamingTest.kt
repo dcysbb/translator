@@ -2,6 +2,7 @@ package com.poozh.translator
 
 import com.poozh.translator.data.DeepSeekClient
 import com.poozh.translator.data.SettingsSnapshot
+import com.poozh.translator.model.AnalysisProgress
 import com.poozh.translator.model.AnalysisResult
 import com.poozh.translator.model.TextLanguage
 import okhttp3.mockwebserver.MockResponse
@@ -20,7 +21,7 @@ import java.util.concurrent.atomic.AtomicReference
 /**
  * Integration tests for the streaming translation client using MockWebServer.
  * Covers: SSE streaming with incremental progress, plain-JSON (server ignores
- * stream=true), and stream-unsupported fallback to one non-streaming request.
+ * stream=true), and the one-request cancellation/error contract.
  */
 class DeepSeekStreamingTest {
 
@@ -95,6 +96,42 @@ class DeepSeekStreamingTest {
     }
 
     @Test
+    fun sseStreamPublishesWordsAndGrammarBeforeCompletion() {
+        fun deltaJson(content: String): String {
+            val delta = org.json.JSONObject().put("content", content)
+            return org.json.JSONObject()
+                .put("choices", org.json.JSONArray().put(org.json.JSONObject().put("delta", delta)))
+                .toString()
+        }
+        val sse = buildString {
+            append("data: ").append(deltaJson("""{"translation":"你好","words":[{"surface":"你","meaning":"你"}""")).append("\n\n")
+            append("data: ").append(deltaJson(""",{"surface":"好","meaning":"好"}],"grammar":["问候句"]}""")).append("\n\n")
+            append("data: [DONE]\n\n")
+        }
+        server.enqueue(MockResponse().setHeader("Content-Type", "text/event-stream").setBody(sse))
+
+        val wordProgressCount = AtomicInteger(0)
+        val grammarProgressCount = AtomicInteger(0)
+        val resultRef = AtomicReference<AnalysisResult?>(null)
+        val latch = CountDownLatch(1)
+        client.analyze("hello", TextLanguage.ENGLISH, snapshot(), object : DeepSeekClient.ResultCallback {
+            override fun onAnalysisProgress(progress: AnalysisProgress) {
+                if (progress.words.isNotEmpty()) wordProgressCount.incrementAndGet()
+                if (progress.grammar.isNotEmpty()) grammarProgressCount.incrementAndGet()
+            }
+            override fun onSuccess(result: AnalysisResult) { resultRef.set(result); latch.countDown() }
+            override fun onFailure(message: String) { latch.countDown() }
+        })
+
+        assertTrue(latch.await(5, TimeUnit.SECONDS))
+        assertTrue(wordProgressCount.get() > 0)
+        assertTrue(grammarProgressCount.get() > 0)
+        assertEquals(2, resultRef.get()?.words?.size)
+        assertEquals(listOf("问候句"), resultRef.get()?.grammar)
+        assertEquals(1, server.requestCount)
+    }
+
+    @Test
     fun plainJsonBodyIsHandledInOneRequest() {
         // Server ignores stream=true and returns a normal chat completion.
         val body = """{"choices":[{"message":{"content":"{\"translation\":\"你好\",\"language\":\"en\"}"}}]}"""
@@ -156,33 +193,26 @@ class DeepSeekStreamingTest {
     }
 
     @Test
-    fun streamUnsupportedFallsBackToSingleNonStreamingRequest() {
-        // First: 400 with a stream-related error body.
+    fun streamUnsupportedFailsWithoutRetrying() {
+        // A stream-related error is terminal: the app keeps the one-request
+        // contract and lets the user explicitly refresh.
         server.enqueue(
             MockResponse()
                 .setResponseCode(400)
                 .setHeader("Content-Type", "application/json")
                 .setBody("""{"error":{"message":"stream not supported"}}""")
         )
-        // Then: a normal non-streaming JSON success.
-        val body = """{"choices":[{"message":{"content":"{\"translation\":\"hi\",\"language\":\"en\"}"}}]}"""
-        server.enqueue(
-            MockResponse()
-                .setResponseCode(200)
-                .setHeader("Content-Type", "application/json")
-                .setBody(body)
-        )
-
         val resultRef = AtomicReference<AnalysisResult?>(null)
+        val failRef = AtomicReference<String?>(null)
         val latch = CountDownLatch(1)
         client.analyze("hi", TextLanguage.ENGLISH, snapshot(), object : DeepSeekClient.ResultCallback {
             override fun onSuccess(result: AnalysisResult) { resultRef.set(result); latch.countDown() }
-            override fun onFailure(message: String) { latch.countDown() }
+            override fun onFailure(message: String) { failRef.set(message); latch.countDown() }
         })
         assertTrue(latch.await(5, TimeUnit.SECONDS))
-        assertEquals("hi", resultRef.get()?.translation)
-        // Exactly two requests: the streaming attempt + one fallback.
-        assertEquals(2, server.requestCount)
+        assertTrue(resultRef.get() == null)
+        assertTrue(failRef.get()?.contains("400") == true)
+        assertEquals(1, server.requestCount)
     }
 
     @Test
@@ -222,17 +252,12 @@ class DeepSeekStreamingTest {
     }
 
     @Test
-    fun cancellingOuterHandleAlsoCancelsFallbackCall() {
-        server.enqueue(
-            MockResponse()
-                .setResponseCode(400)
-                .setBody("""{"error":{"message":"stream not supported"}}""")
-        )
+    fun cancellingOuterHandleCancelsTheSingleCall() {
         server.enqueue(
             MockResponse()
                 .setResponseCode(200)
-                .setHeader("Content-Type", "application/json")
-                .setBody("""{"choices":[{"message":{"content":"{\"translation\":\"late\"}"}}]}""")
+                .setHeader("Content-Type", "text/event-stream")
+                .setBody("data: {\"choices\":[{\"delta\":{\"content\":\"{\\\"translation\\\":\\\"late\"\"}}}]}\n\n")
                 .setBodyDelay(2, TimeUnit.SECONDS)
         )
 
@@ -242,11 +267,10 @@ class DeepSeekStreamingTest {
             override fun onFailure(message: String) { terminal.countDown() }
         })
         assertTrue(server.takeRequest(2, TimeUnit.SECONDS) != null)
-        assertTrue(server.takeRequest(2, TimeUnit.SECONDS) != null)
         handle.cancel()
 
-        assertFalse("cancelled fallback must not call a terminal callback", terminal.await(500, TimeUnit.MILLISECONDS))
-        assertEquals(2, server.requestCount)
+        assertFalse("cancelled call must not call a terminal callback", terminal.await(500, TimeUnit.MILLISECONDS))
+        assertEquals(1, server.requestCount)
     }
 
     @Test

@@ -17,12 +17,14 @@ class DeepSeekPromptTest {
     fun translationIsRequestedAsFirstFieldForStreaming() {
         for (lang in TextLanguage.values()) {
             val prompt = DeepSeekPrompt.systemPrompt(lang)
-            // "translation" must appear before "sourceText" so the streaming
-            // extractor can surface it first.
+            // The response starts with fields that can be rendered while the
+            // single SSE request is still in flight.
             val translationIdx = prompt.indexOf("translation")
-            val sourceTextIdx = prompt.indexOf("sourceText")
+            val wordsIdx = prompt.indexOf("words")
+            val grammarIdx = prompt.indexOf("grammar")
             assertTrue("lang=$lang translation should be mentioned", translationIdx >= 0)
-            assertTrue("lang=$lang translation should precede sourceText", translationIdx < sourceTextIdx)
+            assertTrue("lang=$lang translation should precede words", translationIdx < wordsIdx)
+            assertTrue("lang=$lang words should precede grammar", wordsIdx < grammarIdx)
         }
     }
 

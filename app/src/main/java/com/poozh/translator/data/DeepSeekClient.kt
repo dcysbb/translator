@@ -1,6 +1,7 @@
 package com.poozh.translator.data
 
 import com.poozh.translator.model.AnalysisResult
+import com.poozh.translator.model.AnalysisProgress
 import com.poozh.translator.model.TextLanguage
 import okhttp3.Call
 import okhttp3.Callback
@@ -20,7 +21,10 @@ import java.util.concurrent.atomic.AtomicReference
 class DeepSeekClient(
     private val httpClient: OkHttpClient = OkHttpClient.Builder()
         .connectTimeout(20, TimeUnit.SECONDS)
-        .readTimeout(90, TimeUnit.SECONDS)
+        // A model may spend more than 90 seconds generating a long analysis.
+        // The request is explicitly user-cancellable from the floating window,
+        // so a read timeout would only discard useful partial output.
+        .readTimeout(0, TimeUnit.MILLISECONDS)
         .writeTimeout(20, TimeUnit.SECONDS)
         .build()
 ) {
@@ -29,15 +33,25 @@ class DeepSeekClient(
      * OkHttp thread; callers must marshal onto the UI thread themselves.
      */
     interface ResultCallback {
+        /** A new streaming analysis snapshot is available. */
+        fun onAnalysisProgress(progress: AnalysisProgress) {
+            // Keep source compatibility for callers that only consumed the
+            // original translation-only callback.
+            onTranslationProgress(progress.translation)
+        }
         /** A partial translation has been extracted from the stream so far. */
         fun onTranslationProgress(partialTranslation: String) {}
         /** The full analysis (translation + grammar notes) is ready. */
         fun onSuccess(result: AnalysisResult)
         /** The request failed terminally. Retry is left to the user ("重译"). */
         fun onFailure(message: String)
+        /** The connection ended after useful content had already arrived. */
+        fun onPartialFailure(progress: AnalysisProgress, message: String) {
+            onFailure(message)
+        }
     }
 
-    /** A cancellable handle for a translation request (stream + fallback). */
+    /** A cancellable handle for the single streaming translation request. */
     interface TranslationHandle {
         fun cancel()
     }
@@ -60,21 +74,20 @@ class DeepSeekClient(
 
         val session = RequestSession(callback)
         android.util.Log.d(TAG, "translation request started provider=${provider.id} model=${settings.model}")
-        startStreaming(text, language, settings, provider, session, allowFallback = true)
+        startStreaming(text, language, settings, provider, session)
         return session
     }
 
     /**
-     * Fire the streaming request. [allowFallback] gates whether a clearly-
-     * unsupported-stream error triggers a single non-streaming retry.
+     * Fire the single streaming request. A response may still be a normal JSON
+     * body when a gateway ignores stream=true; it is parsed from the same call.
      */
     private fun startStreaming(
         text: String,
         language: TextLanguage,
         settings: SettingsSnapshot,
         provider: ModelProviderPreset,
-        session: RequestSession,
-        allowFallback: Boolean
+        session: RequestSession
     ) {
         val request = buildRequest(text, language, settings, provider, stream = true)
         val call = httpClient.newCall(request)
@@ -88,52 +101,13 @@ class DeepSeekClient(
             override fun onResponse(call: Call, response: Response) {
                 response.use {
                     val code = it.code
-                    // 400/415/422 with a "stream"/"response_format" complaint →
-                    // the server can't stream; fall back once to non-streaming.
-                    if (allowFallback && isStreamUnsupported(code, it)) {
-                        if (!session.isRunning) return
-                        android.util.Log.d(TAG, "stream unsupported; using one non-streaming fallback")
-                        startNonStreaming(text, language, settings, provider, session)
-                        return
-                    }
                     if (!it.isSuccessful) {
                         if (!session.isRunning) return
                         val body = runCatching { it.body?.string().orEmpty() }.getOrDefault("")
                         session.fail("${provider.name} HTTP $code: ${body.take(240)}")
                         return
                     }
-                    consumeResponseBody(it, text, session)
-                }
-            }
-        })
-    }
-
-    /** One-shot non-streaming fallback for servers that reject stream=true. */
-    private fun startNonStreaming(
-        text: String,
-        language: TextLanguage,
-        settings: SettingsSnapshot,
-        provider: ModelProviderPreset,
-        session: RequestSession
-    ) {
-        val request = buildRequest(text, language, settings, provider, stream = false)
-        val call = httpClient.newCall(request)
-        if (!session.activate(call)) return
-        call.enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                if (!session.isRunning) return
-                session.fail(friendlyNetworkMessage(e))
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                response.use {
-                    if (!session.isRunning) return
-                    if (!it.isSuccessful) {
-                        val body = runCatching { it.body?.string().orEmpty() }.getOrDefault("")
-                        session.fail("${provider.name} HTTP ${it.code}: ${body.take(240)}")
-                        return
-                    }
-                    consumeResponseBody(it, text, session)
+                    consumeResponseBody(it, text, language, session)
                 }
             }
         })
@@ -148,6 +122,7 @@ class DeepSeekClient(
     private fun consumeResponseBody(
         response: Response,
         text: String,
+        language: TextLanguage,
         session: RequestSession
     ) {
         val body = response.body ?: run {
@@ -168,7 +143,7 @@ class DeepSeekClient(
                 }
                 session.markFirstData()
                 if (looksLikeSse(first)) {
-                    consumeSseStream(reader, first, text, session)
+                    consumeSseStream(reader, first, text, language, session)
                 } else {
                     val plain = buildString {
                         append(first)
@@ -178,7 +153,7 @@ class DeepSeekClient(
                             line = reader.readLine()
                         }
                     }
-                    consumePlainText(plain, text, session)
+                    consumePlainText(plain, text, language, session)
                 }
             }
         } catch (e: IOException) {
@@ -196,9 +171,10 @@ class DeepSeekClient(
         reader: BufferedReader,
         firstLine: String,
         text: String,
+        language: TextLanguage,
         session: RequestSession
     ) {
-        val extractor = StreamingTranslationExtractor()
+        val extractor = StreamingAnalysisExtractor()
         val full = StringBuilder()
         var reasoningNotified = false
         try {
@@ -227,31 +203,34 @@ class DeepSeekClient(
                     if (reasoning.isNotEmpty() && content.isEmpty()) {
                         if (!reasoningNotified) {
                             reasoningNotified = true
-                            session.progress("")
+                            session.progress(extractor.snapshot(text, language, isThinking = true))
                         }
                     }
                     if (content.isNotEmpty()) {
                         full.append(content)
                         extractor.append(content)
-                        val partial = extractor.currentTranslation
-                        if (partial.isNotEmpty()) session.progress(partial)
+                        session.progress(extractor.snapshot(text, language, isThinking = false))
                     }
                 }
             }
         } catch (e: IOException) {
             if (session.isRunning) {
-                session.fail(friendlyNetworkMessage(e))
+                session.fail(
+                    friendlyNetworkMessage(e),
+                    extractor.snapshot(text, language, isThinking = false)
+                )
                 return
             }
         }
         if (!session.isRunning) return
-        finishWithContent(full.toString(), text, extractor, session)
+        finishWithContent(full.toString(), text, language, extractor, session)
     }
 
     /** Server ignored stream=true and returned a normal JSON body in one shot. */
     private fun consumePlainText(
         body: String,
         text: String,
+        language: TextLanguage,
         session: RequestSession
     ) {
         if (!session.isRunning) return
@@ -262,42 +241,29 @@ class DeepSeekClient(
                 .getJSONObject("message")
                 .getString("content")
         }.getOrDefault(body) // if not chat-completions shape, treat body as raw content
-        finishWithContent(content, text, StreamingTranslationExtractor().apply { append(content) }, session)
+        val extractor = StreamingAnalysisExtractor().apply { append(content) }
+        session.progress(extractor.snapshot(text, language))
+        finishWithContent(content, text, language, extractor, session)
     }
 
     /** Parse the full accumulated model content into an AnalysisResult. */
     private fun finishWithContent(
         content: String,
         text: String,
-        extractor: StreamingTranslationExtractor,
+        language: TextLanguage,
+        extractor: StreamingAnalysisExtractor,
         session: RequestSession
     ) {
         val parsed = runCatching { AnalysisJsonParser.parse(content, text) }
         parsed.onSuccess(session::succeed)
             .onFailure {
-                // The full JSON didn't parse, but we may have already streamed a
-                // usable translation. Keep it so the user isn't left empty.
-                val quick = extractor.currentTranslation
-                if (quick.isNotBlank()) {
-                    session.succeed(
-                        AnalysisResult(
-                            sourceText = text,
-                            translation = quick,
-                            language = com.poozh.translator.model.LanguageDetector.detect(text),
-                            grammar = listOf("详细解析不可用，仅显示快速翻译")
-                        )
-                    )
+                val partial = extractor.snapshot(text, language)
+                if (partial.translation.isNotBlank() || partial.words.isNotEmpty() || partial.grammar.isNotEmpty()) {
+                    session.fail("解析不完整：${it.message ?: "模型服务返回内容不完整"}", partial)
                 } else {
                     session.fail(it.message ?: "模型服务返回解析失败")
                 }
             }
-    }
-
-    /** True when the error response indicates the server can't handle streaming. */
-    private fun isStreamUnsupported(code: Int, response: Response): Boolean {
-        if (code !in setOf(400, 415, 422)) return false
-        val body = runCatching { response.peekBody(2048L).string().lowercase() }.getOrDefault("")
-        return body.contains("stream") || body.contains("response_format")
     }
 
     private fun buildRequest(
@@ -308,7 +274,7 @@ class DeepSeekClient(
         stream: Boolean
     ): Request {
         android.util.Log.d("DeepSeekClient", "buildRequest: thinkingEnabled=${settings.thinkingEnabled} stream=$stream model=${settings.model} customPrompt=${settings.customSystemPrompt.isNotBlank()}")
-        val body = buildRequestJson(text, language, settings.model, provider.supportsJsonMode, stream, settings.thinkingEnabled, settings.customSystemPrompt)
+        val body = buildRequestJson(text, language, settings.model, stream, settings.thinkingEnabled, settings.customSystemPrompt)
             .toString()
             .toRequestBody(JSON_MEDIA_TYPE)
         return Request.Builder()
@@ -328,7 +294,6 @@ class DeepSeekClient(
         text: String,
         language: TextLanguage,
         model: String,
-        supportsJsonMode: Boolean,
         stream: Boolean,
         thinkingEnabled: Boolean,
         customPrompt: String = ""
@@ -348,11 +313,6 @@ class DeepSeekClient(
         if (!thinkingEnabled) {
             json.put("thinking", JSONObject().put("type", "disabled"))
         }
-        if (supportsJsonMode && !stream) {
-            // response_format is meaningless under streaming and some servers
-            // reject it; only send it for the non-streaming fallback.
-            json.put("response_format", JSONObject().put("type", "json_object"))
-        }
         return json
     }
 
@@ -367,7 +327,7 @@ class DeepSeekClient(
         }
     }
 
-    /** Owns whichever Call is active, including the compatibility fallback. */
+    /** Owns the active Call and prevents stale callbacks after cancellation. */
     private class RequestSession(
         private val callback: ResultCallback
     ) : TranslationHandle {
@@ -400,12 +360,12 @@ class DeepSeekClient(
             }
         }
 
-        fun progress(partial: String) {
+        fun progress(progress: AnalysisProgress) {
             if (!isRunning) return
-            if (partial.isNotBlank() && firstTranslationLogged.compareAndSet(false, true)) {
+            if (progress.translation.isNotBlank() && firstTranslationLogged.compareAndSet(false, true)) {
                 android.util.Log.d(TAG, "first translation text after ${elapsedMs()}ms")
             }
-            callback.onTranslationProgress(partial)
+            callback.onAnalysisProgress(progress)
         }
 
         fun succeed(result: AnalysisResult) {
@@ -415,11 +375,11 @@ class DeepSeekClient(
             callback.onSuccess(result)
         }
 
-        fun fail(message: String) {
+        fun fail(message: String, partial: AnalysisProgress? = null) {
             if (!terminal.compareAndSet(false, true) || cancelled.get()) return
             activeCall.set(null)
             android.util.Log.w(TAG, "translation failed after ${elapsedMs()}ms")
-            callback.onFailure(message)
+            if (partial != null) callback.onPartialFailure(partial, message) else callback.onFailure(message)
         }
 
         override fun cancel() {

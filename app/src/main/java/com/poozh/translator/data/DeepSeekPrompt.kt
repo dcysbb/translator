@@ -14,10 +14,10 @@ object DeepSeekPrompt {
     }
 
     fun builtInSystemPrompt(language: TextLanguage): String {
-        val fields = "translation, sourceText, language, words, grammar"
+        val fields = "translation, words, grammar"
         val wordsNote = "words 是数组，按原句中出现的顺序排列每个词（不按词性分类），每项含 surface（原文词形）, reading（读音/假名，无则留空）, meaning（中文释义）, note（语法/用法简注，无则留空）。"
         val grammarNote = "grammar 是字符串数组，每项是一条语法解析要点。"
-        val jsonRule = "必须只输出合法 JSON，不要 Markdown，不要解释 JSON 外的内容。JSON 字段顺序必须为：$fields。重要：第一个字段必须是 translation（中文译文），其余字段随后。"
+        val jsonRule = "必须只输出合法 JSON，不要 Markdown，不要解释 JSON 外的内容。JSON 只能包含字段：$fields。字段顺序必须为：$fields。重要：第一个字段必须是 translation（中文译文），随后输出 words 和 grammar。"
 
         return when (language) {
             TextLanguage.JAPANESE -> """

@@ -89,6 +89,20 @@ object FavoritesManager {
     }
 
     @Synchronized
+    fun findFavorite(context: Context, word: String): FavoriteItem? {
+        return getFavorites(context).firstOrNull { it.word == word }
+    }
+
+    @Synchronized
+    fun removeFavoriteByWord(context: Context, word: String): Boolean {
+        val list = getFavorites(context)
+        val filtered = list.filter { it.word != word }
+        if (filtered.size == list.size) return false
+        saveList(context, filtered)
+        return true
+    }
+
+    @Synchronized
     fun clearFavorites(context: Context) {
         val file = File(context.filesDir, FILE_NAME)
         if (file.exists()) file.delete()
