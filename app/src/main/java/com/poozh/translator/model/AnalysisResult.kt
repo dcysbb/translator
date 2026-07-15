@@ -11,58 +11,40 @@ data class AnalysisResult(
     val sourceText: String,
     val translation: String,
     val language: TextLanguage,
-    val summary: String = "",
-    val vocabulary: List<TermNote> = emptyList(),
-    val particles: List<TermNote> = emptyList(),
-    val conjugations: List<TermNote> = emptyList(),
-    val fixedExpressions: List<TermNote> = emptyList(),
-    val tone: String = "",
+    /** Words in original sentence order (not grouped by part-of-speech). */
+    val words: List<TermNote> = emptyList(),
     val grammar: List<String> = emptyList()
 ) {
-    fun toDisplayText(): String {
-        val builder = StringBuilder()
-        builder.appendLine("原文")
-        builder.appendLine(sourceText.ifBlank { "未识别到文本" })
-        builder.appendLine()
-        builder.appendLine("中文")
-        builder.appendLine(translation.ifBlank { "暂无翻译" })
+    /**
+     * Renders the result as structured text with emphasised section headers.
+     * Word entries are returned as a flat list so the caller can wrap each
+     * `surface` in a ClickableSpan for the favourites feature.
+     */
+    fun toDisplayText(): String = buildString {
+        appendSectionHeader("原文")
+        appendLine(sourceText.ifBlank { "未识别到文本" })
 
-        if (summary.isNotBlank()) {
-            builder.appendLine()
-            builder.appendLine("说明")
-            builder.appendLine(summary)
-        }
+        appendSectionHeader("译文")
+        appendLine(translation.ifBlank { "暂无翻译" })
 
-        appendNotes(builder, "词汇", vocabulary)
-        appendNotes(builder, "助词", particles)
-        appendNotes(builder, "活用", conjugations)
-        appendNotes(builder, "固定表达", fixedExpressions)
-
-        if (tone.isNotBlank()) {
-            builder.appendLine()
-            builder.appendLine("语气")
-            builder.appendLine(tone)
+        if (words.isNotEmpty()) {
+            appendSectionHeader("单词释义")
+            words.forEach { w ->
+                val readingPart = w.reading.takeIf { it.isNotBlank() }?.let { "【$it】" } ?: ""
+                val meaningPart = w.meaning.takeIf { it.isNotBlank() } ?: ""
+                val notePart = w.note.takeIf { it.isNotBlank() }?.let { "（$it）" } ?: ""
+                appendLine("• ${w.surface}$readingPart　$meaningPart$notePart")
+            }
         }
 
         if (grammar.isNotEmpty()) {
-            builder.appendLine()
-            builder.appendLine("语法")
-            grammar.forEach { builder.appendLine("• $it") }
+            appendSectionHeader("语法解析")
+            grammar.forEach { appendLine("• $it") }
         }
+    }.trim()
 
-        return builder.toString().trim()
-    }
-
-    private fun appendNotes(builder: StringBuilder, title: String, notes: List<TermNote>) {
-        if (notes.isEmpty()) return
-        builder.appendLine()
-        builder.appendLine(title)
-        notes.forEach { note ->
-            val parts = listOf(note.reading, note.meaning, note.note).filter { it.isNotBlank() }
-            builder.append("• ").append(note.surface)
-            if (parts.isNotEmpty()) builder.append("：").append(parts.joinToString("；"))
-            builder.appendLine()
-        }
+    private fun StringBuilder.appendSectionHeader(title: String) {
+        if (isNotEmpty()) appendLine()
+        appendLine("━━ $title ━━")
     }
 }
-

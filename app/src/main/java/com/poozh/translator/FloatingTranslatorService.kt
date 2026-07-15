@@ -23,6 +23,11 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.provider.Settings
+import android.text.SpannableStringBuilder
+import android.text.TextPaint
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.text.style.StyleSpan
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -37,12 +42,14 @@ import android.widget.Toast
 import com.poozh.translator.capture.ScreenCaptureController
 import com.poozh.translator.data.AppSettings
 import com.poozh.translator.data.DeepSeekClient
+import com.poozh.translator.data.FavoritesManager
 import com.poozh.translator.data.ModelProviders
 import com.poozh.translator.data.SettingsSnapshot
 import com.poozh.translator.data.HistoryManager
 import com.poozh.translator.model.AnalysisResult
 import com.poozh.translator.model.LanguageDetector
 import com.poozh.translator.model.RefreshAction
+import com.poozh.translator.model.TermNote
 import com.poozh.translator.model.TranslationRefreshPolicy
 import com.poozh.translator.model.TranslationUiState
 import com.poozh.translator.ocr.ScreenTextRecognizer
@@ -399,13 +406,156 @@ class FloatingTranslatorService : Service() {
             clipToPadding = false
         }
         readingText = TextView(this).apply {
-            text = currentReadingText()
             Md3.applyTextStyle(this, Md3TextStyle.BodyLarge, Md3.dark.onSurface)
             setLineSpacing(dp(5).toFloat(), 1.0f)
             setPadding(dp(4), dp(3), dp(4), dp(22))
+            movementMethod = LinkMovementMethod.getInstance()
+        }
+        // Render with clickable word spans when we have a complete result.
+        val result = lastResult
+        if (result != null && result.words.isNotEmpty()) {
+            readingText!!.text = buildSpannableReadingText(result)
+        } else {
+            readingText!!.text = currentReadingText()
         }
         scroll.addView(readingText)
         swapContent(scroll)
+    }
+
+    /**
+     * Build a SpannableStringBuilder for the reading page. Section headers get
+     * bold style, and each word's surface text is wrapped in a ClickableSpan
+     * that pops up a dialog to add it to favourites.
+     */
+    private fun buildSpannableReadingText(result: AnalysisResult): CharSequence {
+        val sb = SpannableStringBuilder()
+        // 原文
+        sb.appendBoldLine("━━ 原文 ━━")
+        sb.append(result.sourceText.ifBlank { "未识别到文本" }).append("\n\n")
+        // 译文
+        sb.appendBoldLine("━━ 译文 ━━")
+        sb.append(result.translation.ifBlank { "暂无翻译" })
+        // 单词释义
+        if (result.words.isNotEmpty()) {
+            sb.append("\n\n")
+            sb.appendBoldLine("━━ 单词释义 ━━")
+            for (w in result.words) {
+                sb.append("• ")
+                // The clickable surface
+                val surfaceStart = sb.length
+                sb.append(w.surface)
+                sb.setSpan(object : ClickableSpan() {
+                    override fun onClick(widget: View) {
+                        showWordDialog(w)
+                    }
+                    override fun updateDrawState(tp: TextPaint) {
+                        tp.isUnderlineText = false
+                        tp.color = Md3.dark.primary
+                    }
+                }, surfaceStart, sb.length, 0)
+                // Reading + meaning + note
+                w.reading.takeIf { it.isNotBlank() }?.let { sb.append("【$it】") }
+                sb.append("　")
+                w.meaning.takeIf { it.isNotBlank() }?.let { sb.append(it) }
+                w.note.takeIf { it.isNotBlank() }?.let { sb.append("（$it）") }
+                sb.append("\n")
+            }
+        }
+        // 语法解析
+        if (result.grammar.isNotEmpty()) {
+            sb.append("\n")
+            sb.appendBoldLine("━━ 语法解析 ━━")
+            for (g in result.grammar) sb.append("• $g\n")
+        }
+        return sb.trim()
+    }
+
+    private fun SpannableStringBuilder.appendBoldLine(text: String) {
+        val start = this.length
+        this.append(text).append("\n")
+        this.setSpan(StyleSpan(android.graphics.Typeface.BOLD), start, this.length - 1, 0)
+    }
+
+    /** Pop-up showing the word + details, with a "收藏" button. */
+    private fun showWordDialog(word: TermNote) {
+        val msg = buildString {
+            append(word.surface)
+            word.reading.takeIf { it.isNotBlank() }?.let { append("  【$it】") }
+            append("\n")
+            word.meaning.takeIf { it.isNotBlank() }?.let { append(it) }
+            word.note.takeIf { it.isNotBlank() }?.let { append("\n").append(it) }
+        }
+        val alreadyFav = FavoritesManager.isFavorite(this, word.surface)
+        val btnLabel = if (alreadyFav) "已收藏" else "收藏"
+        android.app.AlertDialog.Builder(this)
+            .setTitle(word.surface)
+            .setMessage(msg)
+            .setPositiveButton(btnLabel) { _, _ ->
+                if (!alreadyFav) {
+                    val added = FavoritesManager.addFavorite(
+                        context = this,
+                        word = word.surface,
+                        reading = word.reading,
+                        meaning = word.meaning,
+                        note = word.note,
+                        sourceContext = lastStableText.take(200)
+                    )
+                    Toast.makeText(this, if (added) "已加入收藏" else "已在收藏中", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("关闭", null)
+            .show()
+    }
+
+    private fun showFavoritesPage() {
+        titleText?.text = "收藏夹"
+        val scroll = ScrollView(this).apply { clipToPadding = false }
+        val menu = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(0, 0, 0, dp(12))
+        }
+        val favorites = FavoritesManager.getFavorites(this)
+        if (favorites.isEmpty()) {
+            menu.addView(TextView(this).apply {
+                text = "暂无收藏"
+                Md3.applyTextStyle(this, Md3TextStyle.BodyMedium, Md3.dark.onSurfaceVariant)
+                setPadding(dp(16), dp(24), dp(16), dp(24))
+            })
+        } else {
+            favorites.forEach { item ->
+                val row = TextView(this).apply {
+                    val parts = listOf(
+                        item.reading.takeIf { it.isNotBlank() }?.let { "【$it】" },
+                        item.meaning.takeIf { it.isNotBlank() }
+                    ).filterNotNull().joinToString(" ")
+                    text = "• ${item.word}  $parts"
+                    Md3.applyTextStyle(this, Md3TextStyle.BodyMedium, Md3.dark.onSurface)
+                    setPadding(dp(16), dp(10), dp(16), dp(10))
+                    background = Md3.ripple(this@FloatingTranslatorService, Md3.dark.surfaceContainer, 8f)
+                    clipToOutline = true
+                    setOnClickListener {
+                        FavoritesManager.removeFavorite(this@FloatingTranslatorService, item.id)
+                        Toast.makeText(this@FloatingTranslatorService, "已移除「${item.word}」", Toast.LENGTH_SHORT).show()
+                        showFavoritesPage() // refresh
+                    }
+                    Md3.bindStateLayer(this)
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply { bottomMargin = dp(4) }
+                }
+                menu.addView(row)
+            }
+            menu.addView(menuAction("清空收藏") {
+                FavoritesManager.clearFavorites(this)
+                Toast.makeText(this, "收藏已清空", Toast.LENGTH_SHORT).show()
+                showFavoritesPage()
+            })
+        }
+        menu.addView(menuAction("返回阅读") { showReadingPage() })
+        scroll.addView(menu)
+        swapContent(scroll)
+        showStatus("收藏夹（${favorites.size}）")
     }
 
     private fun currentReadingText(): String {
@@ -433,6 +583,7 @@ class FloatingTranslatorService : Service() {
 
         menu.addView(sectionTitle("操作"))
         menu.addView(menuAction("返回阅读") { showReadingPage() })
+        menu.addView(menuAction("收藏夹") { showFavoritesPage() })
         menu.addView(menuAction("重新翻译") { retranslateLastText() })
         menu.addView(menuAction("复制阅读内容") { copyResult() })
         menu.addView(menuAction("打开主设置") { openSettings() })

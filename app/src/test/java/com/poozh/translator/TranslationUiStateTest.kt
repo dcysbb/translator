@@ -28,7 +28,7 @@ class TranslationUiStateTest {
         )
         val state: TranslationUiState = TranslationUiState.Complete("hello", result)
 
-        assertTrue(state.displayText().contains("中文\n你好"))
+        assertTrue(state.displayText().contains("你好"))
         assertEquals("翻译完成", state.statusText())
     }
 

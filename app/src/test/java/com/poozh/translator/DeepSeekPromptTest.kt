@@ -7,11 +7,10 @@ import org.junit.Test
 
 class DeepSeekPromptTest {
     @Test
-    fun japanesePromptRequestsGrammarFields() {
+    fun japanesePromptRequestsWordsAndGrammar() {
         val prompt = DeepSeekPrompt.systemPrompt(TextLanguage.JAPANESE)
-        assertTrue(prompt.contains("particles"))
-        assertTrue(prompt.contains("conjugations"))
-        assertTrue(prompt.contains("fixedExpressions"))
+        assertTrue(prompt.contains("words"))
+        assertTrue(prompt.contains("grammar"))
     }
 
     @Test

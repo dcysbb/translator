@@ -284,7 +284,7 @@ class DeepSeekClient(
                             sourceText = text,
                             translation = quick,
                             language = com.poozh.translator.model.LanguageDetector.detect(text),
-                            summary = "（详细解析不可用）"
+                            grammar = listOf("详细解析不可用，仅显示快速翻译")
                         )
                     )
                 } else {

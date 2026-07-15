@@ -6,47 +6,41 @@ object DeepSeekPrompt {
     /**
      * Returns the system prompt for the given language, or the user's custom
      * prompt if one is set. When [customPrompt] is non-blank it fully replaces
-     * the built-in template — the caller is responsible for instructing the
-     * model to output the expected JSON shape (especially that `translation`
-     * is the first field, which the streaming extractor relies on).
+     * the built-in template.
      */
     fun systemPrompt(language: TextLanguage, customPrompt: String = ""): String {
         if (customPrompt.isNotBlank()) return customPrompt.trim()
         return builtInSystemPrompt(language)
     }
 
-    /**
-     * Field order matters for streaming: the client incrementally extracts the
-     * `"translation"` value as it arrives, so `translation` MUST be the first
-     * field in the JSON object so users see a translation ASAP. The remaining
-     * fields (language, summary, vocabulary, ...) follow.
-     */
     fun builtInSystemPrompt(language: TextLanguage): String {
-        // The ordered field list is shared; only the lead-in differs per language.
-        val fields = "translation, sourceText, language, summary, vocabulary, particles, conjugations, fixedExpressions, tone, grammar"
-        val arrayNote = "vocabulary/particles/conjugations/fixedExpressions 是数组（每项含 surface, reading, meaning, note），grammar 是字符串数组；无内容用空字符串或空数组。"
+        val fields = "translation, sourceText, language, words, grammar"
+        val wordsNote = "words 是数组，按原句中出现的顺序排列每个词（不按词性分类），每项含 surface（原文词形）, reading（读音/假名，无则留空）, meaning（中文释义）, note（语法/用法简注，无则留空）。"
+        val grammarNote = "grammar 是字符串数组，每项是一条语法解析要点。"
+        val jsonRule = "必须只输出合法 JSON，不要 Markdown，不要解释 JSON 外的内容。JSON 字段顺序必须为：$fields。重要：第一个字段必须是 translation（中文译文），其余字段随后。"
+
         return when (language) {
             TextLanguage.JAPANESE -> """
-                你是日语阅读助手。请把用户提供的屏幕 OCR 文本翻译为自然中文，并解析日语语法。
-                必须只输出合法 JSON，不要 Markdown，不要解释 JSON 外的内容。
-                JSON 字段顺序必须为：$fields。
-                重要：第一个字段必须是 translation（中文译文），其余字段随后。
-                $arrayNote
+                你是日语阅读助手。请把用户提供的屏幕 OCR 文本翻译为自然中文，并逐词解析。
+                $jsonRule
+                $wordsNote
+                $grammarNote
+                若某字段无内容，使用空字符串或空数组。
             """.trimIndent()
 
             TextLanguage.ENGLISH -> """
-                你是英语阅读助手。请把用户提供的屏幕 OCR 文本翻译为自然中文，并给出简短词句说明。
-                必须只输出合法 JSON，不要 Markdown，不要解释 JSON 外的内容。
-                JSON 字段顺序必须为：$fields。
-                重要：第一个字段必须是 translation（中文译文），其余字段随后。
-                英语不需要助词和活用解析，相关数组可为空。
+                你是英语阅读助手。请把用户提供的屏幕 OCR 文本翻译为自然中文，并逐词解析。
+                $jsonRule
+                $wordsNote
+                $grammarNote
+                若某字段无内容，使用空字符串或空数组。
             """.trimIndent()
 
             TextLanguage.UNKNOWN -> """
-                你是屏幕文本翻译助手。请识别文本主要语言，翻译为自然中文，并在可能时给出简短解析。
-                必须只输出合法 JSON，不要 Markdown，不要解释 JSON 外的内容。
-                JSON 字段顺序必须为：$fields。
-                重要：第一个字段必须是 translation（中文译文），其余字段随后。
+                你是屏幕文本翻译助手。请识别文本主要语言，翻译为自然中文，并在可能时逐词解析。
+                $jsonRule
+                $wordsNote
+                $grammarNote
             """.trimIndent()
         }
     }

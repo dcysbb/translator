@@ -14,16 +14,17 @@ object AnalysisJsonParser {
         val source = json.optString("sourceText").ifBlank { fallbackSource }
         val language = parseLanguage(json.optString("language"), source)
 
+        // Prefer the new unified "words" array. Fall back to the legacy
+        // "vocabulary" field for backward compatibility with older models.
+        val words = json.optJSONArray("words")?.toTermNotes()
+            ?: json.optJSONArray("vocabulary")?.toTermNotes()
+            ?: emptyList()
+
         return AnalysisResult(
             sourceText = source,
             translation = json.optString("translation"),
             language = language,
-            summary = json.optString("summary"),
-            vocabulary = json.optJSONArray("vocabulary").toTermNotes(),
-            particles = json.optJSONArray("particles").toTermNotes(),
-            conjugations = json.optJSONArray("conjugations").toTermNotes(),
-            fixedExpressions = json.optJSONArray("fixedExpressions").toTermNotes(),
-            tone = json.optString("tone"),
+            words = words,
             grammar = json.optJSONArray("grammar").toStringList()
         )
     }
@@ -32,8 +33,7 @@ object AnalysisJsonParser {
         return AnalysisResult(
             sourceText = source,
             translation = "",
-            language = LanguageDetector.detect(source),
-            summary = message
+            language = LanguageDetector.detect(source)
         )
     }
 
