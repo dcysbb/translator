@@ -72,8 +72,11 @@ class FloatingTranslatorService : Service() {
     private var contentHost: LinearLayout? = null
     private var selectionOverlay: View? = null
     private var readingText: TextView? = null
+    private var readingScroll: ScrollView? = null
+    private var readingScrollY = 0
     private var statusText: TextView? = null
     private var titleText: TextView? = null
+    private var wordBackButton: TextView? = null
 
     private var mediaProjection: MediaProjection? = null
     private var captureController: ScreenCaptureController? = null
@@ -250,9 +253,12 @@ class FloatingTranslatorService : Service() {
         val panel = panelView ?: return
         panelView = null
         contentHost = null
+        readingScrollY = readingScroll?.scrollY ?: readingScrollY
+        readingScroll = null
         readingText = null
         statusText = null
         titleText = null
+        wordBackButton = null
         // Shrink the panel back into the bubble (non-linear), then remove it.
         val params = panel.layoutParams as? WindowManager.LayoutParams
         val (pivotX, pivotY) = if (params != null) bubblePivotRelativeToPanel(params) else 0f to 0f
@@ -273,8 +279,14 @@ class FloatingTranslatorService : Service() {
         if (panelView != null) return
         val displayWidth = resources.displayMetrics.widthPixels
         val displayHeight = resources.displayMetrics.heightPixels
-        val defaultWidth = min(dp(360), displayWidth - dp(24)).coerceAtLeast(minPanelWidth())
-        val defaultHeight = min(dp(560), displayHeight - dp(88)).coerceAtLeast(minPanelHeight())
+        val defaultWidth = min(dp(328), displayWidth - dp(24)).coerceAtLeast(minPanelWidth())
+        val defaultHeight = min(dp(500), displayHeight - dp(88)).coerceAtLeast(minPanelHeight())
+        settings.migrateLegacyDefaultPanelSize(
+            oldDefaultWidth = min(dp(360), displayWidth - dp(24)).coerceAtLeast(dp(300)),
+            oldDefaultHeight = min(dp(560), displayHeight - dp(88)).coerceAtLeast(dp(320)),
+            newDefaultWidth = defaultWidth,
+            newDefaultHeight = defaultHeight
+        )
         val saved = settings.loadPanelState(dp(56), dp(86), defaultWidth, defaultHeight)
         val panelWidth = clampPanelWidth(saved.width)
         val panelHeight = clampPanelHeight(saved.height)
@@ -282,7 +294,9 @@ class FloatingTranslatorService : Service() {
             panelWidth,
             panelHeight,
             overlayType(),
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
             android.graphics.PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
@@ -290,7 +304,15 @@ class FloatingTranslatorService : Service() {
             y = clampWindowY(saved.y, panelHeight)
         }
 
-        val root = LinearLayout(this).apply {
+        val root = object : LinearLayout(this) {
+            override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+                if (event.actionMasked == MotionEvent.ACTION_OUTSIDE) {
+                    post { collapsePanel() }
+                    return true
+                }
+                return super.dispatchTouchEvent(event)
+            }
+        }.apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(14), dp(14), dp(14), dp(12))
             background = Md3.surface(
@@ -355,6 +377,16 @@ class FloatingTranslatorService : Service() {
             gravity = Gravity.CENTER_VERTICAL
             setPadding(dp(2), 0, dp(2), 0)
         }
+        wordBackButton = textButton("←", compact = true) { showReadingPage() }.apply {
+            visibility = View.GONE
+            contentDescription = "返回阅读"
+            (layoutParams as LinearLayout.LayoutParams).apply {
+                width = dp(42)
+                height = dp(40)
+                leftMargin = 0
+                rightMargin = dp(6)
+            }
+        }
         titleText = TextView(this).apply {
             text = "阅读翻译"
             Md3.applyTextStyle(this, Md3TextStyle.TitleMedium, Md3.dark.onSurface)
@@ -369,6 +401,7 @@ class FloatingTranslatorService : Service() {
         }
         val close = textButton("×", compact = true) { collapsePanel() }
 
+        header.addView(wordBackButton)
         header.addView(titleText)
         header.addView(statusText)
         header.addView(close)
@@ -399,12 +432,15 @@ class FloatingTranslatorService : Service() {
     }
 
     private fun showReadingPage() {
+        wordBackButton?.visibility = View.GONE
         titleText?.text = "阅读翻译"
         val scroll = ScrollView(this).apply {
             isFillViewport = true
             overScrollMode = View.OVER_SCROLL_IF_CONTENT_SCROLLS
             clipToPadding = false
+            setOnScrollChangeListener { _, _, scrollY, _, _ -> readingScrollY = scrollY }
         }
+        readingScroll = scroll
         readingText = TextView(this).apply {
             Md3.applyTextStyle(this, Md3TextStyle.BodyLarge, Md3.dark.onSurface)
             setLineSpacing(dp(5).toFloat(), 1.0f)
@@ -437,6 +473,7 @@ class FloatingTranslatorService : Service() {
         }
         scroll.addView(readingText)
         swapContent(scroll)
+        scroll.post { scroll.scrollTo(0, readingScrollY) }
     }
 
     /**
@@ -585,7 +622,10 @@ class FloatingTranslatorService : Service() {
 
     /** Show word details inside the existing overlay window. */
     private fun showWordDetailsPage(word: TermNote) {
+        readingScrollY = readingScroll?.scrollY ?: readingScrollY
+        readingScroll = null
         readingText = null
+        wordBackButton?.visibility = View.VISIBLE
         titleText?.text = "单词详情"
         val scroll = ScrollView(this).apply { clipToPadding = false }
         val page = LinearLayout(this).apply {
@@ -624,14 +664,15 @@ class FloatingTranslatorService : Service() {
             }
             showWordDetailsPage(word)
         })
-        page.addView(menuAction("返回阅读") { showReadingPage() })
         scroll.addView(page)
         swapContent(scroll)
         showStatus(if (alreadyFav) "已收藏" else "单词详情")
     }
 
     private fun showFavoritesPage() {
+        readingScroll = null
         readingText = null
+        wordBackButton?.visibility = View.GONE
         titleText?.text = "收藏夹"
         val scroll = ScrollView(this).apply { clipToPadding = false }
         val menu = LinearLayout(this).apply {
@@ -687,7 +728,9 @@ class FloatingTranslatorService : Service() {
     }
 
     private fun showMorePage() {
+        readingScroll = null
         readingText = null
+        wordBackButton?.visibility = View.GONE
         titleText?.text = "更多"
         val scroll = ScrollView(this).apply { clipToPadding = false }
         val menu = LinearLayout(this).apply {
@@ -875,6 +918,7 @@ class FloatingTranslatorService : Service() {
         val snapshot = settings.load()
         lastStableText = text
         lastResult = null
+        readingScrollY = 0
         translationUiState = TranslationUiState.InProgress(sourceText = text)
         showReadingPage()
         showStatus(translationUiState.statusText())
@@ -935,8 +979,11 @@ class FloatingTranslatorService : Service() {
                         currentTranslation = null
                         lastResult = null
                         translationUiState = TranslationUiState.Interrupted(text, progress, message)
-                        readingText?.text = SpannableStringBuilder(buildSpannableProgressText(progress))
-                            .append("\n\n⚠ $message")
+                        renderReadingTextInPlace(
+                            content = SpannableStringBuilder(buildSpannableProgressText(progress))
+                                .append("\n\n⚠ $message"),
+                            hasClickableWords = progress.words.isNotEmpty()
+                        )
                         if (panelView != null) {
                             showStatus("解析不完整")
                         } else {
@@ -960,7 +1007,10 @@ class FloatingTranslatorService : Service() {
                             providerId = snapshot.providerId
                         )
                         if (panelView != null) {
-                            showReadingPage()
+                            renderReadingTextInPlace(
+                                content = buildSpannableReadingText(result),
+                                hasClickableWords = result.words.isNotEmpty()
+                            )
                             showStatus("翻译完成")
                         } else {
                             updateBubbleFeedback()
@@ -977,7 +1027,7 @@ class FloatingTranslatorService : Service() {
                         lastResult = null
                         translationUiState = TranslationUiState.Failed(text, message)
                         if (panelView != null) {
-                            readingText?.text = translationUiState.displayText()
+                            renderReadingTextInPlace(translationUiState.displayText(), hasClickableWords = false)
                             showStatus("翻译失败")
                         } else {
                             updateBubbleFeedback()
@@ -990,9 +1040,25 @@ class FloatingTranslatorService : Service() {
     }
 
     private fun renderProgressInPlace(progress: AnalysisProgress) {
+        renderReadingTextInPlace(
+            content = buildSpannableProgressText(progress),
+            hasClickableWords = progress.words.isNotEmpty()
+        )
+    }
+
+    private fun renderReadingTextInPlace(content: CharSequence, hasClickableWords: Boolean) {
         val textView = readingText ?: return
-        textView.text = buildSpannableProgressText(progress)
-        if (progress.words.isNotEmpty()) attachWordTapDetector(textView)
+        val scroll = readingScroll
+        val savedScrollY = scroll?.scrollY ?: readingScrollY
+        textView.text = content
+        if (hasClickableWords) attachWordTapDetector(textView) else textView.setOnTouchListener(null)
+        scroll?.post {
+            val maxScrollY = (textView.height - scroll.height + scroll.paddingTop + scroll.paddingBottom)
+                .coerceAtLeast(0)
+            val restoredScrollY = savedScrollY.coerceIn(0, maxScrollY)
+            scroll.scrollTo(0, restoredScrollY)
+            readingScrollY = restoredScrollY
+        }
     }
 
     private fun cancelActiveTranslation() {
@@ -1575,9 +1641,9 @@ class FloatingTranslatorService : Service() {
         return y.coerceIn(0, maxY)
     }
 
-    private fun minPanelWidth(): Int = dp(300)
+    private fun minPanelWidth(): Int = dp(280)
 
-    private fun minPanelHeight(): Int = dp(320)
+    private fun minPanelHeight(): Int = dp(300)
 
     private fun clampPanelWidth(width: Int): Int {
         val maxWidth = max(minPanelWidth(), resources.displayMetrics.widthPixels - dp(24))

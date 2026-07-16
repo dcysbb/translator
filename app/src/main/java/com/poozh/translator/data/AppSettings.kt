@@ -177,6 +177,28 @@ class AppSettings(context: Context) {
         )
     }
 
+    /** Shrink only windows that still use the old default size. User-resized
+     * windows are preserved, and the migration runs at most once. */
+    fun migrateLegacyDefaultPanelSize(
+        oldDefaultWidth: Int,
+        oldDefaultHeight: Int,
+        newDefaultWidth: Int,
+        newDefaultHeight: Int
+    ) {
+        if (prefs.getBoolean(KEY_COMPACT_PANEL_MIGRATED, false)) return
+        val hasSavedSize = prefs.contains(KEY_PANEL_WIDTH) && prefs.contains(KEY_PANEL_HEIGHT)
+        val usesOldDefault = hasSavedSize &&
+            prefs.getInt(KEY_PANEL_WIDTH, oldDefaultWidth) == oldDefaultWidth &&
+            prefs.getInt(KEY_PANEL_HEIGHT, oldDefaultHeight) == oldDefaultHeight
+        prefs.edit().apply {
+            if (usesOldDefault) {
+                putInt(KEY_PANEL_WIDTH, newDefaultWidth)
+                putInt(KEY_PANEL_HEIGHT, newDefaultHeight)
+            }
+            putBoolean(KEY_COMPACT_PANEL_MIGRATED, true)
+        }.apply()
+    }
+
     fun savePanelState(x: Int, y: Int, width: Int, height: Int) {
         prefs.edit()
             .putInt(KEY_PANEL_X, x)
@@ -256,6 +278,7 @@ class AppSettings(context: Context) {
         private const val KEY_PANEL_X = "panel_x"
         private const val KEY_PANEL_Y = "panel_y"
         private const val KEY_PANEL_WIDTH = "panel_width"
+        private const val KEY_COMPACT_PANEL_MIGRATED = "compact_panel_migrated_v1"
 
         /**
          * API keys bundled with the APK so the listed providers work without the
